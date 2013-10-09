@@ -10,9 +10,6 @@ VENV=/opt/${APP}
 
 all: rpm
 
-req:
-	yum install -y pandoc prelink rpm-build
-
 venv:
 	virtualenv -p python${PYTHON_VERSION} ${VENV}
 	. ${VENV}/bin/activate

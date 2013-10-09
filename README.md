@@ -6,13 +6,17 @@ Hierarchical substitution templating for SaltStack configuration also support's 
 
 *Pre-requisites*
 
-    $ sudo yum install -y pandoc rpm-build
+    $ sudo yum install -y pandoc rpm-build python-virtualenv
 
 *Build RPM*
 
     $ git clone ...
     $ cd pepa
     $ ./build_venv.sh
+
+Logout and login again to get the new group permissions.
+
+    $ cd pepa
     $ make
 
 ## Example ##
