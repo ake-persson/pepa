@@ -15,9 +15,6 @@ pepa [*-c*|*--config* <file>] [*-d*|*--debug*] [*-n*|*--no-color*] [*-j*|*--json
 
 *pepa* generates configuration for Salt Stack in YAML or JSON using Hierarchical substitution similar to Hiera or Distill for Puppet, but with the additional support for Jinja.
 
-Configuration is considered from System, Host and Application perspective where a System is a collection of hosts and applications. the idea is that Software should drive the
-configuration of a host rather then the other way around.
-
 # OPTIONS
 
 -h, --help

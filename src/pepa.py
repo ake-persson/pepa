@@ -65,7 +65,7 @@ sequence = re.split('\s*,\s*', config.get('host', 'sequence'))
 basedir = config.get('main', 'basedir')
 
 # Load host input
-file = basedir + '/input/hosts/' + host + '.sls'
+file = basedir + '/inputs/hosts/' + host + '.sls'
 if not os.path.isfile(file):
     error("Host is not defined: %s" % opts.host)
 input = yaml.load(open(file, 'r').read())

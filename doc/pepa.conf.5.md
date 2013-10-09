@@ -28,12 +28,6 @@ basedir
 sequence
 :   Susbstitution sequence for hosts.
 
-[application]
-:   Application section.
-
-sequence
-:   Substitution sequence for applications.
-
 # AUTHOR
 
 Michael Persson
