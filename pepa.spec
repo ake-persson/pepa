@@ -13,7 +13,7 @@ Summary: %{app}
 Name: %{name}
 Version: %{version}
 Release: %{release}
-License: BSD License
+License: GPLv3 License
 Group: System
 AutoReqProv: no
 #Requires: salt
