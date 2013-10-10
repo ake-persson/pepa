@@ -48,10 +48,10 @@ def info2(message):
 # Get command line options
 parser = optparse.OptionParser()
 parser.add_option('-c', '--config', help='Configuration file', dest = 'config', action ='store', default = '/etc/pepa.conf')
-parser.add_option('-D', '--debug', help='Print debug information', dest = 'debug', action ='store_true', default = False)
+parser.add_option('-d', '--debug', help='Print debug information', dest = 'debug', action ='store_true', default = False)
 parser.add_option('-n', '--no-color', help='No color', dest = 'color', action ='store_false', default = True)
 parser.add_option('-j', '--json', help='JSON output, instead of default YAML', dest = 'json', action ='store_true', default = False)
-parser.add_option('-d', '--daemonize', help='Daemonize and run as a REST API', dest = 'daemonize', action ='store_true', default = False)
+parser.add_option('-D', '--daemonize', help='Daemonize and run as a REST API', dest = 'daemonize', action ='store_true', default = False)
 parser.add_option('--host', help='Hostname', dest = 'host', action ='store')
 (opts, args) = parser.parse_args()
 
