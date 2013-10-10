@@ -24,6 +24,7 @@ Hierarchical substitution templating for SaltStack configuration also support's 
 
 - Add support for running it as a Web service using Flask-restless
 - Add support for talking to Git directly as a back-end
+- Add support for importing Grains when running as a Pillar plugin
 - Add a separate validation tool for input and output using YAML/JSON schema
 
 # License #
