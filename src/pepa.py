@@ -60,7 +60,7 @@ if not os.path.isfile(opts.config):
     error("Configuration file doesn't exist: %s" % opts.config)
 
 # Check options
-if not opts.host:
+if opts.daemonize is False and not opts.host:
     error("You need to specify a host")
 host = opts.host
 
