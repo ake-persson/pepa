@@ -37,6 +37,7 @@ Hierarchical substitution templating for SaltStack configuration also support's 
 
 - Add MIME type awareness to REST API both input/output
 - Add some regexp validation for input
+- Add proper error checking and HTTP error codes
 - Add support for talking to Git directly as a back-end
 - Add support for importing Grains when running as a Pillar plugin
 - Add a separate validation tool for input and output using YAML/JSON schema
