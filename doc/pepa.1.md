@@ -35,6 +35,9 @@ pepa [*-c*|*--config* <file>] [*-d*|*--debug*] [*-n*|*--no-color*] [*-j*|*--json
 -h, --host
 :   Host to generate configuration for.
 
+-D, --daemonize
+:   Daemonize and run as a REST API
+
 # FILES
 
 /etc/pepa.conf
