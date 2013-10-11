@@ -14,6 +14,7 @@ import glob
 from os.path import basename, splitext
 import flask
 from flask.views import MethodView
+from gittle import Gittle, GittleAuth
 
 app = flask.Flask(__name__)
 
@@ -69,11 +70,32 @@ config = ConfigParser.ConfigParser()
 config.read([opts.config])
 sequence = re.split('\s*,\s*', config.get('host', 'sequence'))
 basedir = config.get('main', 'basedir')
+backend = config.get('main', 'backend')
+
+# Check configuration
+if backend != 'git' and backend != 'file':
+    error('Unsupported backend needs to be "file" or "git"')
+
+if backend == 'git':
+    if not config.get('git', 'uri'):
+        error('Need to set uri when using Git backend')
+    uri = config.get('git', 'uri')
+
+    if config.get('git', 'privkey'):
+        privkey = config.get('git', 'privkey')
+        key = open(privkey)
+        auth = GittleAuth(key)
+
+    repo = Gittle.clone(uri, basedir)
+
+    if config.get('git', 'subdir'):
+        basedir += '/' + config.get('git', 'subdir')
 
 def get_config(host):
 
     # Load host input
     file = basedir + '/inputs/hosts/' + host + '.sls'
+    print file
     if not os.path.isfile(file):
         error("Host is not defined: %s" % host)
     input = yaml.load(open(file, 'r').read())
@@ -123,6 +145,9 @@ class HostObject(MethodView):
         return yaml.safe_dump(output, indent = 4, default_flow_style = False)
 
 app.add_url_rule('/hosts/<host>', view_func = HostObject.as_view('host_object'))
+
+# Add REST call for triggering Git pull
+#app.add_url_rule('/git/<pull>', view_func = HostObject.as_view('git'))
 
 if __name__ == '__main__' and opts.daemonize:
     app.run(debug = True)
