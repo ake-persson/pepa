@@ -3,7 +3,7 @@
 USER=$( id -un )
 GROUP='venvbuild'
 
-sudo -i <<EOT
+dzdo -i <<EOT
 groupadd venvbuild
 groupmems -g venvbuild -a ${USER}
 chgrp venvbuild /opt

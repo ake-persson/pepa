@@ -18,6 +18,7 @@ venv:
 	virtualenv -p python${PYTHON_VERSION} --system-site-packages ${VENV}
 #	cp src/pepa.py ${VENV}/bin
 	sed "s!/usr/bin/env python!${VENV}/bin/python2!" src/pepa.py >${VENV}/bin/pepa.py
+	chmod 755 ${VENV}/bin/pepa.py
 #	prelink -u ${VENV}/bin/python
 #	prelink -u ${VENV}/bin/python2.7
 	tar -cvzf ${NAME}.tar.gz ${VENV}
