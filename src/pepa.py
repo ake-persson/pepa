@@ -77,18 +77,26 @@ if backend != 'git' and backend != 'file':
     error('Unsupported backend needs to be "file" or "git"')
 
 if backend == 'git':
-    if not config.get('git', 'uri'):
+    if not config.has_option('git', 'uri'):
         error('Need to set uri when using Git backend')
     uri = config.get('git', 'uri')
 
-    if config.get('git', 'privkey'):
+    if config.has_option('git', 'privkey'):
         privkey = config.get('git', 'privkey')
         key = open(privkey)
         auth = GittleAuth(key)
 
-    repo = Gittle.clone(uri, basedir)
+    if os.path.isdir(basedir + '/.git'):
+        if opts.debug:
+            info("Doing a Git pull for: %s in: %s" % (uri, basedir))
+        repo = Gittle(basedir, uri)
+        repo.pull()
+    else:
+        if opts.debug:
+            info("Doing a Git clone for: %s to: %s" % (uri, basedir))
+        repo = Gittle.clone(uri, basedir)
 
-    if config.get('git', 'subdir'):
+    if config.has_option('git', 'subdir'):
         basedir += '/' + config.get('git', 'subdir')
 
 def get_config(host):
