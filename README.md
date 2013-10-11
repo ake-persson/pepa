@@ -6,7 +6,7 @@ Hierarchical substitution templating for SaltStack configuration also support's 
 
 *Pre-requisites*
 
-    $ sudo yum install -y pandoc rpm-build python-virtualenv
+    $ sudo yum install -y pandoc rpm-build python-virtualenv gcc
 
 *Build RPM*
 

@@ -27,7 +27,7 @@ tar zxvf %{sources}/%{name}.tar.gz -C %{buildroot}
 cp %{sources}/conf/pepa.conf %{buildroot}/etc
 cp %{sources}/*.1 %{buildroot}/usr/share/man/man1
 cp %{sources}/*.5 %{buildroot}/usr/share/man/man5
-ln -sf %{appdir}/bin/pepa %{buildroot}/usr/bin/pepa
+ln -sf %{appdir}/bin/pepa.py %{buildroot}/usr/bin/pepa
 
 %files
 %defattr(-,root,root)
