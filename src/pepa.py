@@ -103,7 +103,6 @@ def get_config(host):
 
     # Load host input
     file = basedir + '/inputs/hosts/' + host + '.sls'
-    print file
     if not os.path.isfile(file):
         error("Host is not defined: %s" % host)
     input = yaml.load(open(file, 'r').read())
