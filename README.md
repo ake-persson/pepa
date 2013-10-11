@@ -15,14 +15,21 @@ Hierarchical substitution templating for SaltStack configuration also support's 
     $ ./build_venv.sh
     $ make
 
+## Python pre-requisites ##
+
+*Install required Python packages*
+
+    cd pepa/
+    sudo pip install -r ./requirements.txt
+
 ## Example ##
 
-    $ cd pepa/src
+    $ cd pepa/src/
     $ ./pepa.py --config ../example/conf/pepa.conf --host foobar.example.com -d
 
 ## Run as a Web service ##
 
-    $ cd pepa/src
+    $ cd pepa/src/
     $ ./pepa.py --config ../example/conf/pepa.conf --daemonize
 
 *Query REST API for all host's*
