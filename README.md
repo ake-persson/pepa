@@ -48,6 +48,7 @@ Hierarchical substitution templating for SaltStack configuration also support's 
 # TODO #
 
 - Add REST call for triggering Git pull
+- Add REST queries for specific attributes like MAC address
 - Git pull must be locking so any concurrent process need to wait for completion, use a lockfile
 - Add an interval for normal git pull
 - Add MIME type awareness to REST API both input/output
@@ -56,6 +57,7 @@ Hierarchical substitution templating for SaltStack configuration also support's 
 - Add support for importing Grains when running as a Pillar plugin
 - Add a separate validation tool for input and output using YAML/JSON schema
 - Add logfile and/ or support for Syslog
+- Add separate sequence for configuring Applications
 
 # License #
 
