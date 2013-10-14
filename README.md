@@ -19,8 +19,8 @@ Hierarchical substitution templating for SaltStack configuration also support's 
 
 *Install required Python packages*
 
-    cd pepa/
-    sudo pip install -r ./requirements.txt
+    $ cd pepa/
+    $ sudo pip install -r ./requirements.txt
 
 ## Example ##
 
@@ -55,6 +55,7 @@ Hierarchical substitution templating for SaltStack configuration also support's 
 - Add proper error checking and HTTP error codes
 - Add support for importing Grains when running as a Pillar plugin
 - Add a separate validation tool for input and output using YAML/JSON schema
+- Add logfile and/ or support for Syslog
 
 # License #
 
