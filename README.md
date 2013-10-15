@@ -15,16 +15,16 @@ Hierarchical substitution templating for SaltStack configuration also support's 
     $ ./build_venv.sh
     $ make
 
-## Python pre-requisites ##
+## Install system wide ##
 
-*Install required Python packages*
-
+    $ sudo yum install -y python-pip gcc
     $ cd pepa/
     $ sudo pip install -r ./requirements.txt
+    $ cp src/pepa.py /usr/bin/pepa
 
 ## Install in a Virtual Environment ##
 
-    $ sudo yum install -y python-pip python-virtualenv gcc
+    $ sudo yum install -y python-virtualenv gcc
     $ virtualenv -p python2.7 ~/venv_pepa
     $ ~/venv_pepa/bin/pip install -r ./requirements.txt
     $ cp src/pepa.py ~/venv_pepa/bin/
