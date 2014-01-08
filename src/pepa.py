@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 
+# Environments per branch, one clone or one per branch?
+# This service can easily be load balanced ;D
+#
+
 import json
 import yaml
 import os
@@ -67,6 +71,16 @@ host = opts.host
 
 # Get configuration
 config = ConfigParser.ConfigParser()
+
+# Set defaults
+config.add_section('main')
+config.set('main', 'basedir', '/srv/pepa')
+config.set('main', 'backend', 'file')
+config.add_section('http')
+config.set('http', 'host', '127.0.0.1')
+config.set('http', 'port', 5000)
+
+# Get config
 config.read([opts.config])
 sequence = re.split('\s*,\s*', config.get('host', 'sequence'))
 basedir = config.get('main', 'basedir')
@@ -126,7 +140,7 @@ def get_config(host):
                 if opts.debug:
                     info("Parsing template: %s" % file)
                 template = Template(open(file).read())
-                config = yaml.load(template.render(output))        
+                config = yaml.load(template.render(output))
                 for key in config:
                     if opts.debug:
                         info2("Substituting key: %s" % key)
@@ -157,7 +171,7 @@ app.add_url_rule('/hosts/<host>', view_func = HostObject.as_view('host_object'))
 #app.add_url_rule('/git/<pull>', view_func = HostObject.as_view('git'))
 
 if __name__ == '__main__' and opts.daemonize:
-    app.run(debug = True)
+    app.run(debug = True, host = config.get('http', 'host'), port = config.get('http', 'port'))
 else:
     output = get_config(opts.host)
     if opts.json:
