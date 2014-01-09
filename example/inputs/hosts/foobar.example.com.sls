@@ -4,4 +4,4 @@ country: nl
 roles:
   - Server
   - Gitolite
-environment: test
+environment: base

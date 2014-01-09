@@ -3,4 +3,4 @@ region: amer
 country: us
 roles:
   - Server
-environment: prod
+environment: base
