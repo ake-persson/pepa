@@ -1,9 +1,5 @@
 #!/usr/bin/env python
 
-# Environments per branch, one clone or one per branch?
-# This service can easily be load balanced ;D
-#
-
 import json
 import yaml
 import os
@@ -76,6 +72,7 @@ config = ConfigParser.ConfigParser()
 config.add_section('main')
 config.set('main', 'basedir', '/srv/pepa')
 config.set('main', 'backend', 'file')
+config.set('main', 'environments', 'base')
 config.add_section('http')
 config.set('http', 'host', '127.0.0.1')
 config.set('http', 'port', 5000)
@@ -85,6 +82,8 @@ config.read([opts.config])
 sequence = re.split('\s*,\s*', config.get('host', 'sequence'))
 basedir = config.get('main', 'basedir')
 backend = config.get('main', 'backend')
+environments = re.split('\s*,\s*', config.get('main', 'environments'))
+subdir = ''
 
 # Check configuration
 if backend != 'git' and backend != 'file':
@@ -100,27 +99,49 @@ if backend == 'git':
         key = open(privkey)
         auth = GittleAuth(key)
 
-    if os.path.isdir(basedir + '/.git'):
+    envdir = basedir + '/base'
+    if os.path.isdir(envdir):
         if opts.debug:
-            info("Doing a Git pull for: %s in: %s" % (uri, basedir))
-        repo = Gittle(basedir, uri)
+            info("Doing a Git pull for: %s in: %s" % (uri, envdir))
+        repo = Gittle(envdir, uri)
         repo.pull()
     else:
         if opts.debug:
-            info("Doing a Git clone for: %s to: %s" % (uri, basedir))
-        repo = Gittle.clone(uri, basedir)
+            info("Doing a Git clone for: %s to: %s" % (uri, envdir))
+        repo = Gittle.clone(uri, envdir)
+
+    branches = repo.branches
+    del branches['master']
+    for branch in branches.keys():
+        envdir = basedir + '/' + branch
+        if os.path.isdir(envdir + '/.git'):
+            if opts.debug:
+                info("Doing a Git pull for: %s in: %s" % (uri, envdir))
+            repo = Gittle(envdir, uri)
+            repo.pull()
+        else:
+            if opts.debug:
+                info("Doing a Git clone for: %s to: %s" % (uri, envdir))
+            repo = Gittle.clone(uri, envdir)
+            repo.switch_branch(branch)
+
+    environments = branches.keys()
+    environments.append('base')
 
     if config.has_option('git', 'subdir'):
-        basedir += '/' + config.get('git', 'subdir')
+        subdir = config.get('git', 'subdir')
 
 def get_config(host):
-
     # Load host input
-    file = basedir + '/inputs/hosts/' + host + '.sls'
+    envdir = basedir + '/base' + '/' + subdir
+    file = envdir + '/inputs/hosts/' + host + '.sls'
     if not os.path.isfile(file):
         error("Host is not defined: %s" % host)
     input = yaml.load(open(file, 'r').read())
     input['default'] = 'default'
+
+    env = input['environment']
+    envdir = basedir + '/' + env + '/' + subdir
 
     # Load templates
     output = input
@@ -135,16 +156,17 @@ def get_config(host):
             entries = [ input[category] ]
 
         for entry in entries:
-            file = basedir + '/templates/' + category + '/' +  re.sub('\W', '_', entry.lower()) + '.sls'
+            file = envdir + '/templates/' + category + '/' +  re.sub('\W', '_', entry.lower()) + '.sls'
             if os.path.isfile(file):
                 if opts.debug:
                     info("Parsing template: %s" % file)
                 template = Template(open(file).read())
                 config = yaml.load(template.render(output))
-                for key in config:
-                    if opts.debug:
-                        info2("Substituting key: %s" % key)
-                    output[key] = config[key]
+                if config != None:
+                    for key in config:
+                        if opts.debug:
+                            info2("Substituting key: %s" % key)
+                        output[key] = config[key]
             else:
                 if opts.debug:
                     warn("Template doesn't exist: %s" % file)
@@ -166,9 +188,6 @@ class HostObject(MethodView):
         return yaml.safe_dump(output, indent = 4, default_flow_style = False)
 
 app.add_url_rule('/hosts/<host>', view_func = HostObject.as_view('host_object'))
-
-# Add REST call for triggering Git pull
-#app.add_url_rule('/git/<pull>', view_func = HostObject.as_view('git'))
 
 if __name__ == '__main__' and opts.daemonize:
     app.run(debug = True, host = config.get('http', 'host'), port = config.get('http', 'port'))
