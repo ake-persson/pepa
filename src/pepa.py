@@ -137,6 +137,8 @@ def get_config(host):
     file = envdir + '/inputs/hosts/' + host + '.sls'
     if not os.path.isfile(file):
         error("Host is not defined: %s" % host)
+    if opts.debug:
+        info("Parsing input: %s" % file)
     input = yaml.load(open(file, 'r').read())
     input['default'] = 'default'
 
