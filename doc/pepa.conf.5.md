@@ -22,11 +22,26 @@ Configuration files for pepa.
 basedir
 :   Basedir for pepa where input and templates are located, defaults to: /srv/pepa
 
+environments
+:   Environments available, defaults to: base
+
+backend
+:   Which backend to use for accessing templates can be either git or file, defaults to: file
+
 [host]
 :   Host section.
 
 sequence
 :   Susbstitution sequence for hosts.
+
+[http]
+:   HTTP section.
+
+host
+:   Which host address to listen to, defaults to: 0.0.0.0
+
+port
+:   Which port to listen to, defaults to: 5000
 
 # AUTHOR
 
