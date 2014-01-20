@@ -192,7 +192,7 @@ class HostObject(MethodView):
 app.add_url_rule('/hosts/<host>', view_func = HostObject.as_view('host_object'))
 
 if __name__ == '__main__' and opts.daemonize:
-    app.run(debug = True, host = config.get('http', 'host'), port = config.get('http', 'port'))
+    app.run(debug = True, host = config.get('http', 'host'), port = int(config.get('http', 'port')))
 else:
     output = get_config(opts.host)
     if opts.json:
