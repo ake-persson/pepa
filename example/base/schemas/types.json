@@ -1,0 +1,43 @@
+{
+    "username": {
+        "type": "string",
+        "minLength": 2,
+        "maxLength": 15
+        "pattern": "^([a-z][a-z0-9\_\-]+){2,15}$",
+    },
+    "name": {
+        "type": "string",
+        "minLength": 2,
+        "maxLength": 50
+        "pattern": "^[\w\s\-]$",
+    },
+    "email": {
+        "type": "string",
+        "minLength": 7,
+        "maxLength": 50,
+        "pattern": "^\S+@\S+$",
+    }
+    "hostname": {
+        "type": "string",
+        "pattern": "^([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\\.)+[a-zA-Z]{2,6}$"
+    },
+    "region": {
+        "type": "string",
+        "enum": [ "amer", "apac", "emea" ]
+    },
+    "country": {
+        "type": "string",
+        "enum": [ "nl", "us", "au" ]
+    },
+    "roles": {
+        "type": "array",
+            "items": {
+                "type": "string",
+                "enum": [ "desktop", "server" ]
+        }
+    },
+    "environment": {
+        "type": "string",
+        "enum": [ "dev", "qa", "pilot", "prod" ]
+    }
+}

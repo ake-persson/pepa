@@ -1,0 +1,25 @@
+{
+    "user": {
+        "title": "User validation",
+        "type": "object",
+        "properties": {
+            "username": { "type": "username" },
+            "name": { "type": "name" },
+            "email": { "type": "email" },
+            "ssh_key": { "type": "string" }
+        },
+        "required": [ "username", "name", "email" ]
+    },
+    "host": {
+        "title": "Host validation",
+        "type": "object",
+        "properties": {
+            "hostname": { "type": "hostname" },
+            "region": { "type": "region" },
+            "country": { "type": "country" },
+            "roles": { "type": "roles" },
+            "environment": { "type": "environment" }
+        },
+        "required": [ "hostname", "region", "country", "roles", "environment" ]
+    }
+}
