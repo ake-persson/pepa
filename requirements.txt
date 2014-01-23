@@ -4,3 +4,4 @@ ConfigParser
 termcolor
 Flask
 gittle
+jsonschema
