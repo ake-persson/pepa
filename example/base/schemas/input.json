@@ -16,7 +16,10 @@
         "properties": {
             "hostname": { "type": "hostname" },
             "region": { "type": "region" },
-            "country": { "type": "country" },
+            "country": {
+                "type": "country",
+                "maxLength": 2
+            },
             "roles": { "type": "roles" },
             "environment": { "type": "environment" }
         },

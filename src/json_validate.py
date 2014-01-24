@@ -8,10 +8,8 @@ def expand_schema(types, schema):
         for entry in schema:
             if isinstance(schema[entry], dict) and 'type' in schema[entry]:
                 if schema[entry]['type'] in types:
-                    print json.dumps(schema[entry])
-                    schema[entry] = types[schema[entry]['type']]
+                    schema[entry].update(types[schema[entry]['type']])
             expand_schema(types, schema[entry])
-
 
 basedir = '/Users/mpersson/Code/pepa/example'
 schemadir = basedir + '/base/schemas'
