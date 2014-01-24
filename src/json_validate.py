@@ -3,17 +3,24 @@
 import json
 from jsonschema import validate
 
+def expand_schema(types, schema):
+    if isinstance(schema, dict):
+        for entry in schema:
+            if isinstance(schema[entry], dict) and 'type' in schema[entry]:
+                if schema[entry]['type'] in types:
+                    print json.dumps(schema[entry])
+                    schema[entry] = types[schema[entry]['type']]
+            expand_schema(types, schema[entry])
+
+
 basedir = '/Users/mpersson/Code/pepa/example'
 schemadir = basedir + '/base/schemas'
 
 types_file = open(schemadir + '/types.json', 'r')
 types_schema = json.load(types_file)
 
-#with open(schemadir + '/input.json', 'r') as input_file:
-#    input_schema = json.load(input_file)
+input_file = open(schemadir + '/input.json', 'r')
+input_schema = json.load(input_file)
 
-#types_u = json.load(types_schema)
-#input_u = json.load(input_schema)
-
-#print types_u
-#print input_u
+expand_schema(types_schema, input_schema)
+print json.dumps(input_schema, indent = 4)
