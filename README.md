@@ -54,17 +54,21 @@ Hierarchical substitution templating for SaltStack configuration also support's 
 
 # TODO #
 
+- JSON Schema validation
+- API based on the JSON Schema
+- CLI based on the JSON Schema
+- Custom substitution sequence per endpoint i.e. you can handle any input ex. input/users, input/apps
+- Fix Git backend, switch out Gittle for PyGit2
+- Add MongoDB backend support
+- Add support for group of items like host group
+- Authentication for Endpoints using LDAP
 - Add REST call for triggering Git pull
 - Add REST queries for specific attributes like MAC address
 - Git pull must be locking so any concurrent process need to wait for completion, use a lockfile
 - Add an interval for normal git pull
 - Add MIME type awareness to REST API both input/output
-- Add some regexp validation for input
 - Add proper error checking and HTTP error codes
-- Add support for importing Grains when running as a Pillar plugin
-- Add a separate validation tool for input and output using YAML/JSON schema
 - Add logfile and/ or support for Syslog
-- Add separate sequence for configuring Applications
 
 # License #
 

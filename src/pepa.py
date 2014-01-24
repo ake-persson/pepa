@@ -13,8 +13,10 @@ import types
 import glob
 from os.path import basename, splitext
 import flask
-from flask.views import MethodView
+from flask.views import MethodView, request
 from gittle import Gittle, GittleAuth
+from jsonschema import validate
+from jsonschema.exceptions import ValidationError, SchemaError
 
 app = flask.Flask(__name__)
 
@@ -45,6 +47,14 @@ def info2(message):
         print >> sys.stderr, colored('[ INFO ] ' + message, 'cyan')
     else:
         print >> sys.stderr, '[ INFO ] ' + message
+
+def expand_schema(types, schema):
+    if isinstance(schema, dict):
+        for entry in schema:
+            if isinstance(schema[entry], dict) and 'type' in schema[entry]:
+                if schema[entry]['type'] in types:
+                    schema[entry].update(types[schema[entry]['type']])
+            expand_schema(types, schema[entry])
 
 # Get command line options
 parser = optparse.OptionParser()
@@ -84,6 +94,8 @@ basedir = config.get('main', 'basedir')
 backend = config.get('main', 'backend')
 environments = re.split('\s*,\s*', config.get('main', 'environments'))
 subdir = ''
+
+schema = {}
 
 # Check configuration
 if backend != 'git' and backend != 'file':
@@ -131,6 +143,24 @@ if backend == 'git':
     if config.has_option('git', 'subdir'):
         subdir = config.get('git', 'subdir')
 
+def get_schemas():
+    schemadir = basedir + '/base/schemas'
+    if not os.path.isdir(schemadir):
+        error("Missing schema directory: %s" % schemadir)
+
+    file = schemadir + '/types.json'
+    if not os.path.isfile(file):
+        error("Schema file doesn't exist: %s" % file)
+    types_schema = json.load(open(file, 'r'))
+
+    file = schemadir + '/input.json'
+    if not os.path.isfile(file):
+        error("Schema file doesn't exist: %s" % file)
+    input_schema = json.load(open(file, 'r'))
+
+    expand_schema(types_schema, input_schema)
+    return input_schema
+
 def get_config(host):
     # Load host input
     envdir = basedir + '/base' + '/' + subdir
@@ -175,14 +205,33 @@ def get_config(host):
     return output
 
 class Host(MethodView):
+    def post(self):
+        data = yaml.load(request.data)
+        try:
+            validate(data, schema['host'])
+        except ValidationError as e:
+            data['success'] = False
+            data['error'] = e.message
+            return yaml.safe_dump(data, indent = 4, default_flow_style = False), 400
+        except SchemaError as e:
+            data['success'] = False
+            data['error'] = e.message
+            return yaml.safe_dump(data, indent = 4, default_flow_style = False), 400
+
+# Store data
+
+        data['success'] = True
+        return yaml.safe_dump(data, indent = 4, default_flow_style = False)
+
     def get(self):
-        files = glob.glob(basedir + '/inputs/hosts/*.sls')
-        hosts = []
+        files = glob.glob(basedir + '/base/inputs/hosts/*.sls')
+        hosts = {}
         for file in files:
-            hosts.append(splitext(basename(file))[0])
+            host = splitext(basename(file))[0]
+            hosts[host] = get_config(host)
         return yaml.safe_dump(hosts, indent = 4, default_flow_style = False)
 
-app.add_url_rule('/hosts/', view_func = Host.as_view('hosts'))
+app.add_url_rule('/hosts', view_func = Host.as_view('hosts'))
 
 class HostObject(MethodView):
     def get(self, host):
@@ -192,6 +241,7 @@ class HostObject(MethodView):
 app.add_url_rule('/hosts/<host>', view_func = HostObject.as_view('host_object'))
 
 if __name__ == '__main__' and opts.daemonize:
+    schema = get_schemas()
     app.run(debug = True, host = config.get('http', 'host'), port = int(config.get('http', 'port')))
 else:
     output = get_config(opts.host)
