@@ -2,9 +2,7 @@
 
 import os
 import pygit2
-from pygit2 import Signature
 
-user = 'mpersson'
 url = 'https://github.com/mickep76/pepa.git'
 path = '/tmp/pepa'
 fn = 'test.txt'
@@ -27,5 +25,10 @@ r.index.read()
 r.index.add(fn)
 r.index.write()
 
-s = Signature('John Doe', 'John.Doe@Foobar.com')
+s = pygit2.Signature('John Doe', 'John.Doe@Foobar.com')
 c = r.create_commit('HEAD', s, s, 'Added a test file', t, [c.oid])
+
+remote = r.remotes[0]
+
+# Requires HTTP Basic Auth. which is not supported yet
+#remote.push('refs/heads/master')
