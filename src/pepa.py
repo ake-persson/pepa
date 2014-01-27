@@ -14,7 +14,7 @@ import glob
 from os.path import basename, splitext
 import flask
 from flask.views import MethodView, request
-from gittle import Gittle, GittleAuth
+#from gittle import Gittle, GittleAuth
 from jsonschema import validate
 from jsonschema.exceptions import ValidationError, SchemaError
 
@@ -98,50 +98,52 @@ subdir = ''
 schema = {}
 
 # Check configuration
-if backend != 'git' and backend != 'file':
-    error('Unsupported backend needs to be "file" or "git"')
+#if backend != 'git' and backend != 'file':
+#    error('Unsupported backend needs to be "file" or "git"')
+if backend != 'file':
+    error('Unsupported backend needs to be "file"')
 
-if backend == 'git':
-    if not config.has_option('git', 'uri'):
-        error('Need to set uri when using Git backend')
-    uri = config.get('git', 'uri')
+#if backend == 'git':
+#    if not config.has_option('git', 'uri'):
+#        error('Need to set uri when using Git backend')
+#    uri = config.get('git', 'uri')
 
-    if config.has_option('git', 'privkey'):
-        privkey = config.get('git', 'privkey')
-        key = open(privkey)
-        auth = GittleAuth(key)
+#    if config.has_option('git', 'privkey'):
+#        privkey = config.get('git', 'privkey')
+#        key = open(privkey)
+#        auth = GittleAuth(key)
 
-    envdir = basedir + '/base'
-    if os.path.isdir(envdir):
-        if opts.debug:
-            info("Doing a Git pull for: %s in: %s" % (uri, envdir))
-        repo = Gittle(envdir, uri)
-        repo.pull()
-    else:
-        if opts.debug:
-            info("Doing a Git clone for: %s to: %s" % (uri, envdir))
-        repo = Gittle.clone(uri, envdir)
+#    envdir = basedir + '/base'
+#    if os.path.isdir(envdir):
+#        if opts.debug:
+#            info("Doing a Git pull for: %s in: %s" % (uri, envdir))
+#        repo = Gittle(envdir, uri)
+#        repo.pull()
+#    else:
+#        if opts.debug:
+#            info("Doing a Git clone for: %s to: %s" % (uri, envdir))
+#        repo = Gittle.clone(uri, envdir)
 
-    branches = repo.branches
-    del branches['master']
-    for branch in branches.keys():
-        envdir = basedir + '/' + branch
-        if os.path.isdir(envdir + '/.git'):
-            if opts.debug:
-                info("Doing a Git pull for: %s in: %s" % (uri, envdir))
-            repo = Gittle(envdir, uri)
-            repo.pull()
-        else:
-            if opts.debug:
-                info("Doing a Git clone for: %s to: %s" % (uri, envdir))
-            repo = Gittle.clone(uri, envdir)
-            repo.switch_branch(branch)
+#    branches = repo.branches
+#    del branches['master']
+#    for branch in branches.keys():
+#        envdir = basedir + '/' + branch
+#        if os.path.isdir(envdir + '/.git'):
+#            if opts.debug:
+#                info("Doing a Git pull for: %s in: %s" % (uri, envdir))
+#            repo = Gittle(envdir, uri)
+#            repo.pull()
+#        else:
+#            if opts.debug:
+#                info("Doing a Git clone for: %s to: %s" % (uri, envdir))
+#            repo = Gittle.clone(uri, envdir)
+#            repo.switch_branch(branch)
 
-    environments = branches.keys()
-    environments.append('base')
+#    environments = branches.keys()
+#    environments.append('base')
 
-    if config.has_option('git', 'subdir'):
-        subdir = config.get('git', 'subdir')
+#    if config.has_option('git', 'subdir'):
+#        subdir = config.get('git', 'subdir')
 
 def get_schemas():
     schemadir = basedir + '/base/schemas'
