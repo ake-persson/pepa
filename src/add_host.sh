@@ -1,7 +1,7 @@
 #!/bin/bash
 
 read -d '' yaml <<__EOT__
-hostname: dumdum.example.com
+host: dumdum.example.com
 region: emea
 country: nl
 roles:

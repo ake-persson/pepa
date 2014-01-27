@@ -14,7 +14,7 @@
         "title": "Host validation",
         "type": "object",
         "properties": {
-            "hostname": { "type": "hostname" },
+            "host": { "type": "hostname" },
             "region": { "type": "region" },
             "country": {
                 "type": "country",
@@ -23,6 +23,6 @@
             "roles": { "type": "roles" },
             "environment": { "type": "environment" }
         },
-        "required": [ "hostname", "region", "country", "roles", "environment" ]
+        "required": [ "host", "region", "country", "roles", "environment" ]
     }
 }

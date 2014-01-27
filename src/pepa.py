@@ -218,7 +218,12 @@ class Host(MethodView):
             data['error'] = e.message
             return yaml.safe_dump(data, indent = 4, default_flow_style = False), 400
 
+# Check if host already exist's
 # Store data
+        file = basedir + '/base/inputs/hosts/' + data['host'] + '.sls'
+        f = open(file, 'w')
+        f.write(yaml.safe_dump(data, indent = 4, default_flow_style = False))
+        f.close()
 
         data['success'] = True
         return yaml.safe_dump(data, indent = 4, default_flow_style = False)

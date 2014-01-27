@@ -5,3 +5,4 @@ termcolor
 Flask
 gittle
 jsonschema
+pygit2==0.19.1
