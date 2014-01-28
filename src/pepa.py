@@ -14,7 +14,6 @@ import glob
 from os.path import basename, splitext
 import flask
 from flask.views import MethodView, request
-#from gittle import Gittle, GittleAuth
 from jsonschema import validate
 from jsonschema.exceptions import ValidationError, SchemaError
 
@@ -48,14 +47,6 @@ def info2(message):
     else:
         print >> sys.stderr, '[ INFO ] ' + message
 
-def expand_schema(types, schema):
-    if isinstance(schema, dict):
-        for entry in schema:
-            if isinstance(schema[entry], dict) and 'type' in schema[entry]:
-                if schema[entry]['type'] in types:
-                    schema[entry].update(types[schema[entry]['type']])
-            expand_schema(types, schema[entry])
-
 # Get command line options
 parser = optparse.OptionParser()
 parser.add_option('-c', '--config', help='Configuration file', dest = 'config', action ='store', default = '/etc/pepa.conf')
@@ -63,7 +54,8 @@ parser.add_option('-d', '--debug', help='Print debug information', dest = 'debug
 parser.add_option('-n', '--no-color', help='No color', dest = 'color', action ='store_false', default = True)
 parser.add_option('-j', '--json', help='JSON output, instead of default YAML', dest = 'json', action ='store_true', default = False)
 parser.add_option('-D', '--daemonize', help='Daemonize and run as a REST API', dest = 'daemonize', action ='store_true', default = False)
-parser.add_option('--host', help='Hostname', dest = 'host', action ='store')
+parser.add_option('-r', '--resource', help='Resource', dest = 'resource', action ='store')
+parser.add_option('-k', '--key', help='Resource key', dest = 'key', action ='store')
 (opts, args) = parser.parse_args()
 
 # Check that configuration file exist's
@@ -71,9 +63,8 @@ if not os.path.isfile(opts.config):
     error("Configuration file doesn't exist: %s" % opts.config)
 
 # Check options
-if opts.daemonize is False and not opts.host:
-    error("You need to specify a host")
-host = opts.host
+if opts.daemonize is False and not opts.resource:
+    error("You need to specify a resource")
 
 # Get configuration
 config = ConfigParser.ConfigParser()
@@ -83,105 +74,54 @@ config.add_section('main')
 config.set('main', 'basedir', '/srv/pepa')
 config.set('main', 'backend', 'file')
 config.set('main', 'environments', 'base')
+config.set('main', 'resources', 'hosts')
 config.add_section('http')
 config.set('http', 'host', '127.0.0.1')
 config.set('http', 'port', 5000)
 
 # Get config
 config.read([opts.config])
-sequence = re.split('\s*,\s*', config.get('host', 'sequence'))
+# Check that item exist's to avoid error
 basedir = config.get('main', 'basedir')
 backend = config.get('main', 'backend')
 environments = re.split('\s*,\s*', config.get('main', 'environments'))
-subdir = ''
-
-schema = {}
+resources = re.split('\s*,\s*', config.get('main', 'resources'))
+sequences = {}
+schemas = {}
+for resource in resources:
+# Check that sequence exist
+# Check that key exist
+    sequences[resource] = re.split('\s*,\s*', config.get(resource, 'sequence'))
+    fn = os.path.join(basedir, 'base', resource, 'schema.json')
+    if not os.path.isfile(fn):
+        error("JSON schema file doesn't exist: %s" % fn)
+    schemas[resource] = json.load(open(fn, 'r'))
 
 # Check configuration
-#if backend != 'git' and backend != 'file':
-#    error('Unsupported backend needs to be "file" or "git"')
 if backend != 'file':
-    error('Unsupported backend needs to be "file"')
+    error('Unsupported backend: %s' % backend)
 
-#if backend == 'git':
-#    if not config.has_option('git', 'uri'):
-#        error('Need to set uri when using Git backend')
-#    uri = config.get('git', 'uri')
+def get_config(resource, key):
 
-#    if config.has_option('git', 'privkey'):
-#        privkey = config.get('git', 'privkey')
-#        key = open(privkey)
-#        auth = GittleAuth(key)
-
-#    envdir = basedir + '/base'
-#    if os.path.isdir(envdir):
-#        if opts.debug:
-#            info("Doing a Git pull for: %s in: %s" % (uri, envdir))
-#        repo = Gittle(envdir, uri)
-#        repo.pull()
-#    else:
-#        if opts.debug:
-#            info("Doing a Git clone for: %s to: %s" % (uri, envdir))
-#        repo = Gittle.clone(uri, envdir)
-
-#    branches = repo.branches
-#    del branches['master']
-#    for branch in branches.keys():
-#        envdir = basedir + '/' + branch
-#        if os.path.isdir(envdir + '/.git'):
-#            if opts.debug:
-#                info("Doing a Git pull for: %s in: %s" % (uri, envdir))
-#            repo = Gittle(envdir, uri)
-#            repo.pull()
-#        else:
-#            if opts.debug:
-#                info("Doing a Git clone for: %s to: %s" % (uri, envdir))
-#            repo = Gittle.clone(uri, envdir)
-#            repo.switch_branch(branch)
-
-#    environments = branches.keys()
-#    environments.append('base')
-
-#    if config.has_option('git', 'subdir'):
-#        subdir = config.get('git', 'subdir')
-
-def get_schemas():
-    schemadir = basedir + '/base/schemas'
-    if not os.path.isdir(schemadir):
-        error("Missing schema directory: %s" % schemadir)
-
-    file = schemadir + '/types.json'
-    if not os.path.isfile(file):
-        error("Schema file doesn't exist: %s" % file)
-    types_schema = json.load(open(file, 'r'))
-
-    file = schemadir + '/input.json'
-    if not os.path.isfile(file):
-        error("Schema file doesn't exist: %s" % file)
-    input_schema = json.load(open(file, 'r'))
-
-    expand_schema(types_schema, input_schema)
-    return input_schema
-
-def get_config(host):
-    # Load host input
-    envdir = basedir + '/base' + '/' + subdir
-    file = envdir + '/inputs/hosts/' + host + '.sls'
-    if not os.path.isfile(file):
-        error("Host is not defined: %s" % host)
+    fn = os.path.join(basedir, 'base', resource, 'inputs', key + '.yaml')
+    if not os.path.isfile(fn):
+        error("Resource is not defined: %s" % key)
     if opts.debug:
-        info("Parsing input: %s" % file)
-    input = yaml.load(open(file, 'r').read())
-    input['default'] = 'default'
+        info("Parsing input: %s" % fn)
 
-    env = input['environment']
-    envdir = basedir + '/' + env + '/' + subdir
+    # Parse both YAML and JSON based on file extension
+    input = yaml.load(open(fn, 'r').read())
+    input['default'] = 'default'
+    input['environment'] = 'base'
+
+    # Check environment is defined, otherwise default to 'base'
+    envdir = os.path.join(basedir, input['environment'])
 
     # Load templates
     output = input
-    for category in sequence:
+    for category in sequences[resource]:
         if category not in input:
-            error("Input: %s is missing for host: %s" % (category, host))
+            continue
 
         entries = []
         if type(input[category]) is list:
@@ -190,11 +130,11 @@ def get_config(host):
             entries = [ input[category] ]
 
         for entry in entries:
-            file = envdir + '/templates/' + category + '/' +  re.sub('\W', '_', entry.lower()) + '.sls'
-            if os.path.isfile(file):
+            fn = os.path.join(envdir, resource, 'templates', category, re.sub('\W', '_', entry.lower()) + '.yaml')
+            if os.path.isfile(fn):
                 if opts.debug:
-                    info("Parsing template: %s" % file)
-                template = Template(open(file).read())
+                    info("Parsing template: %s" % fn)
+                template = Template(open(fn).read())
                 config = yaml.load(template.render(output))
                 if config != None:
                     for key in config:
@@ -203,55 +143,25 @@ def get_config(host):
                         output[key] = config[key]
             else:
                 if opts.debug:
-                    warn("Template doesn't exist: %s" % file)
+                    warn("Template doesn't exist: %s" % fn)
     return output
 
-class Host(MethodView):
-    def post(self):
-        data = yaml.load(request.data)
-        try:
-            validate(data, schema['host'])
-        except ValidationError as e:
-            data['success'] = False
-            data['error'] = e.message
-            return yaml.safe_dump(data, indent = 4, default_flow_style = False), 400
-        except SchemaError as e:
-            data['success'] = False
-            data['error'] = e.message
-            return yaml.safe_dump(data, indent = 4, default_flow_style = False), 400
-
-# Check if host already exist's
-# Store data
-        file = basedir + '/base/inputs/hosts/' + data['host'] + '.sls'
-        f = open(file, 'w')
-        f.write(yaml.safe_dump(data, indent = 4, default_flow_style = False))
-        f.close()
-
-        data['success'] = True
-        return yaml.safe_dump(data, indent = 4, default_flow_style = False)
-
-    def get(self):
-        files = glob.glob(basedir + '/base/inputs/hosts/*.sls')
-        hosts = {}
+class Resource(MethodView):
+    def get(self, resource):
+        print resource
+        files = glob.glob(os.path.join(basedir, 'base', resource, 'inputs', '*.yaml'))
+        results = {}
         for file in files:
-            host = splitext(basename(file))[0]
-            hosts[host] = get_config(host)
-        return yaml.safe_dump(hosts, indent = 4, default_flow_style = False)
+            key = splitext(basename(file))[0]
+            results[key] = get_config(resource, key)
+        return yaml.safe_dump(results, indent = 4, default_flow_style = False)
 
-app.add_url_rule('/hosts', view_func = Host.as_view('hosts'))
-
-class HostObject(MethodView):
-    def get(self, host):
-        output = get_config(host)
-        return yaml.safe_dump(output, indent = 4, default_flow_style = False)
-
-app.add_url_rule('/hosts/<host>', view_func = HostObject.as_view('host_object'))
+app.add_url_rule('/<resource>', view_func = Resource.as_view('resource'))
 
 if __name__ == '__main__' and opts.daemonize:
-    schema = get_schemas()
     app.run(debug = True, host = config.get('http', 'host'), port = int(config.get('http', 'port')))
 else:
-    output = get_config(opts.host)
+    output = get_config(opts.resource, opts.key)
     if opts.json:
         print json.dumps(output, indent = 4) + '\n'
     else:

@@ -1,4 +1,4 @@
-host: foobar.example.com
+hostname: foobar.example.com
 region: emea
 country: nl
 roles:

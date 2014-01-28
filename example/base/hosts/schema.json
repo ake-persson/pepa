@@ -1,0 +1,30 @@
+{
+    "title": "Host validation",
+    "type": "object",
+    "properties": {
+        "hostname": {
+            "type": "string",
+            "pattern": "^([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\\.)+[a-zA-Z]{2,6}$"
+        },
+        "region": {
+            "type": "string",
+            "enum": [ "amer", "apac", "emea" ]
+        },
+        "country": {
+            "type": "string",
+            "enum": [ "nl", "us", "au" ]
+        },
+        "roles": {
+            "type": "array",
+                "items": {
+                    "type": "string",
+                    "enum": [ "desktop", "server" ]
+            }
+        },
+        "environment": {
+            "type": "string",
+            "enum": [ "dev", "qa", "pilot", "prod" ]
+        }
+    },
+    "required": [ "host", "region", "country", "roles", "environment" ]
+}

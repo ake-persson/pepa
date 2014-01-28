@@ -3,6 +3,6 @@ jinja2
 ConfigParser
 termcolor
 Flask
-gittle
+#gittle
 jsonschema
 #pygit2==0.19.1

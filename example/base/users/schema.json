@@ -1,0 +1,28 @@
+{
+    "title": "User validation",
+    "type": "object",
+    "properties": {
+        "username": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 15,
+            "pattern": "^([a-z][a-z0-9\\_\\-]+){2,15}$"
+        },
+        "name": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 50,
+            "pattern": "^[\\w\\s\\-]+$"
+        },
+        "email": {
+            "type": "string",
+            "minLength": 7,
+            "maxLength": 50,
+            "pattern": "^\\S+@\\S+$"
+        },
+        "ssh_key": {
+            "type": "string"
+        }
+    },
+    "required": [ "username", "name", "email" ]
+}

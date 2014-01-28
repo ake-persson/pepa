@@ -9,7 +9,7 @@
         "type": "string",
         "minLength": 2,
         "maxLength": 50,
-        "pattern": "^[\\w\\s\\-]$"
+        "pattern": "^[\\w\\s\\-]+$"
     },
     "email": {
         "type": "string",
