@@ -14,8 +14,8 @@ Add your user to the admin group on your system and then:
 
     $ git clone ...
     $ cd pepa
-    $ chgrp admin /opt
-    $ chmod 770 /opt
+    $ sudo chgrp admin /opt
+    $ sudo chmod 770 /opt
     $ make
 
 ## Install system wide ##
