@@ -10,9 +10,12 @@ Hierarchical substitution templating for SaltStack configuration also support's 
 
 *Build RPM*
 
+Add your user to the admin group on your system and then:
+
     $ git clone ...
     $ cd pepa
-    $ ./build_venv.sh
+    $ chgrp admin /opt
+    $ chmod 770 /opt
     $ make
 
 ## Install system wide ##
@@ -32,7 +35,7 @@ Hierarchical substitution templating for SaltStack configuration also support's 
 ## Example ##
 
     $ cd pepa/src/
-    $ ./pepa.py --config ../example/conf/pepa.conf --host foobar.example.com -d
+    $ ./pepa.py --config ../example/conf/pepa.conf --resource hosts --key foobar.example.com -d
 
 ## Run as a Web service ##
 
@@ -47,28 +50,18 @@ Hierarchical substitution templating for SaltStack configuration also support's 
 
     $ curl http://127.0.0.1:5000/hosts/foobar.example.com
 
-## Use Git backend ##
-
-    $ cd pepa/src
-    $ ./pepa.py --config ../example/conf/pepa_git.conf --host foobar.example.com
-
 # TODO #
 
-- JSON Schema validation
-- API based on the JSON Schema
 - CLI based on the JSON Schema
-- Custom substitution sequence per endpoint i.e. you can handle any input ex. input/users, input/apps
-- Fix Git backend, switch out Gittle for PyGit2
+- Fix Git backend once PyGit2 supports SSH and HTTPS Auth.
 - Add MongoDB backend support
 - Add support for group of items like host group
+- REST POST support
 - Authentication for Endpoints using LDAP
-- Add REST call for triggering Git pull
-- Add REST queries for specific attributes like MAC address
-- Git pull must be locking so any concurrent process need to wait for completion, use a lockfile
-- Add an interval for normal git pull
+- Authorisation for Endpoints based on Roles
+- Add REST queries for specific attributes
 - Add MIME type awareness to REST API both input/output
 - Add proper error checking and HTTP error codes
-- Add logfile and/ or support for Syslog
 
 # License #
 

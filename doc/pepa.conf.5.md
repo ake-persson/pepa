@@ -25,14 +25,11 @@ basedir
 environments
 :   Environments available, defaults to: base
 
+resources
+:   Resources that can be accesses, defaults to: hosts
+
 backend
 :   Which backend to use for accessing templates can be either git or file, defaults to: file
-
-[host]
-:   Host section.
-
-sequence
-:   Susbstitution sequence for hosts.
 
 [http]
 :   HTTP section.
@@ -42,6 +39,17 @@ host
 
 port
 :   Which port to listen to, defaults to: 5000
+
+# RESOURCE
+
+[hosts]
+:   Host section.
+
+key
+:   Key for Schema
+
+sequence
+:   Susbstitution sequence for hosts.
 
 # AUTHOR
 

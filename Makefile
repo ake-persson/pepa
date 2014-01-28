@@ -21,7 +21,7 @@ venv:
 #	prelink -u ${VENV}/bin/python2.7
 	tar -cvzf ${NAME}.tar.gz ${VENV}
 
-rpm:	venv
+rpm: venv
 	mkdir -p ${TMPDIR}/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
 	pandoc -s -w man doc/pepa.1.md -o ${TMPDIR}/SOURCES/pepa.1
 	pandoc -s -w man doc/pepa.conf.5.md -o ${TMPDIR}/SOURCES/pepa.conf.5

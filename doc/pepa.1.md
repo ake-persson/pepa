@@ -9,7 +9,8 @@ pepa - generate configuration for Salt Stack
 # SYNOPSIS
 
 pepa *-h*|*--help*
-pepa [*-c*|*--config* <file>] [*-d*|*--debug*] [*-n*|*--no-color*] [*-j*|*--json*] *--host* <hostname>
+pepa [*-c*|*--config* <file>] [*-d*|*--debug*] [*-n*|*--no-color*] *-D*|*--daemonize*
+pepa [*-c*|*--config* <file>] [*-d*|*--debug*] [*-n*|*--no-color*] [*-j*|*--json*] *-r*|*--resource* <resoure> *-k*|*--key** <key>
 
 # DESCRIPTION
 
@@ -32,8 +33,11 @@ pepa [*-c*|*--config* <file>] [*-d*|*--debug*] [*-n*|*--no-color*] [*-j*|*--json
 -j, --json
 :   Print configuration as JSON instead of YAML.
 
--h, --host
-:   Host to generate configuration for.
+-r, --resource
+:   Resource to generate configuration for.
+
+-k, --key
+:   Resource Key to generate configuration for.
 
 -D, --daemonize
 :   Daemonize and run as a REST API
@@ -43,10 +47,13 @@ pepa [*-c*|*--config* <file>] [*-d*|*--debug*] [*-n*|*--no-color*] [*-j*|*--json
 /etc/pepa.conf
 :   Pepa configuration file.
 
-/srv/pepa/inputs/
+/srv/pepa/<environment>/<resource>/inputs/
 :   Pepa input files.
 
-/srv/pepa/templates/
+/srv/pepa/<environment>/<resource>/schema.json
+:   Input JSON Schema.
+
+/srv/pepa/<environment>/<resource>/templates/
 :   Pepa configuration templates.
 
 # EXIT STATUS
