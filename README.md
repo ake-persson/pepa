@@ -34,13 +34,13 @@ Add your user to the admin group on your system and then:
 
 ## Example ##
 
-    $ cd pepa/src/
-    $ ./pepa.py --config ../example/conf/pepa.conf --resource hosts --key foobar.example.com -d
+    $ cd pepa
+    $ src/pepa.py --config example/conf/pepa.conf --resource hosts --key foobar.example.com -d
 
 ## Run as a Web service ##
 
-    $ cd pepa/src/
-    $ ./pepa.py --config ../example/conf/pepa.conf --daemonize
+    $ cd pepa
+    $ src/pepa.py --config example/conf/pepa.conf --daemonize
 
 *Query REST API for all host's*
 
