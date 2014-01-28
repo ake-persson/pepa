@@ -1,8 +1,7 @@
-pyyaml
-jinja2
+argparse
 ConfigParser
+pyyaml
+jsonschema
+jinja2
 termcolor
 Flask
-#gittle
-jsonschema
-#pygit2==0.19.1
