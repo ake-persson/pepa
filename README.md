@@ -56,7 +56,7 @@ Add your user to the admin group on your system and then:
 
 *Query REST API for a user*
 
-    $ curl http://127.0.0.1:8080/hosts/jdoe
+    $ curl http://127.0.0.1:8080/users/jdoe
 
 # TODO #
 
