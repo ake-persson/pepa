@@ -46,20 +46,21 @@ Add your user to the admin group on your system and then:
 
     $ curl http://127.0.0.1:8080/hosts
 
-*Query REST API for a host*
+*Query REST API for a host, and return it as JSON*
 
-    $ curl http://127.0.0.1:8080/hosts/foobar.example.com
+    $ curl -H "Accept: application/json" http://127.0.0.1:8080/hosts/foobar.example.com
 
-*Query REST API for all user's*
+*Query REST API for all user's, and return it as YAML*
 
-    $ curl http://127.0.0.1:8080/users
+    $ curl -H "Accept: application/yaml" http://127.0.0.1:8080/users
 
 *Query REST API for a user*
 
-    $ curl http://127.0.0.1:8080/users/jdoe
+    $ curl -H "Accept: application/json" http://127.0.0.1:8080/users/jdoe
 
 # TODO #
 
+- Validate Input/Output Git hooks
 - CLI based on the input JSON Schema
 - REST POST support
 - Authentication for Endpoints using LDAP
