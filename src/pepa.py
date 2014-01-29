@@ -122,7 +122,6 @@ config.set('http', 'port', 8080)
 # Get config
 config.read([args.config])
 basedir = config.get('main', 'basedir')
-backend = config.get('main', 'backend')
 environments = re.split('\s*,\s*', config.get('main', 'environments'))
 resources = re.split('\s*,\s*', config.get('main', 'resources'))
 sequences = {}
@@ -134,7 +133,7 @@ for resource in resources:
         error("There is no sequence configured for resource: %s" % resource)
     sequences[resource] = re.split('\s*,\s*', config.get(resource, 'sequence'))
 
-    fn = makepath(basedir, 'base', resource, 'schema')
+    fn = makepath(basedir, 'base', resource, 'schemas', 'input')
     if isfile(fn + '.yaml'):
         info("Load schema: %s.yaml" % fn)
         schemas[resource] = yaml.load(open(fn + '.yaml').read())
