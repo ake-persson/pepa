@@ -50,8 +50,11 @@ pepa [*-c*|*--config* <file>] [*-d*|*--debug*] [*-n*|*--no-color*] [*-j*|*--json
 /srv/pepa/<environment>/<resource>/inputs/
 :   Pepa input files.
 
-/srv/pepa/<environment>/<resource>/schema.json
+/srv/pepa/<environment>/<resource>/schemas/input.json
 :   Input JSON Schema.
+
+/srv/pepa/<environment>/<resource>/schemas/output.json
+:   Output JSON Schema.
 
 /srv/pepa/<environment>/<resource>/templates/
 :   Pepa configuration templates.

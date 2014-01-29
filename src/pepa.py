@@ -4,7 +4,7 @@ import ConfigParser
 import argparse
 import json
 import yaml
-from os.path import isfile, join as joinpath, splitext, basename
+from os.path import isfile, join as makepath, splitext, basename
 import sys
 from sys import stderr
 import re
@@ -13,8 +13,6 @@ from termcolor import colored
 import types
 from  glob import glob
 import flask
-from flask import Response
-from flask.views import MethodView, request
 import mimerender
 from jsonschema import validate
 from jsonschema.exceptions import ValidationError, SchemaError
@@ -43,7 +41,7 @@ def get_config(resource, key):
         'environment': 'base',
     }
 
-    fn = joinpath(basedir, 'base', resource, 'inputs', key)
+    fn = makepath(basedir, 'base', resource, 'inputs', key)
     if isfile(fn + '.yaml'):
         info("Load resource: %s.json" % fn)
         input.update(yaml.load(open(fn + '.yaml').read()))
@@ -67,7 +65,7 @@ def get_config(resource, key):
 
         for entry in entries:
             config = None
-            fn = joinpath(basedir,  input['environment'], resource, 'templates', category,
+            fn = makepath(basedir,  input['environment'], resource, 'templates', category,
                 re.sub('\W', '_', entry.lower()))
             if isfile(fn + '.yaml'):
                 info("Load template: %s.yaml" % fn)
@@ -119,7 +117,7 @@ config.set('hosts', 'key', 'hostname')
 config.set('hosts', 'sequence', 'default, environment, region, country, roles, hostname')
 config.add_section('http')
 config.set('http', 'host', '127.0.0.1')
-config.set('http', 'port', 5000)
+config.set('http', 'port', 8080)
 
 # Get config
 config.read([args.config])
@@ -136,7 +134,7 @@ for resource in resources:
         error("There is no sequence configured for resource: %s" % resource)
     sequences[resource] = re.split('\s*,\s*', config.get(resource, 'sequence'))
 
-    fn = joinpath(basedir, 'base', resource, 'schema')
+    fn = makepath(basedir, 'base', resource, 'schema')
     if isfile(fn + '.yaml'):
         info("Load schema: %s.yaml" % fn)
         schemas[resource] = yaml.load(open(fn + '.yaml').read())
@@ -167,7 +165,7 @@ render_yaml = lambda **args: yaml.safe_dump(args, indent = 4, default_flow_style
     json = render_json
 )
 def resource(resource):
-    files = glob(joinpath(basedir, 'base', resource, 'inputs', '*'))
+    files = glob(makepath(basedir, 'base', resource, 'inputs', '*'))
     output = {}
     for file in files:
         key = splitext(basename(file))[0]

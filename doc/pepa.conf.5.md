@@ -28,17 +28,14 @@ environments
 resources
 :   Resources that can be accesses, defaults to: hosts
 
-backend
-:   Which backend to use for accessing templates can be either git or file, defaults to: file
-
 [http]
 :   HTTP section.
 
 host
-:   Which host address to listen to, defaults to: 0.0.0.0
+:   Which host address to listen to, use 0.0.0.0 for all interfaces. Defaults to: 127.0.0.1
 
 port
-:   Which port to listen to, defaults to: 5000
+:   Which port to listen to, defaults to: 8080
 
 # RESOURCE
 

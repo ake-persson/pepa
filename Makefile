@@ -17,8 +17,6 @@ venv:
 	( cd ${VENV} && rm -f lib64 && ln -s lib lib64 )
 	sed "s!/usr/bin/env python!${VENV}/bin/python2!" src/pepa.py >${VENV}/bin/pepa.py
 	chmod 755 ${VENV}/bin/pepa.py
-#	prelink -u ${VENV}/bin/python
-#	prelink -u ${VENV}/bin/python2.7
 	tar -cvzf ${NAME}.tar.gz ${VENV}
 
 rpm: venv
