@@ -4,56 +4,72 @@ import ConfigParser
 import argparse
 import json
 import yaml
-import os
+from os.path import isfile, join as joinpath, splitext, basename
 import sys
+from sys import stderr
 import re
 import jinja2
 from termcolor import colored
 import types
-import glob
+from  glob import glob
 import flask
 from flask.views import MethodView, request
 from jsonschema import validate
 from jsonschema.exceptions import ValidationError, SchemaError
 
-def error(message):
+def notify(message, color = 'red', prepend = ''):
     if args.color:
-        print >> sys.stderr, colored('[ ERROR ] ' + message, 'red')
+        print >> stderr, colored(prepend + message, color)
     else:
-        print >> sys.stderr, '[ ERROR ] ' + message
+        print >> stderr, prepend + message
+
+def error(message, color = 'red'):
+    notify(message, color, '[ ERRO ] ')
     sys.exit(1)
 
-def warn(message):
-    if args.color:
-        print >> sys.stderr, colored('[ WARN ] ' + message, 'yellow')
-    else:
-        print >> sys.stderr, '[ WARN ] ' + message
+def warn(message, color = 'magenta'):
+    if args.debug:
+        notify(message, color, '[ WARN ] ')
 
-def info(message):
-    if args.color:
-        print >> sys.stderr, colored('[ INFO ] ' + message, 'green')
-    else:
-        print >> sys.stderr, '[ INFO ] ' + message
+def info(message, color = 'green'):
+    if args.debug:
+        notify(message, color, '[ INFO ] ')
 
-def info2(message):
-    if args.color:
-        print >> sys.stderr, colored('[ INFO ] ' + message, 'cyan')
+def parse_file(path, template = False, output = None):
+    files = glob(path)
+    if not files and template:
+        warn("File doesn't exist: %s" % path)
+        return None
+    elif not files:
+        error("File doesn't exist: %s" % path)
+    elif len(files) > 1 and template:
+        warn("More then one file matching pattern: %s" % path)
+        return None
+    elif len(files) > 1:
+        error("More then one file matching pattern: %s" % path)
+    fn = files[0]
+    ext = splitext(fn)[1]
+    if ext != '.yaml' and ext != '.json':
+        error("Incorrect file extension for: %s" % fn)
+
+    info("Loading file: %s" % fn)
+
+    data = None
+    if template:
+        template = jinja2.Template(open(fn).read())
+        data = template.render(output)
     else:
-        print >> sys.stderr, '[ INFO ] ' + message
+        data = open(fn).read()
+
+    if ext == '.yaml':
+        return yaml.load(data)
+    elif ext == '.json':
+        return json.loads(data)
 
 def get_config(resource, key):
-    fn = os.path.join(basedir, 'base', resource, 'inputs', key + '.yaml')
-    if not os.path.isfile(fn):
-        error("Resource is not defined: %s" % key)
-    if args.debug:
-        info("Parsing input: %s" % fn)
-
-    # Parse both YAML and JSON based on file extension
-    input = yaml.load(open(fn, 'r').read())
+    input = parse_file(joinpath(basedir, 'base', resource, 'inputs', key + '.*'))
     input['default'] = 'default'
     input['environment'] = 'base'
-
-    envdir = os.path.join(basedir, input['environment'])
 
     # Load templates
     output = input
@@ -68,20 +84,12 @@ def get_config(resource, key):
             entries = [ input[category] ]
 
         for entry in entries:
-            fn = os.path.join(envdir, resource, 'templates', category, re.sub('\W', '_', entry.lower()) + '.yaml')
-            if os.path.isfile(fn):
-                if args.debug:
-                    info("Parsing template: %s" % fn)
-                template = jinja2.Template(open(fn).read())
-                config = yaml.load(template.render(output))
-                if config != None:
-                    for key in config:
-                        if args.debug:
-                            info2("Substituting key: %s" % key)
-                        output[key] = config[key]
-            else:
-                if args.debug:
-                    warn("Template doesn't exist: %s" % fn)
+            config = parse_file(joinpath(basedir,  input['environment'], resource, 'templates',
+               category, re.sub('\W', '_', entry.lower()) + '.*'), True, output)
+            if config != None:
+                for key in config:
+                    info("Substituting key: %s" % key, 'yellow')
+                    output[key] = config[key]
     return output
 
 # Get command line options
@@ -96,7 +104,7 @@ parser.add_argument('-k', '--key', help = 'Resource key')
 args = parser.parse_args()
 
 # Check that configuration file exist's
-if not os.path.isfile(args.config):
+if not isfile(args.config):
     error("Configuration file doesn't exist: %s" % args.config)
 
 # Check options
@@ -109,7 +117,6 @@ config = ConfigParser.ConfigParser()
 # Set defaults
 config.add_section('main')
 config.set('main', 'basedir', '/srv/pepa')
-config.set('main', 'backend', 'file')
 config.set('main', 'environments', 'base')
 config.set('main', 'resources', 'hosts')
 config.add_section('hosts')
@@ -131,23 +138,20 @@ for resource in resources:
 # Check that sequence exist
 # Check that key exist
     sequences[resource] = re.split('\s*,\s*', config.get(resource, 'sequence'))
-    fn = os.path.join(basedir, 'base', resource, 'schema.json')
-    if not os.path.isfile(fn):
+    fn = joinpath(basedir, 'base', resource, 'schema.json')
+    if not isfile(fn):
         error("JSON schema file doesn't exist: %s" % fn)
 # Validate JSON Schema
-    schemas[resource] = json.load(open(fn, 'r'))
-
-if backend != 'file':
-    error('Unsupported backend: %s' % backend)
+    schemas[resource] = parse_file(fn)
 
 app = flask.Flask(__name__)
 
 class Resource(MethodView):
     def get(self, resource):
-        files = glob.glob(os.path.join(basedir, 'base', resource, 'inputs', '*.yaml'))
+        files = glob(joinpath(basedir, 'base', resource, 'inputs', '*.yaml'))
         results = {}
         for file in files:
-            key = os.path.splitext(os.path.basename(file))[0]
+            key = splitext(basename(file))[0]
             # Key shouldn't be based on filename but rather on the entry in the file
             results[key] = get_config(resource, key)
         return yaml.safe_dump(results, indent = 4, default_flow_style = False)
