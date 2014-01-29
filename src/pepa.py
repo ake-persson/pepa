@@ -13,7 +13,9 @@ from termcolor import colored
 import types
 from  glob import glob
 import flask
+from flask import Response
 from flask.views import MethodView, request
+import mimerender
 from jsonschema import validate
 from jsonschema.exceptions import ValidationError, SchemaError
 
@@ -43,11 +45,13 @@ def get_config(resource, key):
 
     fn = joinpath(basedir, 'base', resource, 'inputs', key)
     if isfile(fn + '.yaml'):
+        info("Load resource: %s.json" % fn)
         input.update(yaml.load(open(fn + '.yaml').read()))
     elif isfile(fn + '.json'):
+        info("Load resource: %s.json" % fn)
         input.update(json.loads(open(fn + '.json').read()))
     else:
-        error("Resource file doesn't exist: %s.(json|yaml)" % fn)
+        error("Resource doesn't exist: %s.(json|yaml)" % fn)
 
     # Load templates
     output = input
@@ -66,13 +70,15 @@ def get_config(resource, key):
             fn = joinpath(basedir,  input['environment'], resource, 'templates', category,
                 re.sub('\W', '_', entry.lower()))
             if isfile(fn + '.yaml'):
+                info("Load template: %s.yaml" % fn)
                 template = jinja2.Template(open(fn + '.yaml').read())
                 config = yaml.load(template.render(output))
             elif isfile(fn + '.json'):
+                info("Load template: %s.json" % fn)
                 template = jinja2.Template(open(fn + '.yaml').read())
                 config = json.loads(template.render(output))
             else:
-                warn("Resource file doesn't exist: %s.(json|yaml)" % fn)
+                warn("Template doesn't exist: %s.(json|yaml)" % fn)
                 continue
 
             if config != None:
@@ -132,36 +138,50 @@ for resource in resources:
 
     fn = joinpath(basedir, 'base', resource, 'schema')
     if isfile(fn + '.yaml'):
+        info("Load schema: %s.yaml" % fn)
         schemas[resource] = yaml.load(open(fn + '.yaml').read())
     elif isfile(fn + '.json'):
+        info("Load schema: %s.json" % fn)
         schemas[resource] = json.loads(open(fn + '.json').read())
     else:
-        error("Schema file doesn't exist: %s.(json|yaml)" % fn)
+        error("Schema doesn't exist: %s.(json|yaml)" % fn)
 
-app = flask.Flask(__name__)
-
-class Resource(MethodView):
-    def get(self, resource):
-        files = glob(joinpath(basedir, 'base', resource, 'inputs', '*'))
-        results = {}
-        for file in files:
-            key = splitext(basename(file))[0]
-            results[key] = get_config(resource, key)
-        return yaml.safe_dump(results, indent = 4, default_flow_style = False)
-
-app.add_url_rule('/<resource>', view_func = Resource.as_view('resource'))
-
-class ResourceEntry(MethodView):
-    def get(self, resource, key):
-        return yaml.safe_dump(get_config(resource, key), indent = 4, default_flow_style = False)
-
-app.add_url_rule('/<resource>/<key>', view_func = ResourceEntry.as_view('resource_entry'))
-
-if __name__ == '__main__' and args.daemonize:
-    app.run(debug = True, host = config.get('http', 'host'), port = int(config.get('http', 'port')))
-else:
+if not args.daemonize:
     output = get_config(args.resource, args.key)
     if args.json:
         print json.dumps(output, indent = 4) + '\n'
     else:
         print yaml.safe_dump(output, indent = 4, default_flow_style = False)
+    sys.exit(0)
+
+app = flask.Flask(__name__)
+
+mimerender = mimerender.FlaskMimeRender()
+render_json = lambda **args: json.dumps(args, indent = 4)
+render_yaml = lambda **args: yaml.safe_dump(args, indent = 4, default_flow_style = False)
+
+@app.route('/<resource>', methods=["GET"])
+@mimerender(
+    default = 'yaml',
+    yaml  = render_yaml,
+    json = render_json
+)
+def resource(resource):
+    files = glob(joinpath(basedir, 'base', resource, 'inputs', '*'))
+    output = {}
+    for file in files:
+        key = splitext(basename(file))[0]
+        output[key] = get_config(resource, key)
+    return output
+
+@app.route('/<resource>/<key>', methods=["GET"])
+@mimerender(
+    default = 'yaml',
+    yaml  = render_yaml,
+    json = render_json
+)
+def get(resource, key):
+    return get_config(resource, key)
+
+if __name__ == '__main__':
+    app.run(debug = True, host = config.get('http', 'host'), port = int(config.get('http', 'port')))
