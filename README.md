@@ -44,24 +44,26 @@ Add your user to the admin group on your system and then:
 
 *Query REST API for all host's*
 
-    $ curl http://127.0.0.1:5000/hosts
+    $ curl http://127.0.0.1:8080/hosts
 
 *Query REST API for a host*
 
-    $ curl http://127.0.0.1:5000/hosts/foobar.example.com
+    $ curl http://127.0.0.1:8080/hosts/foobar.example.com
+
+*Query REST API for all user's*
+
+    $ curl http://127.0.0.1:8080/users
+
+*Query REST API for a user*
+
+    $ curl http://127.0.0.1:8080/hosts/jdoe
 
 # TODO #
 
-- CLI based on the JSON Schema
-- Fix Git backend once PyGit2 supports SSH and HTTPS Auth.
-- Add MongoDB backend support
-- Add support for group of items like host group
+- CLI based on the input JSON Schema
 - REST POST support
 - Authentication for Endpoints using LDAP
 - Authorisation for Endpoints based on Roles
-- Add REST queries for specific attributes
-- Add MIME type awareness to REST API both input/output
-- Add proper error checking and HTTP error codes
 
 # License #
 
