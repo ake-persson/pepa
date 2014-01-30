@@ -13,9 +13,12 @@ from termcolor import colored
 import types
 from  glob import glob
 import flask
+from flask import request, Response
 import mimerender
 from jsonschema import validate
 from jsonschema.exceptions import ValidationError, SchemaError
+import ldap
+from flask.ext.httpauth import HTTPBasicAuth
 
 def notify(message, color = 'red', prepend = ''):
     if args.color:
@@ -111,13 +114,17 @@ config = ConfigParser.ConfigParser()
 config.add_section('main')
 config.set('main', 'basedir', '/srv/pepa')
 config.set('main', 'environments', 'base')
-config.set('main', 'resources', 'hosts')
+config.set('main', 'resources', 'hosts, schemas')
 config.add_section('hosts')
 config.set('hosts', 'key', 'hostname')
 config.set('hosts', 'sequence', 'default, environment, region, country, roles, hostname')
+config.add_section('schemas')
+config.set('schemas', 'key', 'schema')
+config.set('schemas', 'sequence', 'default')
 config.add_section('http')
 config.set('http', 'host', '127.0.0.1')
 config.set('http', 'port', 8080)
+config.set('main', 'auth', 'ad')
 
 # Get config
 config.read([args.config])
@@ -133,7 +140,7 @@ for resource in resources:
         error("There is no sequence configured for resource: %s" % resource)
     sequences[resource] = re.split('\s*,\s*', config.get(resource, 'sequence'))
 
-    fn = makepath(basedir, 'base', resource, 'schemas', 'input')
+    fn = makepath(basedir, 'base/schemas/inputs', resource)
     if isfile(fn + '.yaml'):
         info("Load schema: %s.yaml" % fn)
         schemas[resource] = yaml.load(open(fn + '.yaml').read())
@@ -152,6 +159,17 @@ if not args.daemonize:
     sys.exit(0)
 
 app = flask.Flask(__name__)
+auth = HTTPBasicAuth()
+
+@auth.verify_password
+def verify_password(username, password):
+    ld = ldap.initialize('ldaps://' + config.get('ad', 'server'))
+    ld.set_option(ldap.OPT_X_TLS_DEMAND, True)
+    try:
+        ld.simple_bind_s(config.get('ad', 'domain') + '\\' + username, password)
+        return True
+    except:
+        return False
 
 mimerender = mimerender.FlaskMimeRender()
 render_json = lambda **args: json.dumps(args, indent = 4)
@@ -163,7 +181,7 @@ render_yaml = lambda **args: yaml.safe_dump(args, indent = 4, default_flow_style
     yaml  = render_yaml,
     json = render_json
 )
-def resource(resource):
+def get_all_resources(resource):
     files = glob(makepath(basedir, 'base', resource, 'inputs', '*'))
     output = {}
     for file in files:
@@ -171,14 +189,51 @@ def resource(resource):
         output[key] = get_config(resource, key)
     return output
 
+@app.route('/<resource>', methods=["POST"])
+@auth.login_required
+@mimerender(
+    default = 'yaml',
+    yaml  = render_yaml,
+    json = render_json
+)
+def new_resource(resource):
+    data = {}
+    if request.accept_mimetypes == 'application/json':
+        data = json.loads(request.data)
+    else:
+        data = yaml.load(request.data)
+
+    try:
+        validate(data, schemas[resource])
+    except ValidationError as e:
+        data['success'] = False
+        data['error'] = e.message
+        return data, 400
+    except SchemaError as e:
+        data['success'] = False
+        data['error'] = e.message
+        return data, 400
+
+# Delete existing file .yaml/.json first, so not to have duplicates
+    fn = makepath(basedir, 'base', resource, 'inputs', data[config.get(resource, 'key')] + '.yaml')
+    print fn
+    f = open(fn, 'w')
+    f.write(yaml.safe_dump(data, indent = 4, default_flow_style = False))
+    f.close()
+
+    data['success'] = True
+    return data
+
 @app.route('/<resource>/<key>', methods=["GET"])
 @mimerender(
     default = 'yaml',
     yaml  = render_yaml,
     json = render_json
 )
-def get(resource, key):
-    return get_config(resource, key)
+def get_resource(resource, key):
+# get_config does sys.exit on missing resource, needs to raise an exception
+    data = get_config(resource, key)
+    return data
 
 if __name__ == '__main__':
     app.run(debug = True, host = config.get('http', 'host'), port = int(config.get('http', 'port')))

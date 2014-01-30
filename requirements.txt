@@ -6,3 +6,5 @@ jinja2
 termcolor
 Flask
 mimerender
+python-ldap
+flask-httpauth

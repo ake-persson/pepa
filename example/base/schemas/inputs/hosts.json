@@ -26,5 +26,5 @@
             "enum": [ "dev", "qa", "pilot", "prod" ]
         }
     },
-    "required": [ "host", "region", "country", "roles", "environment" ]
+    "required": [ "hostname", "region", "country", "roles", "environment" ]
 }
