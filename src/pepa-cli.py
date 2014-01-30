@@ -21,7 +21,7 @@ def info(message):
 def warn(message):
     print >> stderr, colored(message, 'yellow')
 
-def error(message, code):
+def error(message, code = 1):
     print >> stderr, colored(message, 'red')
     sys.exit(code)
 
@@ -108,7 +108,11 @@ if args.action == 'list':
                 results[row][field] = 'null'
 
     if args.fields:
-        fields = re.split('\s*,\s*', args.fields)
+        fmt_fields = re.split('\s*,\s*', args.fields)
+        for field in fmt_fields:
+            if field not in fields:
+                error("Unknown field: %s" % field)
+        fields = fmt_fields
 
     if args.format == 'text':
         for row in results.keys():
