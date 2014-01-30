@@ -214,10 +214,11 @@ def new_resource(resource):
         data['error'] = e.message
         return data, 400
 
-# Delete existing file .yaml/.json first, so not to have duplicates
-    fn = makepath(basedir, 'base', resource, 'inputs', data[config.get(resource, 'key')] + '.yaml')
-    print fn
-    f = open(fn, 'w')
+    fn = makepath(basedir, 'base', resource, 'inputs', data[config.get(resource, 'key')])
+    if isfile(fn + '.json'):
+        os.unlink(fn + '.json')
+
+    f = open(fn + '.yaml', 'w')
     f.write(yaml.safe_dump(data, indent = 4, default_flow_style = False))
     f.close()
 

@@ -1,5 +1,6 @@
 {
     "title": "User validation",
+    "id": "username",
     "type": "object",
     "properties": {
         "username": {

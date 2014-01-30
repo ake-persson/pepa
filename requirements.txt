@@ -8,3 +8,5 @@ Flask
 mimerender
 python-ldap
 flask-httpauth
+PrettyTable
+requests

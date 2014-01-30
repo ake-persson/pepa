@@ -1,5 +1,6 @@
 {
     "title": "Host validation",
+    "id": "hostname",
     "type": "object",
     "properties": {
         "hostname": {
