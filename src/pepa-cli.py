@@ -56,12 +56,47 @@ for action in actions:
     parsers[action, 'second'] = parsers[action, 'first'].add_subparsers(dest = 'resource')
     for resource in resources:
         parsers[action, resource] = parsers[action, 'second'].add_parser(resource)
+
         key = schemas[resource]['id']
+        required = [ key ]
+        if 'required' in schemas[resource]:
+            required = schemas[resource]['required']
+
         if action == 'list':
             parsers[action, resource].add_argument('--format', choices = ['text', 'table', 'csv', 'json', 'yaml'], default = 'text', help = 'Print format')
             parsers[action, resource].add_argument('--fields', help = 'Fields to print, ignored by JSON or YAML')
+        elif action == 'delete':
+            descr = key.title()
+            if 'properties' in schemas[resource] and 'description' in schemas[resource]['properties'][key]:
+                descr = schemas[resource]['properties'][key]['description']
+
+            parsers[action, resource].add_argument(key, help = descr)
         else:
-            parsers[action, resource].add_argument(key, help = key)
+            if 'properties' not in schemas[resource]:
+                continue
+
+            for entry in schemas[resource]['properties'].keys():
+                descr = entry.title()
+                if 'description' in schemas[resource]['properties'][entry]:
+                    descr = schemas[resource]['properties'][entry]['description']
+
+                if entry == key:
+                    parsers[action, resource].add_argument(key, help = descr)
+                    continue
+
+                arguments = [ '--%s' % entry ]
+                if 'arguments' in schemas[resource]['properties'][entry]:
+                    arguments = schemas[resource]['properties'][entry]['arguments']
+
+                if len(arguments) > 1:
+                    parsers[action, resource].add_argument(arguments[0], arguments[1], help = descr)
+                else:
+                    parsers[action, resource].add_argument(arguments[0], help = descr)
+
+
+
+
+
 
 args = parser.parse_args()
 
@@ -137,3 +172,15 @@ if args.action == 'list':
             for field in fields:
                 values.append(results[row][field])
             print ','.join(['"%s"' % w for w in values])
+
+#if args.action == 'add':
+#    data = {}
+
+#        if username == None: username = getpass.getuser()
+#        if password == None: password = getpass.getpass()
+#        request = requests.post(url + '/' + args.resource,  json.dumps(data), headers = headers, auth = (username, password))
+
+#        if request.status_code != 200:
+#            error(request.text, request.status_code)
+
+#    print data
