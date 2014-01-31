@@ -28,9 +28,12 @@ def error(message, code = 1):
 def unique(a):
     return OrderedDict.fromkeys(a).keys()
 
+# Should be in a config file
 url = 'http://127.0.0.1:8080'
 headers = {'content-type': 'application/json', 'accept': 'application/json'}
 actions = [ 'get', 'add', 'modify', 'delete', 'list' ]
+username = None
+password = None
 
 request = requests.get(url + '/schemas', headers = headers)
 
@@ -57,14 +60,18 @@ for action in actions:
     for resource in resources:
         parsers[action, resource] = parsers[action, 'second'].add_parser(resource)
 
+        if not 'id' in schemas[resource]:
+            error("Schema: %s needs to declare an id" % resource)
         key = schemas[resource]['id']
-        required = [ key ]
+
+        required_fields = [ key ]
         if 'required' in schemas[resource]:
-            required = schemas[resource]['required']
+            required_fields = schemas[resource]['required']
 
         if action == 'list':
             parsers[action, resource].add_argument('--format', choices = ['text', 'table', 'csv', 'json', 'yaml'], default = 'text', help = 'Print format')
             parsers[action, resource].add_argument('--fields', help = 'Fields to print, ignored by JSON or YAML')
+# Add sort by
         elif action == 'delete':
             descr = key.title()
             if 'properties' in schemas[resource] and 'description' in schemas[resource]['properties'][key]:
@@ -76,6 +83,14 @@ for action in actions:
                 continue
 
             for entry in schemas[resource]['properties'].keys():
+                ftype = None
+                if not 'type' in schemas[resource]['properties'][entry]:
+                    error("Schema: %s entry: %s needs to declare a type" % (resource, entry))
+                ftype = schemas[resource]['properties'][entry]['type']
+
+                if ftype != 'array' and ftype != 'string':
+                    error("Schema: %s entry: %s has an unsupported type: %s for this CLI" % (resource, entry, ftype))
+
                 descr = entry.title()
                 if 'description' in schemas[resource]['properties'][entry]:
                     descr = schemas[resource]['properties'][entry]['description']
@@ -88,15 +103,25 @@ for action in actions:
                 if 'arguments' in schemas[resource]['properties'][entry]:
                     arguments = schemas[resource]['properties'][entry]['arguments']
 
+                choices = None
+                if 'enum' in schemas[resource]['properties'][entry]:
+                    choices = schemas[resource]['properties'][entry]['enum']
+
+                required = False
+                if entry in required_fields:
+                    required = True
+
+                default = None
+                if 'default' in schemas[resource]['properties'][entry]:
+                    default = schemas[resource]['properties'][entry]['default']
+
                 if len(arguments) > 1:
-                    parsers[action, resource].add_argument(arguments[0], arguments[1], help = descr)
+                    parsers[action, resource].add_argument(arguments[0], arguments[1], choices = choices, required = required, default = default, help = descr)
                 else:
-                    parsers[action, resource].add_argument(arguments[0], help = descr)
+                    parsers[action, resource].add_argument(arguments[0], choices = choices, required = required, default = default, help = descr)
 
-
-
-
-
+# Support type array, with enum and default
+# Only support array with type string entries
 
 args = parser.parse_args()
 
@@ -173,14 +198,29 @@ if args.action == 'list':
                 values.append(results[row][field])
             print ','.join(['"%s"' % w for w in values])
 
-#if args.action == 'add':
-#    data = {}
+if args.action == 'add':
+    data = {}
+    arglist = vars(args)
 
-#        if username == None: username = getpass.getuser()
-#        if password == None: password = getpass.getpass()
-#        request = requests.post(url + '/' + args.resource,  json.dumps(data), headers = headers, auth = (username, password))
+    required_fields = [ key ]
+    if 'required' in schemas[resource]:
+        required_fields = schemas[resource]['required']
 
-#        if request.status_code != 200:
-#            error(request.text, request.status_code)
+    for entry in schemas[args.resource]['properties'].keys():
+        key = schemas[args.resource]['id']
+        ftype = schemas[args.resource]['properties'][entry]['type']
+        if ftype == 'string':
+            data[entry] = arglist[entry]
+        else:
+            data[entry] = re.split('\s*,\s*', arglist[entry])
 
-#    print data
+    if username == None: username = getpass.getuser()
+    if password == None: password = getpass.getpass()
+    request = requests.post(url + '/' + args.resource,  json.dumps(data), headers = headers, auth = (username, password))
+
+    if request.status_code != 200:
+        error(request.text, request.status_code)
+    print request.text
+
+if args.action == 'modify':
+    data = {}

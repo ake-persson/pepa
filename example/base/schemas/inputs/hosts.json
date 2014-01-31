@@ -5,34 +5,36 @@
     "properties": {
         "hostname": {
             "type": "string",
+            "format": "host-name",
             "description": "Hostname for this host",
             "pattern": "^([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\\.)+[a-zA-Z]{2,6}$"
         },
         "region": {
             "type": "string",
             "arguments": [ "-r", "--region" ],
-            "description": "Region for where this host is located, ex: amer",
+            "description": "Region for where this host is located",
             "enum": [ "amer", "apac", "emea" ]
         },
         "country": {
             "type": "string",
             "arguments": [ "-c", "--country" ],
-            "description": "Country code for where this host is located, ex: us",
+            "description": "Country code for where this host is located",
             "enum": [ "nl", "us", "au" ]
         },
         "roles": {
             "type": "array",
             "arguments": [ "-R", "--roles" ],
-            "description": "List of roles for this host, ex: server",
+            "description": "List of roles for this host",
             "items": {
                 "type": "string",
-                "enum": [ "desktop", "server" ]
+                "enum": [ "desktop", "server" ],
+                "default": "server"
             }
         },
         "environment": {
             "type": "string",
-            "arguments": [ "-e", "--envionment" ],
-            "description": "Staging environment for this host, ex: dev",
+            "arguments": [ "-e", "--environment" ],
+            "description": "Staging environment for this host",
             "enum": [ "dev", "qa", "pilot", "prod" ]
         }
     },

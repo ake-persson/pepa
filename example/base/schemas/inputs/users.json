@@ -5,24 +5,32 @@
     "properties": {
         "username": {
             "type": "string",
+            "description": "Username",
             "minLength": 2,
             "maxLength": 15,
             "pattern": "^([a-z][a-z0-9\\_\\-]+){2,15}$"
         },
         "name": {
             "type": "string",
+            "arguments": [ "-n", "--name" ],
+            "description": "Full name for this user",
             "minLength": 2,
             "maxLength": 50,
             "pattern": "^[\\w\\s\\-]+$"
         },
         "email": {
             "type": "string",
+            "format": "email",
+            "arguments": [ "-e", "--email" ],
+            "description": "E-Mail for this user",
             "minLength": 7,
             "maxLength": 50,
             "pattern": "^\\S+@\\S+$"
         },
         "ssh_key": {
-            "type": "string"
+            "type": "string",
+            "arguments": [ "-s", "--ssh-key" ],
+            "description": "Public SSH key for this user"
         }
     },
     "required": [ "username", "name", "email" ]
