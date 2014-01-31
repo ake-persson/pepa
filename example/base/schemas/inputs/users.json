@@ -11,14 +11,16 @@
             "pattern": "^([a-z][a-z0-9\\_\\-]+){2,15}$"
         },
         "uid": {
-            "type": "integer",
+            "type": "string",
             "arguments": [ "-u", "--uid" ],
-            "description": "UID for this user"
+            "description": "UID for this user",
+            "pattern": "^[0-9]+$"
         },
         "gid": {
-            "type": "integer",
+            "type": "string",
             "arguments": [ "-g", "--gid" ],
-            "description": "GID for this user"
+            "description": "GID for this user",
+            "pattern": "^[0-9]+$"
         },
         "name": {
             "type": "string",

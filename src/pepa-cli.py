@@ -97,7 +97,7 @@ for action in actions:
                     error("Schema: %s entry: %s needs to declare a type" % (resource, entry))
                 ftype = schemas[resource]['properties'][entry]['type']
 
-                if ftype != 'array' and ftype != 'string' and ftype != 'integer' and ftype != 'number':
+                if ftype != 'array' and ftype != 'string':
                     error("Schema: %s entry: %s has an unsupported type: %s for this CLI" % (resource, entry, ftype))
 
                 descr = entry.title()
