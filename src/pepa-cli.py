@@ -72,6 +72,15 @@ for action in actions:
             parsers[action, resource].add_argument('--format', choices = ['text', 'table', 'csv', 'json', 'yaml'], default = 'text', help = 'Print format')
             parsers[action, resource].add_argument('--fields', help = 'Fields to print, ignored by JSON or YAML')
 # Add sort by
+        elif action == 'get':
+            descr = key.title()
+            if 'properties' in schemas[resource] and 'description' in schemas[resource]['properties'][key]:
+                descr = schemas[resource]['properties'][key]['description']
+
+            parsers[action, resource].add_argument(key, help = descr)
+
+            parsers[action, resource].add_argument('--format', choices = ['text', 'table', 'csv', 'json', 'yaml'], default = 'text', help = 'Print format')
+            parsers[action, resource].add_argument('--fields', help = 'Fields to print, ignored by JSON or YAML')
         elif action == 'delete':
             descr = key.title()
             if 'properties' in schemas[resource] and 'description' in schemas[resource]['properties'][key]:
@@ -124,10 +133,16 @@ for action in actions:
 # Only support array with type string entries
 
 args = parser.parse_args()
+arglist = vars(args)
 
-if args.action == 'list':
+if args.action == 'list' or args.action == 'get':
+    key = schemas[args.resource]['id']
 
-    request = requests.get(url + '/' + args.resource, headers = headers)
+    request = None
+    if args.action == 'get':
+        request = requests.get(url + '/' + args.resource + '/' + arglist[key], headers = headers)
+    else:
+        request = requests.get(url + '/' + args.resource, headers = headers)
 
     if request.status_code == 401:
         if username == None: username = getpass.getuser()
@@ -136,7 +151,12 @@ if args.action == 'list':
 
     if request.status_code != 200:
         error(request.text, request.status_code)
-    response = request.json()
+
+    response = None
+    if args.action == 'get':
+        response = { arglist[key]: request.json() }
+    else:
+        response = request.json()
 
     if args.format == 'json':
         print json.dumps(response, indent = 4) + '\n'
@@ -200,14 +220,13 @@ if args.action == 'list':
 
 if args.action == 'add':
     data = {}
-    arglist = vars(args)
 
     required_fields = [ key ]
     if 'required' in schemas[resource]:
         required_fields = schemas[resource]['required']
 
+    key = schemas[args.resource]['id']
     for entry in schemas[args.resource]['properties'].keys():
-        key = schemas[args.resource]['id']
         ftype = schemas[args.resource]['properties'][entry]['type']
         if ftype == 'string':
             data[entry] = arglist[entry]
@@ -223,4 +242,7 @@ if args.action == 'add':
     print request.text
 
 if args.action == 'modify':
+    data = {}
+
+if args.action == 'delete':
     data = {}
