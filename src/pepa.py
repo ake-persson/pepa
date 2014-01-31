@@ -299,11 +299,11 @@ def delete_resource(resource, key):
     if isfile(fn + '.yaml'):
         unlink(fn + '.yaml')
     else:
-        data['success'] = false
+        data['success'] = False
         data['error'] = "Entry not found"
         return data, 404
 
-    data['success'] = true
+    data['success'] = True
     return data, 204
 
 if __name__ == '__main__':

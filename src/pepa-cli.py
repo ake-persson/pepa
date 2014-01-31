@@ -292,3 +292,4 @@ if args.action == 'delete':
     # Failed
     if request.status_code != 204:
         error(request.text, request.status_code)
+    print request.text
