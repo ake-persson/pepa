@@ -278,7 +278,7 @@ if args.action == 'modify':
     if password == None: password = getpass.getpass()
     request = requests.patch(url + '/' + args.resource + '/' + arglist[key],  json.dumps(data), headers = headers, auth = (username, password))
 
-    if request.status_code != 200:
+    if request.status_code != 204:
         error(request.text, request.status_code)
     print request.text
 
