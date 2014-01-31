@@ -10,6 +10,16 @@
             "maxLength": 15,
             "pattern": "^([a-z][a-z0-9\\_\\-]+){2,15}$"
         },
+        "uid": {
+            "type": "integer",
+            "arguments": [ "-u", "--uid" ],
+            "description": "UID for this user"
+        },
+        "gid": {
+            "type": "integer",
+            "arguments": [ "-g", "--gid" ],
+            "description": "GID for this user"
+        },
         "name": {
             "type": "string",
             "arguments": [ "-n", "--name" ],
