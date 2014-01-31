@@ -257,7 +257,7 @@ if args.action == 'add':
     if password == None: password = getpass.getpass()
     request = requests.post(url + '/' + args.resource,  json.dumps(data), headers = headers, auth = (username, password))
 
-    if request.status_code != 200:
+    if request.status_code != 201:
         error(request.text, request.status_code)
     print request.text
 

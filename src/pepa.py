@@ -215,17 +215,18 @@ def new_resource(resource):
         data['error'] = e.message
         return data, 400
 
-    # Should return error, not unlink file
     fn = makepath(basedir, 'base', resource, 'inputs', data[config.get(resource, 'key')])
-    if isfile(fn + '.json'):
-        unlink(fn + '.json')
+    if isfile(fn + '.yaml') or isfile(fn + '.json'):
+        data['success'] = False
+        data['error'] = 'Duplicate entry, entry already exists'
+        return data, 409
 
     f = open(fn + '.yaml', 'w')
     f.write(yaml.safe_dump(data, indent = 4, default_flow_style = False))
     f.close()
 
     data['success'] = True
-    return data
+    return data, 201
 
 @app.route('/<resource>/<key>', methods=["PATCH"])
 @auth.login_required
