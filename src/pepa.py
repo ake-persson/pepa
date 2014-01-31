@@ -4,6 +4,7 @@ import ConfigParser
 import argparse
 import json
 import yaml
+from os import unlink
 from os.path import isfile, join as makepath, splitext, basename
 import sys
 from sys import stderr
@@ -214,9 +215,10 @@ def new_resource(resource):
         data['error'] = e.message
         return data, 400
 
+    # Should return error, not unlink file
     fn = makepath(basedir, 'base', resource, 'inputs', data[config.get(resource, 'key')])
     if isfile(fn + '.json'):
-        os.unlink(fn + '.json')
+        unlink(fn + '.json')
 
     f = open(fn + '.yaml', 'w')
     f.write(yaml.safe_dump(data, indent = 4, default_flow_style = False))
@@ -281,6 +283,23 @@ def get_resource(resource, key):
 # get_config does sys.exit on missing resource, needs to raise an exception
     data = get_config(resource, key)
     return data
+
+@app.route('/<resource>/<key>', methods=["DELETE"])
+@mimerender(
+    default = 'yaml',
+    yaml  = render_yaml,
+    json = render_json
+)
+def delete_resource(resource, key):
+    fn = makepath(basedir, 'base', resource, 'inputs', key)
+    if isfile(fn + '.json'):
+        unlink(fn + '.json')
+    if isfile(fn + '.yaml'):
+        unlink(fn + '.yaml')
+    else:
+        return {}, 400
+
+    return {}, 200
 
 if __name__ == '__main__':
     app.run(debug = True, host = config.get('http', 'host'), port = int(config.get('http', 'port')))

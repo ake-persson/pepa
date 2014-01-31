@@ -1,7 +1,0 @@
-hostname: foobar.example.com
-region: emea
-country: nl
-roles:
-  - Server
-  - Gitolite
-environment: base
