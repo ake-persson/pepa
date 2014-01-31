@@ -113,15 +113,15 @@ for action in actions:
                     arguments = schemas[resource]['properties'][entry]['arguments']
 
                 choices = None
-                if 'enum' in schemas[resource]['properties'][entry]:
+                if action != 'modify' and 'enum' in schemas[resource]['properties'][entry]:
                     choices = schemas[resource]['properties'][entry]['enum']
 
                 required = False
-                if entry in required_fields:
+                if action != 'modify' and entry in required_fields:
                     required = True
 
                 default = None
-                if 'default' in schemas[resource]['properties'][entry]:
+                if action != 'modify' and 'default' in schemas[resource]['properties'][entry]:
                     default = schemas[resource]['properties'][entry]['default']
 
                 if len(arguments) > 1:
@@ -220,12 +220,32 @@ if args.action == 'list' or args.action == 'get':
 
 if args.action == 'add':
     data = {}
+    key = schemas[args.resource]['id']
+
+    request = None
+    if args.action == 'get':
+        request = requests.get(url + '/' + args.resource + '/' + arglist[key], headers = headers)
+    else:
+        request = requests.get(url + '/' + args.resource, headers = headers)
+
+    if request.status_code == 401:
+        if username == None: username = getpass.getuser()
+        if password == None: password = getpass.getpass()
+        request = requests.get(url + '/' + args.resource, headers = headers, auth = (username, password))
+
+    if request.status_code != 200:
+        error(request.text, request.status_code)
+
+    response = None
+    if args.action == 'get':
+        response = { arglist[key]: request.json() }
+    else:
+        response = request.json()
 
     required_fields = [ key ]
     if 'required' in schemas[resource]:
         required_fields = schemas[resource]['required']
 
-    key = schemas[args.resource]['id']
     for entry in schemas[args.resource]['properties'].keys():
         ftype = schemas[args.resource]['properties'][entry]['type']
         if ftype == 'string':
@@ -242,7 +262,33 @@ if args.action == 'add':
     print request.text
 
 if args.action == 'modify':
+# Change key like hostname
+    key = schemas[args.resource]['id']
+
     data = {}
+    for entry in arglist:
+        if arglist[entry] and entry in schemas[args.resource]['properties'].keys():
+            ftype = schemas[args.resource]['properties'][entry]['type']
+            if ftype == 'string':
+                data[entry] = arglist[entry]
+            else:
+                data[entry] = re.split('\s*,\s*', arglist[entry])
+
+    if username == None: username = getpass.getuser()
+    if password == None: password = getpass.getpass()
+    request = requests.patch(url + '/' + args.resource + '/' + arglist[key],  json.dumps(data), headers = headers, auth = (username, password))
+
+    if request.status_code != 200:
+        error(request.text, request.status_code)
+    print request.text
 
 if args.action == 'delete':
-    data = {}
+    key = schemas[args.resource]['id']
+
+    if username == None: username = getpass.getuser()
+    if password == None: password = getpass.getpass()
+    request = requests.delete(url + '/' + args.resource + '/' + arglist[key], headers = headers, auth = (username, password))
+
+    # Failed
+    if request.status_code != 200:
+        error(request.text, request.status_code)

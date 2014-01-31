@@ -225,6 +225,52 @@ def new_resource(resource):
     data['success'] = True
     return data
 
+@app.route('/<resource>/<key>', methods=["PATCH"])
+@auth.login_required
+@mimerender(
+    default = 'yaml',
+    yaml  = render_yaml,
+    json = render_json
+)
+def modify_resource(resource, key):
+    data = {}
+
+    fn = makepath(basedir, 'base', resource, 'inputs', key)
+    if isfile(fn + '.yaml'):
+        info("Load resource input: %s" % fn)
+        data = yaml.load(open(fn + '.yaml', 'r'))
+    elif isfile(fn + '.json'):
+        info("Load resource input: %s" % fn)
+        data = json.loads(open(fn + '.json', 'r'))
+
+    if request.accept_mimetypes == 'application/json':
+        data.update(json.loads(request.data))
+    else:
+        data.update(yaml.load(request.data))
+
+    try:
+        validate(data, schemas[resource])
+    except ValidationError as e:
+        data['success'] = False
+        data['error'] = e.message
+        return data, 400
+    except SchemaError as e:
+        data['success'] = False
+        data['error'] = e.message
+        return data, 400
+
+    if isfile(fn + '.yaml'):
+        f = open(fn + '.yaml', 'w')
+        f.write(yaml.safe_dump(data, indent = 4, default_flow_style = False))
+        f.close()
+    elif isfile(fn + '.json'):
+        f = open(fn + '.json', 'w')
+        f.write(json.dumps(data, indent = 4))
+        f.close()
+
+    data['success'] = True
+    return data
+
 @app.route('/<resource>/<key>', methods=["GET"])
 @mimerender(
     default = 'yaml',
