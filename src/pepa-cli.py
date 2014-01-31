@@ -6,7 +6,7 @@ import argparse
 from prettytable import PrettyTable
 import requests
 import ConfigParser
-from os.path import exists, expanduser
+from os.path import exists, expanduser, isfile
 from termcolor import colored
 import sys
 from sys import stderr
@@ -28,12 +28,29 @@ def error(message, code = 1):
 def unique(a):
     return OrderedDict.fromkeys(a).keys()
 
-# Should be in a config file
-url = 'http://127.0.0.1:8080'
+# Get configuration
+config = ConfigParser.ConfigParser()
+
+# Set defaults
+config.add_section('client')
+config.set('client', 'url', 'http://127.0.0.1:8080')
+config.set('client', 'username', None)
+config.set('client', 'password', None)
+
+# Get config
+cfile = None
+if isfile('/etc/pepa.conf'):
+    cfile = '/etc/pepa.conf'
+if isfile('~/.pepa.conf'):
+    cfile = '~/.pepa.conf'
+if cfile:
+    config.read(cfile)
+
+url = config.get('client', 'url')
 headers = {'content-type': 'application/json', 'accept': 'application/json'}
 actions = [ 'get', 'add', 'modify', 'delete', 'list' ]
-username = None
-password = None
+username = config.get('client', 'username')
+password = config.get('client', 'password')
 
 request = requests.get(url + '/schemas', headers = headers)
 
@@ -50,7 +67,6 @@ resources = schemas.keys()
 
 parser = argparse.ArgumentParser()
 subparser = parser.add_subparsers(dest = 'action')
-parser.add_argument('-c', '--config', default = '/etc/pepa.conf', help = 'Configuration file')
 parser.add_argument('-d', '--debug', action = 'store_true', help = 'Print debug info')
 
 parsers = {}
