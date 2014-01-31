@@ -1,0 +1,6 @@
+country: nl
+environment: dev
+hostname: testme.example.com
+region: emea
+roles:
+- server

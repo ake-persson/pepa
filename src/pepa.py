@@ -272,7 +272,7 @@ def modify_resource(resource, key):
         f.close()
 
     data['success'] = True
-    return data
+    return data, 200
 
 @app.route('/<resource>/<key>', methods=["GET"])
 @mimerender(
@@ -283,7 +283,7 @@ def modify_resource(resource, key):
 def get_resource(resource, key):
 # get_config does sys.exit on missing resource, needs to raise an exception
     data = get_config(resource, key)
-    return data
+    return data, 200
 
 @app.route('/<resource>/<key>', methods=["DELETE"])
 @mimerender(
@@ -292,15 +292,19 @@ def get_resource(resource, key):
     json = render_json
 )
 def delete_resource(resource, key):
+    data = {}
     fn = makepath(basedir, 'base', resource, 'inputs', key)
     if isfile(fn + '.json'):
         unlink(fn + '.json')
     if isfile(fn + '.yaml'):
         unlink(fn + '.yaml')
     else:
-        return {}, 400
+        data['success'] = false
+        data['error'] = "Entry not found"
+        return data, 404
 
-    return {}, 200
+    data['success'] = true
+    return data, 204
 
 if __name__ == '__main__':
     app.run(debug = True, host = config.get('http', 'host'), port = int(config.get('http', 'port')))
