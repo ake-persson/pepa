@@ -130,7 +130,7 @@ curl -i http://localhost:8080/hosts/foobar.example.com
 
 **Create host:**
 <pre>
-read -d '' yaml <<__EOT__
+read -d '' yaml &lt;&lt;__EOT__
 country: us
 environment: dev
 hostname: foobar.example.com
@@ -144,7 +144,7 @@ curl -i -u user:password -X POST -H "Accept: application/yaml" -H "Content-Type:
 
 **Update host:**
 <pre>
-read -d '' yaml <<__EOT__
+read -d '' yaml &lt;&lt;__EOT__
 region: apac
 country: au
 __EOT__

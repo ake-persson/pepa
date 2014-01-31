@@ -58,6 +58,10 @@ Add your user to the admin group on your system and then:
 
     $ curl -H "Accept: application/json" http://127.0.0.1:8080/users/jdoe
 
+# DOCUMENTATION #
+
+More documentation can be found in the doc/ folder.
+
 # TODO #
 
 - Validate Input/Output Git hooks
