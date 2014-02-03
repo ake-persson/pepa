@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/opt/pepa/bin/python2
 
 import ConfigParser
 import argparse
@@ -168,15 +168,17 @@ auth = HTTPBasicAuth()
 
 # SSL
 context = None
-if config.get('http', 'use_ssl'):
+if config.getboolean('http', 'use_ssl'):
     context = SSL.Context(SSL.SSLv23_METHOD)
 
     if not isfile(config.get('http', 'ssl_pkey')):
         error("SSL private key doesn't exist: %s" % config.get('http', 'ssl_pkey'))
+    info('Load SSL private key: %s' % config.get('http', 'ssl_pkey'))
     context.use_privatekey_file(config.get('http', 'ssl_pkey'))
 
     if not isfile(config.get('http', 'ssl_cert')):
         error("SSL certificate doesn't exist: %s" % config.get('http', 'ssl_cert'))
+    info('Load SSL certificate key: %s' % config.get('http', 'ssl_cert'))
     context.use_certificate_file(config.get('http', 'ssl_cert'))
 
 @auth.verify_password
@@ -324,7 +326,8 @@ def delete_resource(resource, key):
     return data, 204
 
 if __name__ == '__main__':
-    if config.get('http', 'use_ssl'):
-        app.run(debug = args.debug, host = config.get('http', 'host'), port = int(config.get('http', 'port')))
-    else:
+    if config.getboolean('http', 'use_ssl'):
+        info('Start with SSL support enabled')
         app.run(debug = args.debug, host = config.get('http', 'host'), port = int(config.get('http', 'port')), ssl_context = context)
+    else:
+        app.run(debug = args.debug, host = config.get('http', 'host'), port = int(config.get('http', 'port')))
