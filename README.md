@@ -6,7 +6,7 @@ Hierarchical substitution templating for SaltStack configuration also support's 
 
 *Pre-requisites*
 
-    $ sudo yum install -y pandoc rpm-build python-virtualenv gcc openldap-devel
+    $ sudo yum install -y pandoc rpm-build python-virtualenv gcc openldap-devel openssl-devel
 
 *Build RPM*
 
