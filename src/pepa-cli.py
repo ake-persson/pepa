@@ -1,4 +1,4 @@
-#!.venv/bin/python2.7
+#!/opt/pepa/bin/python2
 
 import json
 import yaml
@@ -52,7 +52,7 @@ headers = {'content-type': 'application/json', 'accept': 'application/json'}
 actions = [ 'get', 'add', 'modify', 'delete', 'list' ]
 username = config.get('client', 'username')
 password = config.get('client', 'password')
-verify_ssl = config.get('client', 'verify_ssl')
+verify_ssl = config.getboolean('client', 'verify_ssl')
 
 request = requests.get(url + '/schemas', headers = headers, verify = verify_ssl)
 
