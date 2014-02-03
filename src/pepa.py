@@ -171,11 +171,11 @@ context = None
 if config.get('http', 'use_ssl'):
     context = SSL.Context(SSL.SSLv23_METHOD)
 
-    if isfile(config.get('http', 'ssl_pkey')):
+    if not isfile(config.get('http', 'ssl_pkey')):
         error("SSL private key doesn't exist: %s" % config.get('http', 'ssl_pkey'))
     context.use_privatekey_file(config.get('http', 'ssl_pkey'))
 
-    if isfile(config.get('http', 'ssl_cert')):
+    if not isfile(config.get('http', 'ssl_cert')):
         error("SSL certificate doesn't exist: %s" % config.get('http', 'ssl_cert'))
     context.use_certificate_file(config.get('http', 'ssl_cert'))
 

@@ -20,13 +20,16 @@ AutoReqProv: no
 %description
 %{app}
 
+%pre
+useradd -M -r -d /srv/pepa >/dev/null
+
 %post
 mkdir -p /etc/pepa/ssl
-openssl genrsa -des3 -passout pass:x -out /etc/pepa/ssl/server.pass.key 2048
-openssl rsa -passin pass:x -in /etc/pepa/ssl/server.pass.key -out /etc/pepa/ssl/server.key
+openssl genrsa -des3 -passout pass:x -out /etc/pepa/ssl/server.pass.key 2048 >/dev/null
+openssl rsa -passin pass:x -in /etc/pepa/ssl/server.pass.key -out /etc/pepa/ssl/server.key >/dev/null
 rm -f /etc/pepa/ssl/server.pass.key
-openssl req -new -key /etc/pepa/ssl/server.key -out /etc/pepa/ssl/server.csr -subj "/C=US/ST=Denial/L=Springfield/O=Dis/CN=$( hostname -s )"
-openssl x509 -req -days 365 -in /etc/pepa/ssl/server.csr -signkey /etc/pepa/ssl/server.key -out /etc/pepa/ssl/server.crt
+openssl req -new -key /etc/pepa/ssl/server.key -out /etc/pepa/ssl/server.csr -subj "/C=US/ST=Denial/L=Springfield/O=Dis/CN=$( hostname -s )" >/dev/null
+openssl x509 -req -days 365 -in /etc/pepa/ssl/server.csr -signkey /etc/pepa/ssl/server.key -out /etc/pepa/ssl/server.crt >/dev/null
 
 %prep
 mkdir -p %{buildroot}/srv/pepa %{buildroot}/usr/{bin,sbin} %{buildroot}/usr/share/man/{man1,man5} %{buildroot}/etc/pepa/ssl
@@ -42,7 +45,7 @@ ln -sf %{appdir}/bin/pepa-cli.py %{buildroot}/usr/bin/pepa-cli
 %dir %{appdir}
 %{appdir}/*
 %config(noreplace) /etc/pepa/pepa.conf
-%dir /srv/pepa
+%attr{-,pepa,pepa} %dir /srv/pepa
 /usr/bin/*
 /usr/share/man/man1/*
 /usr/share/man/man5/*
