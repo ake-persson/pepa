@@ -40,8 +40,8 @@ config.set('client', 'password', None)
 
 # Get config
 cfile = None
-if isfile('/etc/pepa.conf'):
-    cfile = '/etc/pepa.conf'
+if isfile('/etc/pepa/pepa.conf'):
+    cfile = '/etc/pepa/pepa.conf'
 if isfile('~/.pepa.conf'):
     cfile = '~/.pepa.conf'
 if cfile:

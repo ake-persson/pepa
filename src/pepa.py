@@ -92,7 +92,7 @@ def get_config(resource, key):
 
 # Get command line options
 parser = argparse.ArgumentParser()
-parser.add_argument('-c', '--config', help = 'Configuration file', default = '/etc/pepa.conf')
+parser.add_argument('-c', '--config', help = 'Configuration file', default = '/etc/pepa/pepa.conf')
 parser.add_argument('-d', '--debug', help = 'Print debug information', action = 'store_true', default = False)
 parser.add_argument('-n', '--no-color', help = 'No color', dest = 'color', action = 'store_false', default = True)
 parser.add_argument('-j', '--json', help = 'JSON output, instead of default YAML', action = 'store_true', default = False)
