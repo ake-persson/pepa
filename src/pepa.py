@@ -20,6 +20,7 @@ from jsonschema import validate
 from jsonschema.exceptions import ValidationError, SchemaError
 import ldap
 from flask.ext.httpauth import HTTPBasicAuth
+from OpenSSL import SSL
 
 def notify(message, color = 'red', prepend = ''):
     if args.color:
@@ -125,7 +126,9 @@ config.set('schemas', 'sequence', 'default')
 config.add_section('http')
 config.set('http', 'host', '127.0.0.1')
 config.set('http', 'port', 8080)
-config.set('main', 'auth', 'ad')
+config.set('http', 'use_ssl', False)
+config.set('http', 'ssl_pkey', '/etc/pepa/ssl/server.key')
+config.set('http', 'ssl_cert', '/etc/pepa/ssl/server.crt')
 
 # Get config
 config.read([args.config])
@@ -159,8 +162,22 @@ if not args.daemonize:
         print yaml.safe_dump(output, indent = 4, default_flow_style = False)
     sys.exit(0)
 
+# Initiate Flask
 app = flask.Flask(__name__)
 auth = HTTPBasicAuth()
+
+# SSL
+context = None
+if config.get('http', 'use_ssl'):
+    context = SSL.Context(SSL.SSLv23_METHOD)
+
+    if isfile(config.get('http', 'ssl_pkey')):
+        error("SSL private key doesn't exist: %s" % config.get('http', 'ssl_pkey'))
+    context.use_privatekey_file(config.get('http', 'ssl_pkey'))
+
+    if isfile(config.get('http', 'ssl_cert')):
+        error("SSL certificate doesn't exist: %s" % config.get('http', 'ssl_cert'))
+    context.use_certificate_file(config.get('http', 'ssl_cert'))
 
 @auth.verify_password
 def verify_password(username, password):
@@ -307,4 +324,7 @@ def delete_resource(resource, key):
     return data, 204
 
 if __name__ == '__main__':
-    app.run(debug = True, host = config.get('http', 'host'), port = int(config.get('http', 'port')))
+    if config.get('http', 'use_ssl'):
+        app.run(debug = args.debug, host = config.get('http', 'host'), port = int(config.get('http', 'port')))
+    else:
+        app.run(debug = args.debug, host = config.get('http', 'host'), port = int(config.get('http', 'port')), ssl_context = context)

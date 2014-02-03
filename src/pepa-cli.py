@@ -34,6 +34,7 @@ config = ConfigParser.ConfigParser()
 # Set defaults
 config.add_section('client')
 config.set('client', 'url', 'http://127.0.0.1:8080')
+config.set('client', 'verify_ssl', False)
 config.set('client', 'username', None)
 config.set('client', 'password', None)
 
@@ -51,13 +52,9 @@ headers = {'content-type': 'application/json', 'accept': 'application/json'}
 actions = [ 'get', 'add', 'modify', 'delete', 'list' ]
 username = config.get('client', 'username')
 password = config.get('client', 'password')
+verify_ssl = config.get('client', 'verify_ssl')
 
-request = requests.get(url + '/schemas', headers = headers)
-
-if request.status_code == 401:
-    if username == None: username = getpass.getuser()
-    if password == None: password = getpass.getpass()
-    request = requests.get(url + '/schemas', headers = headers, auth = (username, password))
+request = requests.get(url + '/schemas', headers = headers, verify = verify_ssl)
 
 if request.status_code != 200:
     error(request.text, request.status_code)
@@ -156,14 +153,10 @@ if args.action == 'list' or args.action == 'get':
 
     request = None
     if args.action == 'get':
-        request = requests.get(url + '/' + args.resource + '/' + arglist[key], headers = headers)
+        request = requests.get(url + '/' + args.resource + '/' + arglist[key], headers = headers,
+            verify = verify_ssl)
     else:
-        request = requests.get(url + '/' + args.resource, headers = headers)
-
-    if request.status_code == 401:
-        if username == None: username = getpass.getuser()
-        if password == None: password = getpass.getpass()
-        request = requests.get(url + '/' + args.resource, headers = headers, auth = (username, password))
+        request = requests.get(url + '/' + args.resource, headers = headers, verify = verify_ssl)
 
     if request.status_code != 200:
         error(request.text, request.status_code)
@@ -240,14 +233,14 @@ if args.action == 'add':
 
     request = None
     if args.action == 'get':
-        request = requests.get(url + '/' + args.resource + '/' + arglist[key], headers = headers)
+        request = requests.get(url + '/' + args.resource + '/' + arglist[key], headers = headers, verify = verify_ssl)
     else:
-        request = requests.get(url + '/' + args.resource, headers = headers)
+        request = requests.get(url + '/' + args.resource, headers = headers, verify = verify_ssl)
 
     if request.status_code == 401:
         if username == None: username = getpass.getuser()
         if password == None: password = getpass.getpass()
-        request = requests.get(url + '/' + args.resource, headers = headers, auth = (username, password))
+        request = requests.get(url + '/' + args.resource, headers = headers, auth = (username, password), verify = verify_ssl)
 
     if request.status_code != 200:
         error(request.text, request.status_code)
@@ -271,7 +264,8 @@ if args.action == 'add':
 
     if username == None: username = getpass.getuser()
     if password == None: password = getpass.getpass()
-    request = requests.post(url + '/' + args.resource,  json.dumps(data), headers = headers, auth = (username, password))
+    request = requests.post(url + '/' + args.resource,  json.dumps(data), headers = headers,
+        auth = (username, password), verify = verify_ssl)
 
     if request.status_code != 201:
         error(request.text, request.status_code)
@@ -292,7 +286,8 @@ if args.action == 'modify':
 
     if username == None: username = getpass.getuser()
     if password == None: password = getpass.getpass()
-    request = requests.patch(url + '/' + args.resource + '/' + arglist[key],  json.dumps(data), headers = headers, auth = (username, password))
+    request = requests.patch(url + '/' + args.resource + '/' + arglist[key],  json.dumps(data), headers = headers,
+        auth = (username, password), verify = verify_ssl)
 
     if request.status_code != 200:
         error(request.text, request.status_code)
@@ -303,7 +298,8 @@ if args.action == 'delete':
 
     if username == None: username = getpass.getuser()
     if password == None: password = getpass.getpass()
-    request = requests.delete(url + '/' + args.resource + '/' + arglist[key], headers = headers, auth = (username, password))
+    request = requests.delete(url + '/' + args.resource + '/' + arglist[key], headers = headers,
+        auth = (username, password), verify = verify_ssl)
 
     # Failed
     if request.status_code != 204:
