@@ -16,7 +16,9 @@ venv:
 	${VENV}/bin/pip install -r requirements.txt
 	( cd ${VENV} && rm -f lib64 && ln -s lib lib64 )
 	sed "s!/usr/bin/env python!${VENV}/bin/python2!" src/pepa.py >${VENV}/bin/pepa.py
+	sed "s!/usr/bin/env python!${VENV}/bin/python2!" src/pepa-cli.py >${VENV}/bin/pepa-cli.py
 	chmod 755 ${VENV}/bin/pepa.py
+	chmod 755 ${VENV}/bin/pepa-cli.py
 	tar -cvzf ${NAME}.tar.gz ${VENV}
 
 rpm: venv
