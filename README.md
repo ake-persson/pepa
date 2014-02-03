@@ -69,11 +69,25 @@ More documentation can be found in the doc/ folder.
 
 # TODO #
 
+- 2 Security groups in AD for roles for Pepa. This means it can be managed by IAM with the AD driver.
+  + Unprivileged
+    - Can query all entries
+  + Normal user
+    - Can create new entries
+    - Can modify existing entries they created
+    - Can delete existing entries they created
+  + Admin
+    - Full access
+- Use JavaScript framework to template GUI based on JSON schema
+- Puppet option in config
+- Default datatype in API YAML or JSON, should be configurable
+- Query language to ask for specific attributes
+- Version API
+- Git hooks for validating input
+- Modify templates using REST API
+- Error messages def. to support JSON error
+- Modify/rename hostname/username i.e. using the key in CLI
 - Validate Input/Output Git hooks
-- CLI based on the input JSON Schema
-- REST POST support
-- Authentication for Endpoints using LDAP
-- Authorisation for Endpoints based on Roles
 
 # License #
 
