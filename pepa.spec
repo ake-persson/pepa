@@ -45,7 +45,7 @@ ln -sf %{appdir}/bin/pepa-cli.py %{buildroot}/usr/bin/pepa-cli
 %dir %{appdir}
 %{appdir}/*
 %config(noreplace) /etc/pepa/pepa.conf
-%attr{-,pepa,pepa} %dir /srv/pepa
+%attr(-,pepa,pepa) %dir /srv/pepa
 /usr/bin/*
 /usr/share/man/man1/*
 /usr/share/man/man5/*
