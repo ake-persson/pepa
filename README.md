@@ -6,16 +6,21 @@ Hierarchical substitution templating for SaltStack configuration also support's 
 
 *Pre-requisites*
 
-    $ sudo yum install -y pandoc rpm-build python-virtualenv gcc
+    $ sudo yum install -y pandoc rpm-build python-virtualenv gcc openldap-devel
 
 *Build RPM*
 
-Add your user to the admin group on your system and then:
+Add your user to the wheel group on your system:
+
+    $ sudo groupmems -a &lt;username&gt; -g wheel
+    $ newgrp wheel
+    $ sudo chgrp wheel /opt
+    $ sudo chmod 775 /opt
+
+Now you can build the RPM:
 
     $ git clone ...
     $ cd pepa
-    $ sudo chgrp admin /opt
-    $ sudo chmod 770 /opt
     $ make
 
 ## Install system wide ##
