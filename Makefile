@@ -19,6 +19,7 @@ venv:
 	sed "s!/usr/bin/env python!${VENV}/bin/python2!" src/pepa-cli.py >${VENV}/bin/pepa-cli.py
 	chmod 755 ${VENV}/bin/pepa.py
 	chmod 755 ${VENV}/bin/pepa-cli.py
+	prelink -u ${VENV}/bin/python2.7 || true
 	tar -cvzf ${NAME}.tar.gz ${VENV}
 
 rpm: venv
