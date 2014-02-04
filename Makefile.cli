@@ -1,4 +1,5 @@
-NAME=pepa-cli
+APP=pepa-cli
+NAME=${APP}
 VERSION=0.2
 RELEASE=0
 PYTHON_VERSION=2.7
@@ -18,6 +19,7 @@ venv:
 	. ${VENV}/bin/activate
 	${VENV}/bin/pip install -r requirements-cli.txt
 	( cd ${VENV} && rm -f lib64 && ln -s lib lib64 )
+	prelink -u ${VENV}/bin/python2.7 || true
 	sed "s%^#\!.*python%#\!${VENV}/bin/python2.7%" src/pepa-cli.py >${VENV}/bin/pepa-cli.py
 	chmod 755 ${VENV}/bin/pepa-cli.py
 	tar -cvzf ${NAME}.tar.gz ${VENV}
@@ -52,7 +54,7 @@ rpm: venv
 	cp -r ${NAME}.tar.gz conf ${TMPDIR}/SOURCES
 	cp conf/pepa-cli.conf ${TMPDIR}/SOURCES/pepa.conf
 	pandoc -s -w man doc/pepa-cli.1.md -o ${TMPDIR}/SOURCES/pepa-cli.1
-	sed -e "s/%NAME%/${NAME}/g" -e "s/%VERSION%/${VERSION}/g" -e "s/%RELEASE%/${RELEASE}/g" -e "s/%PYTHON_VERSION%/${PYTHON_VERSION}/g" \
-		-e "s!%SOURCE%!${SOURCE}!g" ${NAME}.spec > ${TMPDIR}/SPECS/${NAME}.spec
+	sed -e "s/%APP%/${APP}/g" -e "s/%VERSION%/${VERSION}/g" -e "s/%RELEASE%/${RELEASE}/g" -e "s/%PYTHON_VERSION%/${PYTHON_VERSION}/g" \
+		-e "s!%SOURCE%!${SOURCE}!g" ${APP}.spec > ${TMPDIR}/SPECS/${NAME}.spec
 	rpmbuild -vv -bb --target="noarch" --clean --define "_topdir `pwd`/${TMPDIR}" ${TMPDIR}/SPECS/${NAME}.spec
 	mv ${TMPDIR}/RPMS/noarch/*.rpm .

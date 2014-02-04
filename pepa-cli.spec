@@ -21,7 +21,7 @@ AutoReqProv: no
 %{app}
 
 %prep
-mkdir -p {buildroot}/usr/bin %{buildroot}/usr/share/man/man1
+mkdir -p %{buildroot}/usr/bin %{buildroot}/usr/share/man/man1 %{buildroot}/etc/pepa
 tar zxvf %{sources}/%{name}.tar.gz -C %{buildroot}
 cp %{sources}/conf/pepa.conf %{buildroot}/etc/pepa
 cp %{sources}/*.1 %{buildroot}/usr/share/man/man1
