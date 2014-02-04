@@ -1,0 +1,48 @@
+NAME=pepa-cli
+VERSION=0.2
+RELEASE=0
+PYTHON_VERSION=2.7
+SOURCE=https://github.com/mickep76/pepa.git
+VENV=/opt/${NAME}
+TMPDIR=.build
+
+all: dmg
+
+clean:
+	rm -f *.dmg *.pkg *.rpm *.tar.gz *.1
+	rm -rf ${TMPDIR}
+	rm -rf ${VENV}
+
+venv:
+	virtualenv -p python${PYTHON_VERSION} ${VENV}
+	. ${VENV}/bin/activate
+	${VENV}/bin/pip install -r requirements-cli.txt
+	( cd ${VENV} && rm -f lib64 && ln -s lib lib64 )
+	sed "s/^#!.*python\$/${VENV}\/bin\/python2.7/" src/pepa-cli.py >${VENV}/bin/pepa-cli.py
+	chmod 755 ${VENV}/bin/pepa-cli.py
+	tar -cvzf ${NAME}.tar.gz ${VENV}
+
+pkg: venv
+	mkdir -p ${TMPDIR}/etc
+	mkdir -p ${TMPDIR}/usr/bin
+	mkdir -p ${TMPDIR}/usr/share/man/man1
+	tar zxvf ${NAME}.tar.gz -C ${TMPDIR}
+	cp conf/pepa-cli.conf ${TMPDIR}/etc/pepa.conf
+	pandoc -s -w man doc/pepa-cli.1.md -o ${TMPDIR}/usr/share/man/man1/pepa-cli.1
+	( cd ${TMPDIR}/usr/bin && ln -s ../../opt/pepa-cli/bin/pepa-cli pepa-cli )
+	/Applications/PackageMaker.app/Contents/MacOS/PackageMaker \
+	--title ${NAME} \
+	--version "${VERSION}-${RELEASE}" \
+	--filter "\.DS_Store" \
+	--root-volume-only \
+	--verbose \
+	--no-relocate \
+	--target "10.5" \
+	--id "com.${NAME}.pkg" \
+	--root ${TMPDIR} \
+	--out "${NAME}-${VERSION}-${RELEASE}.pkg"
+
+dmg: pkg
+	mkdir ${TMPDIR}/dmg
+	cp -pR "${NAME}-${VERSION}-${RELEASE}.pkg" ${TMPDIR}/dmg
+	hdiutil create "${NAME}-${VERSION}-${RELEASE}.dmg" -volname "${NAME}" -fs HFS+ -srcfolder ${TMPDIR}/dmg

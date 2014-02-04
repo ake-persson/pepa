@@ -15,15 +15,20 @@ import getpass
 from collections import OrderedDict
 import re
 
-def info(message):
-    print >> stderr, colored(message, 'green')
+def notify(message, color = 'red', prepend = ''):
+    print >> stderr, colored(prepend + message, color)
 
-def warn(message):
-    print >> stderr, colored(message, 'yellow')
+def error(message, color = 'red'):
+    notify(message, color, '[ ERRO ] ')
+    sys.exit(1)
 
-def error(message, code = 1):
-    print >> stderr, colored(message, 'red')
-    sys.exit(code)
+def warn(message, color = 'magenta'):
+#    if args.debug:
+    notify(message, color, '[ WARN ] ')
+
+def info(message, color = 'green'):
+#    if args.debug:
+    notify(message, color, '[ INFO ] ')
 
 def unique(a):
     return OrderedDict.fromkeys(a).keys()
@@ -34,7 +39,7 @@ config = ConfigParser.ConfigParser()
 # Set defaults
 config.add_section('client')
 config.set('client', 'url', 'http://127.0.0.1:8080')
-config.set('client', 'verify_ssl', False)
+config.set('client', 'verify_ssl', 'false')
 config.set('client', 'username', None)
 config.set('client', 'password', None)
 
@@ -42,9 +47,10 @@ config.set('client', 'password', None)
 cfile = None
 if isfile('/etc/pepa/pepa.conf'):
     cfile = '/etc/pepa/pepa.conf'
-if isfile('~/.pepa.conf'):
-    cfile = '~/.pepa.conf'
+if isfile(expanduser('~/.pepa.conf')):
+    cfile = expanduser('~/.pepa.conf')
 if cfile:
+    info("Using config file: %s" % cfile)
     config.read(cfile)
 
 url = config.get('client', 'url')
@@ -54,6 +60,7 @@ username = config.get('client', 'username')
 password = config.get('client', 'password')
 verify_ssl = config.getboolean('client', 'verify_ssl')
 
+info("Using API url: %s" % url)
 request = requests.get(url + '/schemas', headers = headers, verify = verify_ssl)
 
 if request.status_code != 200:

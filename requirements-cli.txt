@@ -1,0 +1,6 @@
+argparse
+ConfigParser
+pyyaml
+termcolor
+PrettyTable
+requests
