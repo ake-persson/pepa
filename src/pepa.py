@@ -185,10 +185,19 @@ if config.getboolean('http', 'use_ssl'):
 def verify_password(username, password):
     ld = ldap.initialize('ldaps://' + config.get('ad', 'server'))
     ld.set_option(ldap.OPT_X_TLS_DEMAND, True)
+
     try:
+        ld.start_tls_s()
         ld.simple_bind_s(config.get('ad', 'domain') + '\\' + username, password)
         return True
-    except:
+    except ldap.INVALID_CREDENTIALS:
+        warn('Login failed for user: %s incorrect user or password' % username)
+        return False
+    except ldap.LDAPError, e:
+        if type(e.message) == dict and e.message.has_key('desc'):
+            warn('Login failed for user: %s error: %s' % (username, e.message['desc']))
+        else:
+            warn('Login failed for user: %s error: %s' % (username, e))
         return False
 
 mimerender = mimerender.FlaskMimeRender()
