@@ -1,4 +1,4 @@
-#!/opt/pepa/bin/python2
+#!/usr/bin/env python
 
 import ConfigParser
 import argparse

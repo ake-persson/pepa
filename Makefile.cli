@@ -18,7 +18,7 @@ venv:
 	. ${VENV}/bin/activate
 	${VENV}/bin/pip install -r requirements-cli.txt
 	( cd ${VENV} && rm -f lib64 && ln -s lib lib64 )
-	sed "s/^#!.*python\$/${VENV}\/bin\/python2.7/" src/pepa-cli.py >${VENV}/bin/pepa-cli.py
+	sed "s%^#\!.*python%${VENV}/bin/python2.7%" src/pepa-cli.py >${VENV}/bin/pepa-cli.py
 	chmod 755 ${VENV}/bin/pepa-cli.py
 	tar -cvzf ${NAME}.tar.gz ${VENV}
 
@@ -29,7 +29,7 @@ pkg: venv
 	tar zxvf ${NAME}.tar.gz -C ${TMPDIR}
 	cp conf/pepa-cli.conf ${TMPDIR}/etc/pepa.conf
 	pandoc -s -w man doc/pepa-cli.1.md -o ${TMPDIR}/usr/share/man/man1/pepa-cli.1
-	( cd ${TMPDIR}/usr/bin && ln -s ../../opt/pepa-cli/bin/pepa-cli pepa-cli )
+	( cd ${TMPDIR}/usr/bin && ln -s ../../opt/pepa-cli/bin/pepa-cli.py pepa-cli )
 	/Applications/PackageMaker.app/Contents/MacOS/PackageMaker \
 	--title ${NAME} \
 	--version "${VERSION}-${RELEASE}" \
