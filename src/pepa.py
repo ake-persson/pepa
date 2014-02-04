@@ -187,7 +187,6 @@ def verify_password(username, password):
     ld.set_option(ldap.OPT_X_TLS_DEMAND, True)
 
     try:
-        ld.start_tls_s()
         ld.simple_bind_s(config.get('ad', 'domain') + '\\' + username, password)
         return True
     except ldap.INVALID_CREDENTIALS:
