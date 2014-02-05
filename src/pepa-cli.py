@@ -15,19 +15,17 @@ import getpass
 from collections import OrderedDict
 import re
 
-def notify(message, color = 'red', prepend = ''):
+def notify(message, color, prepend = ''):
     print >> stderr, colored(prepend + message, color)
 
-def error(message, color = 'red'):
+def error(message, err_code = 1, color = 'red'):
     notify(message, color, '[ ERRO ] ')
-    sys.exit(1)
+    sys.exit(err_code)
 
 def warn(message, color = 'magenta'):
-#    if args.debug:
     notify(message, color, '[ WARN ] ')
 
 def info(message, color = 'green'):
-#    if args.debug:
     notify(message, color, '[ INFO ] ')
 
 def unique(a):

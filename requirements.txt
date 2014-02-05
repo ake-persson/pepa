@@ -11,3 +11,4 @@ flask-httpauth
 PrettyTable
 requests
 PyOpenSSL
+pymongo

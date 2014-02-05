@@ -21,6 +21,8 @@ from jsonschema.exceptions import ValidationError, SchemaError
 import ldap
 from flask.ext.httpauth import HTTPBasicAuth
 from OpenSSL import SSL
+import pymongo
+from bson.objectid import ObjectId
 
 def notify(message, color = 'red', prepend = ''):
     if args.color:
@@ -46,15 +48,19 @@ def get_config(resource, key):
         'environment': 'base',
     }
 
-    fn = makepath(basedir, 'base', resource, 'inputs', key)
-    if isfile(fn + '.yaml'):
-        info("Load resource: %s.json" % fn)
-        input.update(yaml.load(open(fn + '.yaml').read()))
-    elif isfile(fn + '.json'):
-        info("Load resource: %s.json" % fn)
-        input.update(json.loads(open(fn + '.json').read()))
+    if config.get('main', 'backend') == 'file' or resource == 'schemas':
+        fn = makepath(basedir, 'base', resource, 'inputs', key)
+        if isfile(fn + '.yaml'):
+            info("Load resource: %s.json" % fn)
+            input.update(yaml.load(open(fn + '.yaml').read()))
+        elif isfile(fn + '.json'):
+            info("Load resource: %s.json" % fn)
+            input.update(json.loads(open(fn + '.json').read()))
+        else:
+            error("Resource doesn't exist: %s.(json|yaml)" % fn)
     else:
-        error("Resource doesn't exist: %s.(json|yaml)" % fn)
+        input.update(dbo[resource].find_one({ config.get(resource, 'key'): key }))
+        del input['_id']
 
     # Load templates
     output = input
@@ -69,25 +75,25 @@ def get_config(resource, key):
             entries = [ input[category] ]
 
         for entry in entries:
-            config = None
+            results = None
             fn = makepath(basedir,  input['environment'], resource, 'templates', category,
                 re.sub('\W', '_', entry.lower()))
             if isfile(fn + '.yaml'):
                 info("Load template: %s.yaml" % fn)
                 template = jinja2.Template(open(fn + '.yaml').read())
-                config = yaml.load(template.render(output))
+                results = yaml.load(template.render(output))
             elif isfile(fn + '.json'):
                 info("Load template: %s.json" % fn)
                 template = jinja2.Template(open(fn + '.yaml').read())
-                config = json.loads(template.render(output))
+                results = json.loads(template.render(output))
             else:
                 warn("Template doesn't exist: %s.(json|yaml)" % fn)
                 continue
 
-            if config != None:
-                for key in config:
+            if results != None:
+                for key in results:
                     info("Substituting key: %s" % key, 'yellow')
-                    output[key] = config[key]
+                    output[key] = results[key]
     return output
 
 # Get command line options
@@ -117,6 +123,7 @@ config.add_section('main')
 config.set('main', 'basedir', '/srv/pepa')
 config.set('main', 'environments', 'base')
 config.set('main', 'resources', 'hosts, schemas')
+config.set('main', 'backend', 'file')
 config.add_section('hosts')
 config.set('hosts', 'key', 'hostname')
 config.set('hosts', 'sequence', 'default, environment, region, country, roles, hostname')
@@ -126,9 +133,11 @@ config.set('schemas', 'sequence', 'default')
 config.add_section('http')
 config.set('http', 'host', '127.0.0.1')
 config.set('http', 'port', 8080)
-config.set('http', 'use_ssl', False)
+config.set('http', 'use_ssl', 'false')
 config.set('http', 'ssl_pkey', '/etc/pepa/ssl/server.key')
 config.set('http', 'ssl_cert', '/etc/pepa/ssl/server.crt')
+config.add_section('mongodb')
+config.set('mongodb', 'database', 'pepa')
 
 # Get config
 config.read([args.config])
@@ -161,6 +170,16 @@ if not args.daemonize:
     else:
         print yaml.safe_dump(output, indent = 4, default_flow_style = False)
     sys.exit(0)
+
+# Initiate MongoDB
+database =  None
+conn = None
+dbo = None
+if config.get('main', 'backend') == 'mongodb':
+    database = config.get('mongodb', 'database')
+    info('Using MongoDB backend with database: %s' % database)
+    conn = pymongo.Connection()
+    dbo = conn[database]
 
 # Initiate Flask
 app = flask.Flask(__name__)
@@ -212,9 +231,14 @@ render_yaml = lambda **args: yaml.safe_dump(args, indent = 4, default_flow_style
 def get_all_resources(resource):
     files = glob(makepath(basedir, 'base', resource, 'inputs', '*'))
     output = {}
-    for file in files:
-        key = splitext(basename(file))[0]
-        output[key] = get_config(resource, key)
+    if config.get('main', 'backend') == 'file' or resource == 'schemas':
+        for file in files:
+            key = splitext(basename(file))[0]
+            output[key] = get_config(resource, key)
+    else:
+        for entry in dbo[resource].find():
+            key = entry[config.get(resource, 'key')]
+            output[key] = get_config(resource, key)
     return output
 
 @app.route('/<resource>', methods=["POST"])
@@ -242,15 +266,25 @@ def new_resource(resource):
         data['error'] = e.message
         return data, 400
 
-    fn = makepath(basedir, 'base', resource, 'inputs', data[config.get(resource, 'key')])
-    if isfile(fn + '.yaml') or isfile(fn + '.json'):
-        data['success'] = False
-        data['error'] = 'Duplicate entry, entry already exists'
-        return data, 409
+    if config.get('main', 'backend') == 'file':
+        fn = makepath(basedir, 'base', resource, 'inputs', data[config.get(resource, 'key')])
+        if isfile(fn + '.yaml') or isfile(fn + '.json'):
+            data['success'] = False
+            data['error'] = 'Duplicate entry, entry already exists'
+            return data, 409
 
-    f = open(fn + '.yaml', 'w')
-    f.write(yaml.safe_dump(data, indent = 4, default_flow_style = False))
-    f.close()
+        f = open(fn + '.yaml', 'w')
+        f.write(yaml.safe_dump(data, indent = 4, default_flow_style = False))
+        f.close()
+    else:
+        # Check if already exists
+        if not dbo[resource].find_one({ config.get(resource, 'key'): data[config.get(resource, 'key')] }):
+            dbo[resource].insert(data, safe = True)
+            del data['_id']
+        else:
+            data['success'] = False
+            data['error'] = 'Duplicate entry, entry already exists'
+            return data, 409
 
     data['success'] = True
     return data, 201
@@ -265,13 +299,17 @@ def new_resource(resource):
 def modify_resource(resource, key):
     data = {}
 
-    fn = makepath(basedir, 'base', resource, 'inputs', key)
-    if isfile(fn + '.yaml'):
-        info("Load resource input: %s" % fn)
-        data = yaml.load(open(fn + '.yaml', 'r'))
-    elif isfile(fn + '.json'):
-        info("Load resource input: %s" % fn)
-        data = json.loads(open(fn + '.json', 'r'))
+    if config.get('main', 'backend') == 'file':
+        fn = makepath(basedir, 'base', resource, 'inputs', key)
+        if isfile(fn + '.yaml'):
+            info("Load resource input: %s" % fn)
+            data = yaml.load(open(fn + '.yaml', 'r'))
+        elif isfile(fn + '.json'):
+            info("Load resource input: %s" % fn)
+            data = json.loads(open(fn + '.json', 'r'))
+    else:
+        data = dbo[resource].find_one({config.get(resource, 'key'): key})
+        del data['_id']
 
     if request.accept_mimetypes == 'application/json':
         data.update(json.loads(request.data))
@@ -289,14 +327,17 @@ def modify_resource(resource, key):
         data['error'] = e.message
         return data, 400
 
-    if isfile(fn + '.yaml'):
-        f = open(fn + '.yaml', 'w')
-        f.write(yaml.safe_dump(data, indent = 4, default_flow_style = False))
-        f.close()
-    elif isfile(fn + '.json'):
-        f = open(fn + '.json', 'w')
-        f.write(json.dumps(data, indent = 4))
-        f.close()
+    if config.get('main', 'backend') == 'file':
+        if isfile(fn + '.yaml'):
+            f = open(fn + '.yaml', 'w')
+            f.write(yaml.safe_dump(data, indent = 4, default_flow_style = False))
+            f.close()
+        elif isfile(fn + '.json'):
+            f = open(fn + '.json', 'w')
+            f.write(json.dumps(data, indent = 4))
+            f.close()
+    else:
+        dbo.repo.update({config.get(resource, 'key'): key}, data)
 
     data['success'] = True
     return data, 200
@@ -320,15 +361,18 @@ def get_resource(resource, key):
 )
 def delete_resource(resource, key):
     data = {}
-    fn = makepath(basedir, 'base', resource, 'inputs', key)
-    if isfile(fn + '.json'):
-        unlink(fn + '.json')
-    if isfile(fn + '.yaml'):
-        unlink(fn + '.yaml')
+    if config.get('main', 'backend') == 'file':
+        fn = makepath(basedir, 'base', resource, 'inputs', key)
+        if isfile(fn + '.json'):
+            unlink(fn + '.json')
+        if isfile(fn + '.yaml'):
+            unlink(fn + '.yaml')
+        else:
+            data['success'] = false
+            data['error'] = "Entry not found"
+            return data, 404
     else:
-        data['success'] = false
-        data['error'] = "Entry not found"
-        return data, 404
+        dbo[resource].remove({config.get(resource, 'key'): key})
 
     data['success'] = True
     return data, 204
