@@ -16,6 +16,7 @@ Release: %{release}
 License: GPLv3 License
 Group: System
 AutoReqProv: no
+Requires: mongodb-server
 
 %description
 %{app}
