@@ -1,6 +1,6 @@
 APP=pepa
 NAME=${APP}
-VERSION=0.2
+VERSION=0.3
 PYTHON_VERSION=2.7
 RELEASE=$(shell date -u +%Y%m%d%H%M)
 SOURCE=https://github.com/mickep76/pepa.git
