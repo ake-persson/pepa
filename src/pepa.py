@@ -132,11 +132,13 @@ config.set('schemas', 'key', 'schema')
 config.set('schemas', 'sequence', 'default')
 config.add_section('http')
 config.set('http', 'host', '127.0.0.1')
-config.set('http', 'port', 8080)
+config.set('http', 'port', '8080')
 config.set('http', 'use_ssl', 'false')
 config.set('http', 'ssl_pkey', '/etc/pepa/ssl/server.key')
 config.set('http', 'ssl_cert', '/etc/pepa/ssl/server.crt')
 config.add_section('mongodb')
+config.set('mongodb', 'server', 'pepa')
+config.set('mongodb', 'port', '27017')
 config.set('mongodb', 'database', 'pepa')
 
 # Get config
@@ -178,7 +180,7 @@ dbo = None
 if config.get('main', 'backend') == 'mongodb':
     database = config.get('mongodb', 'database')
     info('Using MongoDB backend with database: %s' % database)
-    conn = pymongo.Connection()
+    conn = pymongo.Connection(config.get('mongodb', 'server'), int(config.get('mongodb', 'port')))
     dbo = conn[database]
 
 # Initiate Flask
