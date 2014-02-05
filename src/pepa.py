@@ -132,13 +132,13 @@ config.set('schemas', 'key', 'schema')
 config.set('schemas', 'sequence', 'default')
 config.add_section('http')
 config.set('http', 'host', '127.0.0.1')
-config.set('http', 'port', '8080')
+config.set('http', 'port', 8080)
 config.set('http', 'use_ssl', 'false')
 config.set('http', 'ssl_pkey', '/etc/pepa/ssl/server.key')
 config.set('http', 'ssl_cert', '/etc/pepa/ssl/server.crt')
 config.add_section('mongodb')
 config.set('mongodb', 'server', 'pepa')
-config.set('mongodb', 'port', '27017')
+config.set('mongodb', 'port', 27017)
 config.set('mongodb', 'database', 'pepa')
 
 # Get config
@@ -180,7 +180,7 @@ dbo = None
 if config.get('main', 'backend') == 'mongodb':
     database = config.get('mongodb', 'database')
     info('Using MongoDB backend with database: %s' % database)
-    conn = pymongo.Connection(config.get('mongodb', 'server'), int(config.get('mongodb', 'port')))
+    conn = pymongo.Connection(config.get('mongodb', 'server'), config.getint('mongodb', 'port'))
     dbo = conn[database]
 
 # Initiate Flask
@@ -382,6 +382,6 @@ def delete_resource(resource, key):
 if __name__ == '__main__':
     if config.getboolean('http', 'use_ssl'):
         info('Start with SSL support enabled')
-        app.run(debug = args.debug, host = config.get('http', 'host'), port = int(config.get('http', 'port')), ssl_context = context)
+        app.run(debug = args.debug, host = config.get('http', 'host'), port = config.getint('http', 'port'), ssl_context = context)
     else:
-        app.run(debug = args.debug, host = config.get('http', 'host'), port = int(config.get('http', 'port')))
+        app.run(debug = args.debug, host = config.get('http', 'host'), port = config.getint('http', 'port'))
