@@ -26,7 +26,7 @@ rpm: venv
 	mkdir -p ${TMPDIR}/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
 	pandoc -s -w man doc/pepa.1.md -o ${TMPDIR}/SOURCES/pepa.1
 	pandoc -s -w man doc/pepa.conf.5.md -o ${TMPDIR}/SOURCES/pepa.conf.5
-	cp -r ${NAME}.tar.gz conf ${TMPDIR}/SOURCES
+	cp -r ${NAME}.tar.gz conf files ${TMPDIR}/SOURCES
 	sed -e "s/%APP%/${APP}/g" -e "s/%VERSION%/${VERSION}/g" -e "s/%RELEASE%/${RELEASE}/g" -e "s/%PYTHON_VERSION%/${PYTHON_VERSION}/g" \
 		-e "s!%SOURCE%!${SOURCE}!g" ${APP}.spec > ${TMPDIR}/SPECS/${NAME}.spec
 	rpmbuild -vv -bb --target="${ARCH}" --clean --define "_topdir `pwd`/${TMPDIR}" ${TMPDIR}/SPECS/${NAME}.spec

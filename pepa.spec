@@ -25,7 +25,6 @@ Requires: mongodb-server
 useradd -M -r -d /srv/pepa pepa || true
 
 %post
-mkdir -p /etc/pepa/ssl
 openssl genrsa -des3 -passout pass:x -out /etc/pepa/ssl/server.pass.key 2048
 openssl rsa -passin pass:x -in /etc/pepa/ssl/server.pass.key -out /etc/pepa/ssl/server.key
 rm -f /etc/pepa/ssl/server.pass.key
@@ -33,12 +32,15 @@ openssl req -new -key /etc/pepa/ssl/server.key -out /etc/pepa/ssl/server.csr -su
 openssl x509 -req -days 365 -in /etc/pepa/ssl/server.csr -signkey /etc/pepa/ssl/server.key -out /etc/pepa/ssl/server.crt
 
 %prep
-mkdir -p %{buildroot}/srv/pepa %{buildroot}/usr/{bin,sbin} %{buildroot}/usr/share/man/{man1,man5} %{buildroot}/etc/pepa/ssl
+mkdir -p %{buildroot}/srv/pepa %{buildroot}/usr/{bin,sbin} %{buildroot}/usr/share/man/{man1,man5} %{buildroot}/etc/pepa/ssl \
+	%{buildroot}/usr/lib/systemd/system %{buildroot}/var/run/pepa %{buildroot}/etc/sysconfig
 tar zxvf %{sources}/%{name}.tar.gz -C %{buildroot}
 cp %{sources}/conf/pepa.conf %{buildroot}/etc/pepa
+cp %{sources}/files/pepa.service %{buildroot}/usr/lib/systemd/system
+cp %{sources}/files/pepa %{buildroot}/etc/sysconfig
 cp %{sources}/*.1 %{buildroot}/usr/share/man/man1
 cp %{sources}/*.5 %{buildroot}/usr/share/man/man5
-ln -sf %{appdir}/bin/pepa.py %{buildroot}/usr/bin/pepa
+ln -sf %{appdir}/bin/pepa.py %{buildroot}/usr/sbin/pepa
 ln -sf %{appdir}/bin/pepa-cli.py %{buildroot}/usr/bin/pepa-cli
 
 %files
@@ -48,5 +50,9 @@ ln -sf %{appdir}/bin/pepa-cli.py %{buildroot}/usr/bin/pepa-cli
 %config(noreplace) /etc/pepa/pepa.conf
 %attr(-,pepa,pepa) %dir /srv/pepa
 /usr/bin/*
+/usr/sbin/*
 /usr/share/man/man1/*
 /usr/share/man/man5/*
+/usr/lib/systemd/system/*
+%attr(-,pepa,pepa) %dir /var/run/pepa
+%config(noreplace) /etc/sysconfig/pepa

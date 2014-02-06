@@ -1,0 +1,13 @@
+[Unit]
+Description=Pepa configuration templating for Salt Stack
+After=syslog.target network.target mongod.target
+
+[Service]
+Type=simple
+User=pepa
+PIDFile=/var/run/pepa/pepa.pid
+EnvironmentFile=/etc/sysconfig/pepa
+ExecStart=/usr/sbin/pepa $OPTIONS -n -D
+
+[Install]
+WantedBy=multi-user.target
