@@ -1,5 +1,5 @@
 #!/bin/bash
 
-readonly SSH_KEY='/srv/salt/.ssh/id_dsa'
+readonly SSH_KEY='/srv/pepa/.ssh/id_dsa'
 
 exec /usr/bin/ssh -i $SSH_KEY -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no "$@"
