@@ -54,5 +54,6 @@ ln -sf %{appdir}/bin/pepa-cli.py %{buildroot}/usr/bin/pepa-cli
 /usr/share/man/man1/*
 /usr/share/man/man5/*
 /usr/lib/systemd/system/*
+%dir /etc/pepa/ssl
 %attr(-,pepa,pepa) %dir /var/run/pepa
 %config(noreplace) /etc/sysconfig/pepa
