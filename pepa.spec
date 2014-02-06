@@ -25,11 +25,14 @@ Requires: mongodb-server
 useradd -M -r -d /srv/pepa pepa || true
 
 %post
-openssl genrsa -des3 -passout pass:x -out /etc/pepa/ssl/server.pass.key 2048
-openssl rsa -passin pass:x -in /etc/pepa/ssl/server.pass.key -out /etc/pepa/ssl/server.key
-rm -f /etc/pepa/ssl/server.pass.key
-openssl req -new -key /etc/pepa/ssl/server.key -out /etc/pepa/ssl/server.csr -subj "/C=US/ST=Denial/L=Springfield/O=Dis/CN=$( hostname -s )"
-openssl x509 -req -days 365 -in /etc/pepa/ssl/server.csr -signkey /etc/pepa/ssl/server.key -out /etc/pepa/ssl/server.crt
+if ! [ -f '/etc/pepa/ssl/server.key' -a '/etc/pepa/ssl/server.crt' ]; then
+    openssl genrsa -des3 -passout pass:x -out /etc/pepa/ssl/server.pass.key 2048
+    openssl rsa -passin pass:x -in /etc/pepa/ssl/server.pass.key -out /etc/pepa/ssl/server.key
+    rm -f /etc/pepa/ssl/server.pass.key
+    openssl req -new -key /etc/pepa/ssl/server.key -out /etc/pepa/ssl/server.csr -subj "/C=US/ST=Denial/L=Springfield/O=Dis/CN=$( hostname -s )"
+    openssl x509 -req -days 365 -in /etc/pepa/ssl/server.csr -signkey /etc/pepa/ssl/server.key -out /etc/pepa/ssl/server.crt
+fi
+systemctl --system daemon-reload
 
 %prep
 mkdir -p %{buildroot}/srv/pepa %{buildroot}/usr/{bin,sbin} %{buildroot}/usr/share/man/{man1,man5} %{buildroot}/etc/pepa/ssl \
