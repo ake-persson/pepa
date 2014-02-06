@@ -3,7 +3,7 @@
 set -e
 set -u
 
-readonly USER='salt_vcs'
+readonly USER='pepa'
 readonly BASEDIR='/srv/pepa'
 readonly SSH_KEY="${BASEDIR}/.ssh/id_dsa"
 readonly URI='Path to Git repo'
