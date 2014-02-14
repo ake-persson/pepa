@@ -231,9 +231,9 @@ render_yaml = lambda **args: yaml.safe_dump(args, indent = 4, default_flow_style
     json = render_json
 )
 def get_all_resources(resource):
-    files = glob(makepath(basedir, 'base', resource, 'inputs', '*'))
     output = {}
     if config.get('main', 'backend') == 'file' or resource == 'schemas':
+        files = glob(makepath(basedir, 'base', resource, 'inputs', '*'))
         for file in files:
             key = splitext(basename(file))[0]
             output[key] = get_config(resource, key)
