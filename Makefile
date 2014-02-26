@@ -11,7 +11,7 @@ VENV=/opt/${APP}
 all: rpm
 
 venv:
-	virtualenv -p python${PYTHON_VERSION} ${VENV}
+	virtualenv -p python${PYTHON_VERSION} ${VENV} --no-site-packages
 	. ${VENV}/bin/activate
 	${VENV}/bin/pip install -r requirements.txt
 	( cd ${VENV} && rm -f lib64 && ln -s lib lib64 )
