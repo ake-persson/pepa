@@ -10,5 +10,5 @@ python-ldap
 flask-httpauth
 PrettyTable
 requests
-PyOpenSSL
+PyOpenSSL==0.13
 pymongo
