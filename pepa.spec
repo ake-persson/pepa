@@ -64,4 +64,4 @@ ln -sf %{appdir}/bin/pepa-cli.py %{buildroot}/usr/bin/pepa-cli
 %attr(-,pepa,pepa) %dir /var/run/pepa
 %config(noreplace) /etc/sysconfig/pepa
 %config(noreplace) /etc/uwsgi.d/pepa.ini
-%config(noreplace) /etc/nginx/conf.d/nginx.conf
+%config(noreplace) /etc/nginx/conf.d/pepa.ini
