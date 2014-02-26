@@ -7,7 +7,7 @@ Type=simple
 User=pepa
 PIDFile=/var/run/pepa/pepa.pid
 EnvironmentFile=/etc/sysconfig/pepa
-ExecStart=/usr/sbin/pepa $OPTIONS -n -D
+ExecStart=/usr/sbin/pepa $OPTIONS -n
 
 [Install]
 WantedBy=multi-user.target
