@@ -102,7 +102,7 @@ parser.add_argument('-c', '--config', help = 'Configuration file', default = '/e
 parser.add_argument('-d', '--debug', help = 'Print debug information', action = 'store_true', default = False)
 parser.add_argument('-n', '--no-color', help = 'No color', dest = 'color', action = 'store_false', default = True)
 parser.add_argument('-j', '--json', help = 'JSON output, instead of default YAML', action = 'store_true', default = False)
-parser.add_argument('-D', '--daemonize', help = 'Daemonize and run as a REST API', action = 'store_true', default = False)
+parser.add_argument('-D', '--dont-daemonize', help = 'Don\'t daemonize and run as a REST API', action = 'store_false', default = True)
 parser.add_argument('-r', '--resource', help = 'Resource')
 parser.add_argument('-k', '--key', help = 'Resource key')
 args = parser.parse_args()
