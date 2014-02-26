@@ -1,6 +1,6 @@
 APP=pepa-cli
 NAME=${APP}
-VERSION=0.3
+VERSION=0.4
 RELEASE=0
 PYTHON_VERSION=2.7
 SOURCE=https://github.com/mickep76/pepa.git
