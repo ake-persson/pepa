@@ -36,7 +36,8 @@ systemctl --system daemon-reload
 
 %prep
 mkdir -p %{buildroot}/srv/pepa %{buildroot}/usr/{bin,sbin} %{buildroot}/usr/share/man/{man1,man5} %{buildroot}/etc/pepa/ssl \
-	%{buildroot}/usr/lib/systemd/system %{buildroot}/var/run/pepa %{buildroot}/etc/sysconfig %{buildroot}/etc/uwsgi/conf.d
+	%{buildroot}/usr/lib/systemd/system %{buildroot}/var/run/pepa %{buildroot}/etc/sysconfig %{buildroot}/etc/uwsgi/conf.d \
+    %{buildroot}/var/log/pepa
 tar zxvf %{sources}/%{name}.tar.gz -C %{buildroot}
 cp %{sources}/conf/uwsgi.ini %{buildroot}/etc/uwsgi/conf.d/%{app}.ini
 cp %{sources}/conf/pepa.conf %{buildroot}/etc/pepa
@@ -61,4 +62,5 @@ ln -sf %{appdir}/bin/pepa-cli.py %{buildroot}/usr/bin/pepa-cli
 %dir /etc/pepa/ssl
 %attr(-,pepa,pepa) %dir /var/run/pepa
 %config(noreplace) /etc/sysconfig/pepa
-%config(noreplace) /etc//etc/uwsgi/conf.d/%{app}.ini
+%config(noreplace) /etc/uwsgi/conf.d/pepa.ini
+%attr(-,pepa,pepa) %dir /var/log/pepa
