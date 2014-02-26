@@ -112,7 +112,7 @@ if not isfile(args.config):
     error("Configuration file doesn't exist: %s" % args.config)
 
 # Check options
-if args.daemonize is False and not args.resource:
+if args.dont_daemonize is False and not args.resource:
     error("You need to specify a resource")
 
 # Get configuration
@@ -165,7 +165,7 @@ for resource in resources:
     else:
         error("Schema doesn't exist: %s.(json|yaml)" % fn)
 
-if not args.daemonize:
+if not args.dont_daemonize:
     output = get_config(args.resource, args.key)
     if args.json:
         print json.dumps(output, indent = 4) + '\n'
