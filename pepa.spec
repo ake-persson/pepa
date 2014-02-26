@@ -39,8 +39,8 @@ mkdir -p %{buildroot}/srv/pepa %{buildroot}/usr/{bin,sbin} %{buildroot}/usr/shar
 	%{buildroot}/usr/lib/systemd/system %{buildroot}/var/run/pepa %{buildroot}/etc/sysconfig %{buildroot}/etc/uwsgi.d \
 	%{buildroot}/etc/nginx/conf.d
 tar zxvf %{sources}/%{name}.tar.gz -C %{buildroot}
-cp %{sources}/conf/uwsgi.ini %{buildroot}/etc/uwsgi.d/peppa.ini
-cp %{sources}/conf/nginx.conf %{buildroot}/etc/nginx/conf.d/peppa.conf
+cp %{sources}/conf/uwsgi.ini %{buildroot}/etc/uwsgi.d/pepa.ini
+cp %{sources}/conf/nginx.conf %{buildroot}/etc/nginx/conf.d/pepa.conf
 cp %{sources}/conf/pepa.conf %{buildroot}/etc/pepa
 cp %{sources}/files/pepa.service %{buildroot}/usr/lib/systemd/system
 cp %{sources}/files/pepa %{buildroot}/etc/sysconfig
