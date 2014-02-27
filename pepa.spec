@@ -48,6 +48,8 @@ cp %{sources}/*.1 %{buildroot}/usr/share/man/man1
 cp %{sources}/*.5 %{buildroot}/usr/share/man/man5
 ln -sf %{appdir}/bin/pepa.py %{buildroot}/usr/sbin/pepa
 ln -sf %{appdir}/bin/pepa-cli.py %{buildroot}/usr/bin/pepa-cli
+ln -sf %{appdir}/bin/export.py %{buildroot}/usr/sbin/pepa-export
+ln -sf %{appdir}/bin/import.py %{buildroot}/usr/sbin/pepa-import
 
 %files
 %defattr(-,root,root)

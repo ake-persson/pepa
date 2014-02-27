@@ -1,6 +1,6 @@
 APP=pepa
 NAME=${APP}
-VERSION=0.4
+VERSION=0.4.1
 PYTHON_VERSION=2.7
 RELEASE=$(shell date -u +%Y%m%d%H%M)
 SOURCE=https://github.com/mickep76/pepa.git
@@ -17,8 +17,12 @@ venv:
 	( cd ${VENV} && rm -f lib64 && ln -s lib lib64 )
 	sed "s!/usr/bin/env python!${VENV}/bin/python2!" src/pepa.py >${VENV}/bin/pepa.py
 	sed "s!/usr/bin/env python!${VENV}/bin/python2!" src/pepa-cli.py >${VENV}/bin/pepa-cli.py
+	sed "s!/usr/bin/env python!${VENV}/bin/python2!" src/export.py >${VENV}/bin/export.py
+	sed "s!/usr/bin/env python!${VENV}/bin/python2!" src/import.py >${VENV}/bin/import.py
 	chmod 755 ${VENV}/bin/pepa.py
 	chmod 755 ${VENV}/bin/pepa-cli.py
+	chmod 755 ${VENV}/bin/export.py
+	chmod 755 ${VENV}/bin/import.py
 	prelink -u ${VENV}/bin/python2.7 || true
 	tar -cvzf ${NAME}.tar.gz ${VENV}
 

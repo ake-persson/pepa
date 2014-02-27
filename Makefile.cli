@@ -1,13 +1,13 @@
 APP=pepa-cli
 NAME=${APP}
-VERSION=0.4
+VERSION=0.4.1
 RELEASE=0
 PYTHON_VERSION=2.7
 SOURCE=https://github.com/mickep76/pepa.git
 VENV=/opt/${NAME}
 TMPDIR=.build
 
-all: dmg
+all: rpm
 
 clean:
 	rm -f *.dmg *.pkg *.rpm *.tar.gz *.1
