@@ -165,14 +165,6 @@ for resource in resources:
     else:
         error("Schema doesn't exist: %s.(json|yaml)" % fn)
 
-if not args.dont_daemonize:
-    output = get_config(args.resource, args.key)
-    if args.json:
-        print json.dumps(output, indent = 4) + '\n'
-    else:
-        print yaml.safe_dump(output, indent = 4, default_flow_style = False)
-    sys.exit(0)
-
 # Initiate MongoDB
 database =  None
 conn = None
@@ -182,6 +174,15 @@ if config.get('main', 'backend') == 'mongodb':
     info('Using MongoDB backend with database: %s' % database)
     conn = pymongo.Connection(config.get('mongodb', 'server'), config.getint('mongodb', 'port'))
     dbo = conn[database]
+
+# Standalone run
+if not args.dont_daemonize:
+    output = get_config(args.resource, args.key)
+    if args.json:
+        print json.dumps(output, indent = 4) + '\n'
+    else:
+        print yaml.safe_dump(output, indent = 4, default_flow_style = False)
+    sys.exit(0)
 
 # Initiate Flask
 app = flask.Flask(__name__)
