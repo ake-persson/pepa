@@ -140,6 +140,8 @@ config.add_section('mongodb')
 config.set('mongodb', 'server', '127.0.0.1')
 config.set('mongodb', 'port', '27017')
 config.set('mongodb', 'database', 'pepa')
+config.set('mongodb', 'connect_retry', '6')
+config.set('mongodb', 'connect_wait', '30')
 
 # Get config
 config.read([args.config])
@@ -172,8 +174,17 @@ dbo = None
 if config.get('main', 'backend') == 'mongodb':
     database = config.get('mongodb', 'database')
     info('Using MongoDB backend with database: %s' % database)
-    conn = pymongo.Connection(config.get('mongodb', 'server'), config.getint('mongodb', 'port'))
-    dbo = conn[database]
+    connection_ok = False
+    for attempt in range(1, config.getint('mongodb', 'connect_retry')):
+        try:
+            conn = pymongo.Connection(config.get('mongodb', 'server'), config.getint('mongodb', 'port'))
+            dbo = conn[database]
+            connection_ok = True
+            break
+        except:
+            warn('Failed to connect to MongoDB waiting %s seconds, %s attempts left' %
+                (config.getint('mongodb', 'connect_wait'), config.getint('mongodb', 'connect_retry') - attempt))
+            time.sleep(config.getint('mongodb', 'connect_wait'))
 
 # Standalone run
 if not args.dont_daemonize:
