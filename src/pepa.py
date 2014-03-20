@@ -4,6 +4,7 @@ import ConfigParser
 import argparse
 import json
 import yaml
+import os
 from os import unlink
 from os.path import isfile, join as makepath, splitext, basename
 import sys
@@ -24,6 +25,8 @@ from OpenSSL import SSL
 import pymongo
 from bson.objectid import ObjectId
 import time
+from pwd import getpwnam
+from grp import getgrnam
 
 def notify(message, color = 'red', prepend = ''):
     if args.color:
@@ -178,10 +181,12 @@ uid = getpwnam(config.get('main', 'user')).pw_uid
 gid = getgrnam(config.get('main', 'group')).gr_gid
 
 # If root then switch user and group
-if os.getuid() == 0:
-    os.setuid(uid)
 if os.getgid() == 0:
+    info('Change uid to %s:' % uid)
     os.setgid(gid)
+if os.getuid() == 0:
+    info('Change gid to %s:' % gid)
+    os.setuid(uid)
 
 # Check that we're running as the correct user and group
 if os.getuid() != uid:
@@ -278,8 +283,7 @@ def get_all_resources(resource):
     return output
 
 @app.route('/<resource>', methods=["POST"])
-if 'POST' in auth_required:
-    @auth.login_required
+@auth.login_required
 @mimerender(
     default = 'yaml',
     yaml  = render_yaml,
@@ -327,8 +331,7 @@ def new_resource(resource):
     return data, 201
 
 @app.route('/<resource>/<key>', methods=["PATCH"])
-if 'PATCH' in auth_required:
-    @auth.login_required
+@auth.login_required
 @mimerender(
     default = 'yaml',
     yaml  = render_yaml,
@@ -381,8 +384,7 @@ def modify_resource(resource, key):
     return data, 200
 
 @app.route('/<resource>/<key>', methods=["GET"])
-if 'GET' in auth_required:
-    @auth.login_required
+@auth.login_required
 @mimerender(
     default = 'yaml',
     yaml  = render_yaml,
@@ -394,8 +396,7 @@ def get_resource(resource, key):
     return data, 200
 
 @app.route('/<resource>/<key>', methods=["DELETE"])
-if 'DELETE' in auth_required:
-    @auth.login_required
+@auth.login_required
 @mimerender(
     default = 'yaml',
     yaml  = render_yaml,
