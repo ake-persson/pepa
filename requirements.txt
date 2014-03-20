@@ -12,3 +12,4 @@ PrettyTable
 requests
 PyOpenSSL==0.13
 pymongo
+flask-conditional

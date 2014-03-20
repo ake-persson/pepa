@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/opt/pepa/bin/python2
 
 import ConfigParser
 import argparse
@@ -27,6 +27,7 @@ from bson.objectid import ObjectId
 import time
 from pwd import getpwnam
 from grp import getgrnam
+from flask.ext.conditional import conditional
 
 def notify(message, color = 'red', prepend = ''):
     if args.color:
@@ -129,7 +130,7 @@ config.set('main', 'environments', 'base')
 config.set('main', 'resources', 'hosts, schemas')
 config.set('main', 'backend', 'file')
 config.set('main', 'auth', 'ad')
-config.set('main', 'require_auth', 'POST, PATCH, DELETE')
+config.set('main', 'auth_required', 'POST, PATCH, DELETE')
 config.set('main', 'user', 'pepa')
 config.set('main', 'group', 'pepa')
 config.add_section('hosts')
@@ -156,7 +157,7 @@ config.read([args.config])
 basedir = config.get('main', 'basedir')
 environments = re.split('\s*,\s*', config.get('main', 'environments'))
 resources = re.split('\s*,\s*', config.get('main', 'resources'))
-require_auth = re.split('\s*,\s*', config.get('main', 'require_auth'))
+auth_required = re.split('\s*,\s*', config.get('main', 'auth_required'))
 sequences = {}
 schemas = {}
 for resource in resources:
@@ -264,6 +265,7 @@ render_json = lambda **args: json.dumps(args, indent = 4)
 render_yaml = lambda **args: yaml.safe_dump(args, indent = 4, default_flow_style = False)
 
 @app.route('/<resource>', methods=["GET"])
+@conditional(auth.login_required, 'GET' in auth_required)
 @mimerender(
     default = 'yaml',
     yaml  = render_yaml,
@@ -283,7 +285,7 @@ def get_all_resources(resource):
     return output
 
 @app.route('/<resource>', methods=["POST"])
-@auth.login_required
+@conditional(auth.login_required, 'POST' in auth_required)
 @mimerender(
     default = 'yaml',
     yaml  = render_yaml,
@@ -331,7 +333,7 @@ def new_resource(resource):
     return data, 201
 
 @app.route('/<resource>/<key>', methods=["PATCH"])
-@auth.login_required
+@conditional(auth.login_required, 'PATCH' in auth_required)
 @mimerender(
     default = 'yaml',
     yaml  = render_yaml,
@@ -384,7 +386,7 @@ def modify_resource(resource, key):
     return data, 200
 
 @app.route('/<resource>/<key>', methods=["GET"])
-@auth.login_required
+@conditional(auth.login_required, 'GET' in auth_required)
 @mimerender(
     default = 'yaml',
     yaml  = render_yaml,
@@ -396,7 +398,7 @@ def get_resource(resource, key):
     return data, 200
 
 @app.route('/<resource>/<key>', methods=["DELETE"])
-@auth.login_required
+@conditional(auth.login_required, 'DELETE' in auth_required)
 @mimerender(
     default = 'yaml',
     yaml  = render_yaml,
