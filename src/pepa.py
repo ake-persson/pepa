@@ -125,6 +125,10 @@ config.set('main', 'basedir', '/srv/pepa')
 config.set('main', 'environments', 'base')
 config.set('main', 'resources', 'hosts, schemas')
 config.set('main', 'backend', 'file')
+config.set('main', 'auth', 'ad')
+config.set('main', 'require_auth', 'POST, PATCH, DELETE')
+config.set('main', 'user', 'pepa')
+config.set('main', 'group', 'pepa')
 config.add_section('hosts')
 config.set('hosts', 'key', 'hostname')
 config.set('hosts', 'sequence', 'default, environment, region, country, roles, hostname')
@@ -149,6 +153,7 @@ config.read([args.config])
 basedir = config.get('main', 'basedir')
 environments = re.split('\s*,\s*', config.get('main', 'environments'))
 resources = re.split('\s*,\s*', config.get('main', 'resources'))
+require_auth = re.split('\s*,\s*', config.get('main', 'require_auth'))
 sequences = {}
 schemas = {}
 for resource in resources:
@@ -167,6 +172,22 @@ for resource in resources:
         schemas[resource] = json.loads(open(fn + '.json').read())
     else:
         error("Schema doesn't exist: %s.(json|yaml)" % fn)
+
+# Get user and group id
+uid = getpwnam(config.get('main', 'user')).pw_uid
+gid = getgrnam(config.get('main', 'group')).gr_gid
+
+# If root then switch user and group
+if os.getuid() == 0:
+    os.setuid(uid)
+if os.getgid() == 0:
+    os.setgid(gid)
+
+# Check that we're running as the correct user and group
+if os.getuid() != uid:
+    error('Application need to run as user: %s(%s)' % (config.get('main', 'user'), uid))
+if os.getgid() != gid:
+    error('Application need to run as group: %s(%s)' % (config.get('main', 'group'), gid))
 
 # Initiate MongoDB
 database =  None
@@ -257,7 +278,8 @@ def get_all_resources(resource):
     return output
 
 @app.route('/<resource>', methods=["POST"])
-@auth.login_required
+if 'POST' in auth_required:
+    @auth.login_required
 @mimerender(
     default = 'yaml',
     yaml  = render_yaml,
@@ -305,7 +327,8 @@ def new_resource(resource):
     return data, 201
 
 @app.route('/<resource>/<key>', methods=["PATCH"])
-@auth.login_required
+if 'PATCH' in auth_required:
+    @auth.login_required
 @mimerender(
     default = 'yaml',
     yaml  = render_yaml,
@@ -358,6 +381,8 @@ def modify_resource(resource, key):
     return data, 200
 
 @app.route('/<resource>/<key>', methods=["GET"])
+if 'GET' in auth_required:
+    @auth.login_required
 @mimerender(
     default = 'yaml',
     yaml  = render_yaml,
@@ -369,6 +394,8 @@ def get_resource(resource, key):
     return data, 200
 
 @app.route('/<resource>/<key>', methods=["DELETE"])
+if 'DELETE' in auth_required:
+    @auth.login_required
 @mimerender(
     default = 'yaml',
     yaml  = render_yaml,
