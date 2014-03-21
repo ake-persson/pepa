@@ -394,6 +394,17 @@ def modify_resource(resource, key):
     else:
         dbo.repo.update({config.get(resource, 'key'): key}, data)
 
+    if config.has_option(resource, 'on_PATCH'):
+        info('Calling external command: %s' % config.get(resource, 'on_PATCH'))
+        p = Popen(config.get(resource, 'on_PATCH'), stdout = PIPE, stderr = PIPE)
+        stdout, stderr = p.communicate()
+        assert p.returncode
+        if p.returncode:
+            warn('Command failed: %s (%s)' % (stderr, p.returncode))
+            data['success'] = False
+            data['error'] = '%s (%s)' % (stderr, p.returncode)
+            return data, 200
+
     data['success'] = True
     return data, 200
 
@@ -407,6 +418,18 @@ def modify_resource(resource, key):
 def get_resource(resource, key):
 # get_config does sys.exit on missing resource, needs to raise an exception
     data = get_config(resource, key)
+
+    if config.has_option(resource, 'on_GET'):
+        info('Calling external command: %s' % config.get(resource, 'on_GET'))
+        p = Popen(config.get(resource, 'on_GET'), stdout = PIPE, stderr = PIPE)
+        stdout, stderr = p.communicate()
+        assert p.returncode
+        if p.returncode:
+            warn('Command failed: %s (%s)' % (stderr, p.returncode))
+            data['success'] = False
+            data['error'] = '%s (%s)' % (stderr, p.returncode)
+            return data, 200
+
     return data, 200
 
 @app.route('/<resource>/<key>', methods=["DELETE"])
@@ -417,7 +440,7 @@ def get_resource(resource, key):
     json = render_json
 )
 def delete_resource(resource, key):
-    data = {}
+    data = { config.get(resource, key): key }
     if config.get('main', 'backend') == 'file':
         fn = makepath(basedir, 'base', resource, 'inputs', key)
         if isfile(fn + '.json'):
@@ -430,6 +453,17 @@ def delete_resource(resource, key):
             return data, 404
     else:
         dbo[resource].remove({config.get(resource, 'key'): key})
+
+    if config.has_option(resource, 'on_DELETE'):
+        info('Calling external command: %s' % config.get(resource, 'on_DELETE'))
+        p = Popen(config.get(resource, 'on_DELETE'), stdout = PIPE, stderr = PIPE)
+        stdout, stderr = p.communicate()
+        assert p.returncode
+        if p.returncode:
+            warn('Command failed: %s (%s)' % (stderr, p.returncode))
+            data['success'] = False
+            data['error'] = '%s (%s)' % (stderr, p.returncode)
+            return data, 204
 
     data['success'] = True
     return data, 204
