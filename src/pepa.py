@@ -28,6 +28,7 @@ import time
 from pwd import getpwnam
 from grp import getgrnam
 from flask.ext.conditional import conditional
+from subprocess import Popen, PIPE
 
 def notify(message, color = 'red', prepend = ''):
     if args.color:
@@ -331,6 +332,14 @@ def new_resource(resource):
 
     if config.has_option(resource, 'on_POST'):
         info('Calling external command: %s' % config.get(resource, 'on_POST'))
+        p = Popen(config.get(resource, 'on_POST'), stdout = PIPE, stderr = PIPE)
+        stdout, stderr = p.communicate()
+        assert p.returncode
+        if p.returncode:
+            warn('Command failed: %s (%s)' % (stderr, p.returncode))
+            data['success'] = False
+            data['error'] = '%s (%s)' % (stderr, p.returncode)
+            return data, 201
 
     data['success'] = True
     return data, 201
