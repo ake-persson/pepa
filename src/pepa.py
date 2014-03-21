@@ -329,6 +329,9 @@ def new_resource(resource):
             data['error'] = 'Duplicate entry, entry already exists'
             return data, 409
 
+    if config.has_option(resource, 'on_POST'):
+        info('Calling external command: %s' % config.get(resource, 'on_POST'))
+
     data['success'] = True
     return data, 201
 
