@@ -440,7 +440,7 @@ def get_resource(resource, key):
     json = render_json
 )
 def delete_resource(resource, key):
-    data = { config.get(resource, key): key }
+    data = { config.get(resource, 'key'): key }
     if config.get('main', 'backend') == 'file':
         fn = makepath(basedir, 'base', resource, 'inputs', key)
         if isfile(fn + '.json'):
