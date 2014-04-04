@@ -3,8 +3,6 @@
 import logging
 import salt
 import salt.log
-import salt.modules.network
-import salt.modules.cmdmod
 
 log = logging.getLogger(__name__)
 log.warn("Availabe stuff: {0}".format(dir())) #"
@@ -16,32 +14,39 @@ def run():
   # This is the trick to accessing grains from within pillar python code
   log.warn("Mygrains: {0}".format(grains))
 
+  # Get hostname
   fqdn = grains['fqdn']
-  pepa_server = 'pepa'
-  pepa_ssl = True
-  pepa_protocol = 'https'
 
+  # Pepa defaults
   data = {}
+  data['pepa_server'] = 'pepa'
+  data['pepa_port'] = '8080'
+  data['pepa_ssl'] = True
+  data['pepa_protocol'] = 'https'
 
+  # Check if defaults we're overriden by a Grain
   if 'pepa_server' in grains:
-    pepa_server = grains['pepa_server']
+    data['pepa_server'] = grains['pepa_server']
 
   if 'pepa_port' in grains:
-    pepa_port = grains['pepa_port']|string()
+    data['pepa_port'] = grains['pepa_port']|string()
 
   if 'pepa_ssl' in grains:
-    pepa_ssl = grains['pepa_ssl']
+    data['pepa_ssl'] = grains['pepa_ssl']
 
-  if pepa_ssl == False:
-    pepa_protocol = 'http'
+  if data['pepa_ssl'] == False:
+    data['pepa_protocol'] = 'http'
 
-  pepa_url = '%s://%s:%s/hosts/%s' % (pepa_protocol, pepa_server, pepa_port, fqdn)
+  # Get request url
+  data['pepa_url'] = '%s://%s:%s/hosts/%s' % (data['pepa_protocol'], data['pepa_server'], data['pepa_port'], fqdn)
 
+  # Request data
   try:
     request = requests.get(data['pepa_url'], verify = False)
-    data = yaml.load(request.text)
+    data.update(yaml.load(request.text))
   except:
     pass
 
+  # Return data
   if data:
     return data
