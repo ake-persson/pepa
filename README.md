@@ -1,94 +1,121 @@
-# Pepa #
+# Installation
 
-Hierarchical substitution templating for SaltStack configuration also support's the use of Jinja2.
+- Create folder */srv/salt/ext/pillar*
+- Copy file *pepa.py* to */srv/salt/ext/pillar*
+- Modify */etc/salt/master* and add the following
 
-## Build RPM ##
+```yaml
+extension_modules : /srv/salt/ext
 
-*Pre-requisites*
+ext_pillar:
+  - pepa:
+      resource: hosts
+      grains:
+        - osfinger
+      sequence:
+        - default
+        - environment
+        - region
+        - country
+        - roles
+        - osfinger
+        - hostname
 
-    $ sudo yum install -y pandoc rpm-build python-virtualenv gcc openldap-devel openssl-devel prelink
+pepa_roots:
+  dev: /srv/salt/base
+  qa: /srv/salt/qa
+  prod: /srv/salt/prod
+```
 
-*Build RPM*
+# Configuration
 
-Add your user to the wheel group on your system:
+```yaml
+ext_pillar:
+  - pepa:
+      resource: hosts             # Name of resource directory
+      grains:                     # List of grain's to import
+        - osfinger
+      sequence:                   # Sequence of hierarchical substitution
+        - default
+        - environment
+        ...
 
-    $ sudo groupmems -a &lt;username&gt; -g wheel
-    $ newgrp wheel
-    $ sudo chgrp wheel /opt
-    $ sudo chmod 775 /opt
+pepa_roots:                     # Base directory for each environment
+  dev: /srv/salt/base
+  ...
+```
 
-Now you can build the RPM:
+# Input
 
-    $ git clone ...
-    $ cd pepa
-    $ make
+Input is basically authoritative information for a host, you don't necessarily need this since you can use Grains or other Ext. Pillars for this.
 
-## Install system wide ##
+**Ex.**
 
-    $ sudo yum install -y python-pip gcc
-    $ cd pepa/
-    $ sudo pip install -r ./requirements.txt
-    $ cp src/pepa.py /usr/bin/pepa
+**File:** /srv/salt/base/hosts/inputs/rocksalt.example.com.yaml
 
-## Install in a Virtual Environment ##
+```yaml
+hostname: rocksalt.example.com
+region: emea
+country: nl
+environment: dev
+host_type: server
+roles:
+  salt-master
+```
 
-    $ sudo yum install -y python-virtualenv gcc
-    $ virtualenv -p python2.7 ~/venv_pepa
-    $ ~/venv_pepa/bin/pip install -r ./requirements.txt
-    $ cp src/pepa.py ~/venv_pepa/bin/
+# Templates
 
-## Example ##
+Templates are located based on the *pepa_roots*. So for the above configuration templates for *Dev* would be located as follows:
 
-    $ cd pepa
-    $ src/pepa.py --config example/conf/pepa.conf --resource hosts --key foobar.example.com -d
+```yaml
+/srv/salt/dev/hosts/templates
+    default
+    environment
+    region
+    ...
+```
 
-## Run as a Web service ##
+Each template is named the value of the key using lowercase and all extended characters are replaces with underscore.
 
-    $ cd pepa
-    $ src/pepa.py --config example/conf/pepa.conf --daemonize
+**Ex.:**
 
-*Query REST API for all host's*
+    osfinger: Fedora-19
 
-    $ curl http://127.0.0.1:8080/hosts
+**Would become:**
 
-*Query REST API for a host, and return it as JSON*
+    fedora_19.yaml
 
-    $ curl -H "Accept: application/json" http://127.0.0.1:8080/hosts/foobar.example.com
+# Nested dictionaries
 
-*Query REST API for all user's, and return it as YAML*
+In order to create nested dictionaries as output you can use dot **(.)** as a separator.
 
-    $ curl -H "Accept: application/yaml" http://127.0.0.1:8080/users
+**Ex.**
 
-*Query REST API for a user*
+```yaml
+dns.servers:
+  - 10.0.0.1
+  - 10.0.0.2
+dns.options:
+  - timeout:2
+  - attempts:1
+  - ndots:1
+dns.search:
+  - example.com
+```
 
-    $ curl -H "Accept: application/json" http://127.0.0.1:8080/users/jdoe
+**Would become:**
 
-# DOCUMENTATION #
+```yaml
+dns:
+    servers:
+      - 10.0.0.1
+      - 10.0.0.2
+    options:
+      - timeout:2
+      - attempts:1
+      - ndots:1
+    search:
+      - example.com
+```
 
-More documentation can be found in the doc/ folder.
-
-# TODO #
-
-- 2 Security groups in AD for roles for Pepa. This means it can be managed by IAM with the AD driver.
-  + Unprivileged
-    - Can query all entries
-  + Normal user
-    - Can create new entries
-    - Can modify existing entries they created
-    - Can delete existing entries they created
-  + Admin
-    - Full access
-- Use JavaScript framework to template GUI based on JSON schema
-- Puppet option in config
-- Default datatype in API YAML or JSON, should be configurable
-- Query language to ask for specific attributes
-- Version API
-- Git hooks for validating input
-- Modify templates using REST API
-- Error messages def. to support JSON error
-- Modify/rename hostname/username i.e. using the key in CLI
-- Validate Input/Output Git hooks
-
-# License #
-
-See the file LICENSE.
+# Validation

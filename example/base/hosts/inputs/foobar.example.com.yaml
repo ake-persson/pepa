@@ -1,6 +1,0 @@
-country: us
-environment: dev
-hostname: foobar.example.com
-region: amer
-roles:
-- server
