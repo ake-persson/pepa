@@ -1,0 +1,7 @@
+ntp.servers:
+  - ntp1.emea.example.com
+  - ntp2.emea.example.com
+  - ntp3.emea.example.com
+dns.servers:
+  - 10.2.0.1
+  - 10.2.0.2
