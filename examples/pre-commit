@@ -1,0 +1,19 @@
+#!/bin/bash
+
+readonly RED='\033[31m'
+readonly GREEN='\033[32m'
+readonly CLEAR='\033[0m'
+readonly BASEDIR=$( git rev-parse --show-toplevel )
+
+exit_code=0
+files=$( git diff-index --cached HEAD --name-only | grep -E 'hosts/inputs/.*\.(json|yaml)$' )
+for file in $files; do
+    if [ -f $file ]; then
+        file=$( basename $file )
+        echo -e "${GREEN}Validate Host input: $file${RED}"
+        $BASEDIR/bin/validate.py -f $file -b $BASEDIR || exit_code=1
+        echo -en ${CLEAR}
+    fi
+done
+
+exit $exit_code
