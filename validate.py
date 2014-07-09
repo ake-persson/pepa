@@ -6,7 +6,7 @@ import yaml
 from os.path import isfile, join as makepath, splitext
 from jsonschema import validate
 from jsonschema.exceptions import ValidationError, SchemaError
-from  glob import glob
+from glob import glob
 
 # Convert key/value to nested dictionary
 # Plundered with impunity from salt-pillar-dynamo (https://github.com/jasondenning/salt-pillar-dynamo)
@@ -14,7 +14,7 @@ def key_value_to_tree(data):
 	tree = {}
 	for flatkey, value in data.items():
 		t = tree
-		keys = flatkey.split('.')
+		keys = flatkey.split('..')
 		for key in keys:
 			if key == keys[-1]:
 				t[key] = value

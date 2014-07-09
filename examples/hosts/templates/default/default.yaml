@@ -1,7 +1,7 @@
-dns.search:
+dns..search:
   - example.com
-dns.options:
+dns..options:
   - timeout:2
   - attempts:1
   - ndots:1
-mail.gateway: smtp.{{ region }}.example.com
+mail..gateway: smtp.{{ region }}.example.com

@@ -5,9 +5,9 @@ environment: dev
 host_type: server
 roles:
   - salt-master
-network.gateway: 10.0.0.254
-network.interfaces.eth0.hwaddr: 00:20:26:a1:12:12
-network.interfaces.eth0.dhcp: False
-network.interfaces.eth0.ipv4: 10.0.0.3
-network.interfaces.eth0.netmask: 255.255.255.0
-network.interfaces.eth0.fqdn: foobar.example.com
+network..gateway: 10.0.0.254
+network..interfaces..eth0..hwaddr: 00:20:26:a1:12:12
+network..interfaces..eth0..dhcp: False
+network..interfaces..eth0..ipv4: 10.0.0.3
+network..interfaces..eth0..netmask: 255.255.255.0
+network..interfaces..eth0..fqdn: foobar.example.com
