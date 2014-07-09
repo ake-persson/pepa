@@ -1,7 +1,7 @@
 __author__ = 'Michael Persson <michael.ake.persson@gmail.com>'
 __copyright__ = 'Copyright (c) 2013 Michael Persson'
 __license__ = 'GPLv3'
-__version__ = '0.5.2'
+__version__ = '0.5.5'
 
 # Import python libs
 from salt.exceptions import SaltInvocationError
@@ -17,7 +17,8 @@ __virtualname__ = 'pepa'
 __opts__ = {
     'pepa_roots': {
         'base': '/srv/salt'
-    }
+    },
+    'pepa_delimiter': '..'
 }
 
 # Import third party libs
@@ -81,7 +82,7 @@ def key_value_to_tree(data):
     tree = {}
     for flatkey, value in data.items():
         t = tree
-        keys = flatkey.split('.')
+        keys = flatkey.split(__opts__['pepa_delimiter'])
         for key in keys:
             if key == keys[-1]:
                 t[key] = value
@@ -108,14 +109,18 @@ def ext_pillar(minion_id, pillar, resource, sequence):
     if isfile(fn + '.yaml'):
         log.debug("Pepa ext_pillar load host input: %s.json" % fn)
         input.update(yaml.load(open(fn + '.yaml').read()))
+        input['pepa_input'] = minion_id + '.yaml'
     elif isfile(fn + '.json'):
         log.debug("Pepa ext_pillar load host input: %s.json" % fn)
         input.update(json.loads(open(fn + '.json').read()))
+        input['pepa_input'] = minion_id + '.json'
     else:
         log.error("Pepa ext_pillar host input doesn't exist: %s.(json|yaml)" % fn)
+        input['pepa_input'] = 'None'
 
     # Load templates
     output = input
+    output['pepa_templates'] = []
     for category in sequence:
         if category not in input:
             continue
@@ -132,13 +137,15 @@ def ext_pillar(minion_id, pillar, resource, sequence):
             if isfile(fn + '.yaml'):
                 log.debug("Pepa ext_pillar load template: %s.yaml" % fn)
                 template = jinja2.Template(open(fn + '.yaml').read())
+                output['pepa_templates'].append('%s: %s' % (category,  re.sub('\W', '_', entry.lower()) + '.yaml'))
                 data = key_value_to_tree(output)
                 data['grains'] = __grains__.copy()
                 data['pillar'] = pillar.copy()
                 results = yaml.load(template.render(data))
             elif isfile(fn + '.json'):
                 log.debug("Pepa ext_pillar load template: %s.json" % fn)
-                template = jinja2.Template(open(fn + '.yaml').read())
+                template = jinja2.Template(open(fn + '.json').read())
+                output['pepa_templates'].append('%s: %s' % (category,  re.sub('\W', '_', entry.lower()) + '.json'))
                 data = key_value_to_tree(output)
                 data['grains'] = __grains__.copy()
                 data['pillar'] = pillar.copy()
@@ -149,7 +156,7 @@ def ext_pillar(minion_id, pillar, resource, sequence):
 
             if results != None:
                 for key in results:
-                    log.debug("Pepa ext_pillar substituting key: %s" % key)
+                    log.debug("Pepa ext_pillar substituting key: %s value: %s" % (key, results[key]))
                     output[key] = results[key]
 
     tree = key_value_to_tree(output)
