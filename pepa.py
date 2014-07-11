@@ -1,7 +1,7 @@
 __author__ = 'Michael Persson <michael.ake.persson@gmail.com>'
 __copyright__ = 'Copyright (c) 2013 Michael Persson'
 __license__ = 'GPLv3'
-__version__ = '0.5.5'
+__version__ = '0.5.6'
 
 # Import python libs
 from salt.exceptions import SaltInvocationError
@@ -22,12 +22,6 @@ __opts__ = {
 }
 
 # Import third party libs
-try:
-    import json
-    HAS_JSON = True
-except ImportError:
-    HAS_JSON = False
-
 try:
     import yaml
     HAS_YAML = True
@@ -55,10 +49,6 @@ except ImportError:
 def __virtual__():
     if not HAS_YAML:
         log.error("Pepa ext_pillar failed to load YAML library")
-        return False
-
-    if not HAS_JSON:
-        log.error("Pepa ext_pillar failed to load JSON library")
         return False
 
     if not HAS_OS_PATH:
@@ -90,7 +80,7 @@ def key_value_to_tree(data):
                 t = t.setdefault(key, {})
     return(tree)
 
-def ext_pillar(minion_id, pillar, resource, sequence):
+def ext_pillar(minion_id, pillar, resource, sequence, baseonly):
     roots = __opts__['pepa_roots']
 
     # Validate roots
@@ -105,17 +95,13 @@ def ext_pillar(minion_id, pillar, resource, sequence):
     input['default'] = 'default'
 
     # Load input
-    fn = makepath(roots['base'], resource, 'inputs', minion_id)
-    if isfile(fn + '.yaml'):
-        log.debug("Pepa ext_pillar load host input: %s.json" % fn)
-        input.update(yaml.load(open(fn + '.yaml').read()))
-        input['pepa_input'] = minion_id + '.yaml'
-    elif isfile(fn + '.json'):
-        log.debug("Pepa ext_pillar load host input: %s.json" % fn)
-        input.update(json.loads(open(fn + '.json').read()))
-        input['pepa_input'] = minion_id + '.json'
+    fn = makepath(roots['base'], resource, 'inputs', minion_id + '.yaml')
+    if isfile(fn):
+        log.debug("Pepa ext_pillar load host input: %s" % fn)
+        input.update(yaml.load(open(fn).read()))
+        input['pepa_input'] = fn
     else:
-        log.error("Pepa ext_pillar host input doesn't exist: %s.(json|yaml)" % fn)
+        log.error("Pepa ext_pillar host input doesn't exist: %s" % fn)
         input['pepa_input'] = 'None'
 
     # Load templates
@@ -133,25 +119,21 @@ def ext_pillar(minion_id, pillar, resource, sequence):
 
         for entry in entries:
             results = None
-            fn = makepath(roots[input['environment']], resource, 'templates', category, re.sub('\W', '_', entry.lower()))
-            if isfile(fn + '.yaml'):
-                log.debug("Pepa ext_pillar load template: %s.yaml" % fn)
-                template = jinja2.Template(open(fn + '.yaml').read())
-                output['pepa_templates'].append('%s: %s' % (category,  re.sub('\W', '_', entry.lower()) + '.yaml'))
+            fn = None
+            if category in baseonly:
+                fn = makepath(roots['base'], resource, 'templates', category, re.sub('\W', '_', entry.lower()) + '.yaml')
+            else:
+                fn = makepath(roots[input['environment']], resource, 'templates', category, re.sub('\W', '_', entry.lower()) + '.yaml')
+            if isfile(fn):
+                log.debug("Pepa ext_pillar load template: %s" % fn)
+                template = jinja2.Template(open(fn).read())
+                output['pepa_templates'].append(fn)
                 data = key_value_to_tree(output)
                 data['grains'] = __grains__.copy()
                 data['pillar'] = pillar.copy()
                 results = yaml.load(template.render(data))
-            elif isfile(fn + '.json'):
-                log.debug("Pepa ext_pillar load template: %s.json" % fn)
-                template = jinja2.Template(open(fn + '.json').read())
-                output['pepa_templates'].append('%s: %s' % (category,  re.sub('\W', '_', entry.lower()) + '.json'))
-                data = key_value_to_tree(output)
-                data['grains'] = __grains__.copy()
-                data['pillar'] = pillar.copy()
-                results = json.loads(template.render(data))
             else:
-                log.debug("Pepa ext_pillar template doesn't exist: %s.(json|yaml)" % fn)
+                log.debug("Pepa ext_pillar template doesn't exist: %s" % fn)
                 continue
 
             if results != None:
