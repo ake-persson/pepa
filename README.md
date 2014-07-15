@@ -42,7 +42,7 @@ ext_pillar:
       resource: hosts             # Name of resource directory
       sequence:                   # Sequence used for hierarchical substitution
         - hostname:               # Name of key
-            name: host_input      # Alias for key used for template directory
+            name: host_input      # Alias used for template directory
             base_only: True       # Only use templates in Base environment, i.e. no staging
         - default:
         ...
@@ -92,7 +92,7 @@ yum..mirror: yum.amer.example.com
 
 Each template is named the value of the key using lowercase and all extended characters are replaces with underscore.
 
-**Ex.:**
+**Example:**
 
     osfinger: Fedora-19
 
