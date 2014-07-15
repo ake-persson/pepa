@@ -5,23 +5,30 @@
 - Modify */etc/salt/master* and add the following
 
 ```yaml
-extension_modules : /srv/salt/ext
+extension_modules: /srv/salt/ext
 
 ext_pillar:
   - pepa:
       resource: hosts
-      grains:
-        - osfinger
       sequence:
-        - default
-        - environment
-        - region
-        - country
-        - roles
-        - osfinger
-        - hostname
+        - hostname:
+            name: host_input
+            base_only: True
+        - default:
+        - environment:
+        - location..region:
+            name: region
+        - location..country:
+            name: country
+        - location..datacenter:
+            name: datacenter
+        - roles:
+        - osfinger:
+        - hostname:
+            base_only: True  
 
 pepa_roots:
+  base: /srv/salt/base
   dev: /srv/salt/base
   qa: /srv/salt/qa
   prod: /srv/salt/prod
@@ -33,11 +40,11 @@ pepa_roots:
 ext_pillar:
   - pepa:
       resource: hosts             # Name of resource directory
-      grains:                     # List of grain's to import
-        - osfinger
-      sequence:                   # Sequence of hierarchical substitution
-        - default
-        - environment
+      sequence:                   # Sequence used for hierarchical substitution
+        - hostname:               # Name of key
+            name: host_input      # Alias for key used for template directory
+            base_only: True       # Only use templates in Base environment, i.e. no staging
+        - default:
         ...
 
 pepa_roots:                     # Base directory for each environment
@@ -45,34 +52,42 @@ pepa_roots:                     # Base directory for each environment
   ...
 ```
 
-# Input
-
-Input is basically authoritative information for a host, you don't necessarily need this since you can use Grains or other Ext. Pillars for this.
-
-**Ex.**
-
-**File:** /srv/salt/base/hosts/inputs/rocksalt.example.com.yaml
-
-```yaml
-hostname: rocksalt.example.com
-region: emea
-country: nl
-environment: dev
-host_type: server
-roles:
-  salt-master
-```
-
 # Templates
 
-Templates are located based on the *pepa_roots*. So for the above configuration templates for *Dev* would be located as follows:
+Templates are configuration for a host, that can use information from Grains or Pillars, these are then hierarchically substituted.
+
+**Example:**
+
+**File:** /srv/salt/base/hosts/host_input/test.example.com.yaml
 
 ```yaml
-/srv/salt/dev/hosts/templates
-    default
-    environment
-    region
-    ...
+location..region: emea
+location..country: nl
+location..datacenter: foobar
+environment: dev
+roles:
+  - salt.master
+network..gateway: 10.0.0.254
+network..interfaces..eth0..hwaddr: 00:20:26:a1:12:12
+network..interfaces..eth0..dhcp: False
+network..interfaces..eth0..ipv4: 10.0.0.3
+network..interfaces..eth0..netmask: 255.255.255.0
+network..interfaces..eth0..fqdn: {{ hostname }}
+cobbler..profile: fedora-19-x86_64
+```
+
+**File:** /srv/salt/base/hosts/region/amer.yaml
+
+```yaml
+network..dns..servers:
+  - 10.0.0.1
+  - 10.0.0.2
+time..ntp..servers:
+  - ntp1.amer.example.com
+  - ntp2.amer.example.com
+  - ntp3.amer.example.com
+time..timezone: America/Chihuahua
+yum..mirror: yum.amer.example.com
 ```
 
 Each template is named the value of the key using lowercase and all extended characters are replaces with underscore.
@@ -87,26 +102,27 @@ Each template is named the value of the key using lowercase and all extended cha
 
 # Nested dictionaries
 
-In order to create nested dictionaries as output you can use dot **(.)** as a separator.
+In order to create nested dictionaries as output you can use double dot **".."** as a delimiter. You can change this using "pepa_delimiter" but I choose this because single dot is already used by quite a few modules (God know's why?), and using ":" requires quoting in the YAML which is plain ugly.
 
-**Ex.**
+**Example:**
 
 ```yaml
-dns.servers:
+networ.dns.servers:
   - 10.0.0.1
   - 10.0.0.2
-dns.options:
+network.dns.options:
   - timeout:2
   - attempts:1
   - ndots:1
-dns.search:
+network.dns.search:
   - example.com
 ```
 
 **Would become:**
 
 ```yaml
-dns:
+network:
+  dns:
     servers:
       - 10.0.0.1
       - 10.0.0.2
@@ -117,5 +133,3 @@ dns:
     search:
       - example.com
 ```
-
-# Validation
