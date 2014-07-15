@@ -1,7 +1,0 @@
-ntp..servers:
-  - ntp1.apac.example.com
-  - ntp2.apac.example.com
-  - ntp3.apac.example.com
-dns..servers:
-  - 10.1.0.1
-  - 10.1.0.2

@@ -1,0 +1,51 @@
+auto_accept: True
+
+file_roots:
+  base:
+    - /srv/salt/base/states
+  qa:
+    - /srv/salt/qa/states
+  prod:
+    - /srv/salt/prod/states
+
+pillar_roots:
+  base:
+    - /srv/salt/base/pillars
+  qa:
+    - /srv/salt/qa/pillars
+  prod:
+    - /srv/salt/prod/pillars
+
+extension_modules: /srv/salt/ext
+
+ext_pillar:
+  - pepa:
+      resource: hosts
+      sequence:
+        - hostname:
+            name: host_input
+            base_only: True
+        - default:
+        - environment:
+        - location..region:
+            name: region
+        - location..country:
+            name: country
+        - location..datacenter:
+            name: datacenter
+        - roles:
+        - osfinger:
+        - hostname:
+            base_only: True  
+
+pepa_roots:
+  base: /srv/salt/base
+  dev: /srv/salt/base
+  qa: /srv/salt/qa
+  prod: /srv/salt/prod
+
+log_level: debug
+
+log_granular_levels:
+  salt: warning
+  salt.loaded.ext.pillar.pepa: debug

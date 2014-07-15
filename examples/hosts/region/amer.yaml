@@ -1,0 +1,9 @@
+network..dns..servers:
+  - 10.0.0.1
+  - 10.0.0.2
+time..ntp..servers:
+  - ntp1.amer.example.com
+  - ntp2.amer.example.com
+  - ntp3.amer.example.com
+time..timezone: America/Chihuahua
+yum..mirror: yum.amer.example.com

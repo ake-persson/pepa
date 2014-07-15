@@ -1,0 +1,12 @@
+dns..search:
+  - example.com
+dns..options:
+  - timeout:2
+  - attempts:1
+  - ndots:1
+mail..agent: sendmail
+mail..gateway: smtp.{{ location.region }}.example.com
+osfinger: {{ grains.osfinger }}
+salt..version: 2014.1.5
+salt..release: 1
+salt..master: salt.{{ location.region }}.example.com

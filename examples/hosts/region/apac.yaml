@@ -1,0 +1,9 @@
+time..ntp..servers:
+  - ntp1.apac.example.com
+  - ntp2.apac.example.com
+  - ntp3.apac.example.com
+network..dns..servers:
+  - 10.1.0.1
+  - 10.1.0.2
+time..timezone: Asia/Hong_Kong
+yum..mirror: yum.apac.example.com
