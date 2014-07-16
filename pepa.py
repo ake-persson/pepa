@@ -177,23 +177,18 @@ if sys.stdout.isatty():
         log.critical("Configuration file doesn't exist: %s" % args.config)
         sys.exit(1)
 
-    cfg = yaml.load(open(args.config).read())
-
     # Get configuration
+    __opts__.update(yaml.load(open(args.config).read()))
+
     __grains__ = {}
-    if 'grains' in cfg:
-        __grains__ = cfg['grains']
+    if 'grains' in __opts__:
+        __grains__ = __opts__['grains']
 
-    if not 'pillar' in cfg:
-        cfg['pillar'] = {}
+    __pillar__ = {}
+    if 'pillar' in __opts__:
+        __pillar__ = __opts__['pillar']
 
-    if 'pepa_roots' in cfg:
-        __opts__['pepa_roots'] = cfg['pepa_roots']
-    if 'pepa_delimiter' in cfg:
-        __opts__['pepa_delimiter'] = cfg['pepa_delimiter']
+    result = ext_pillar(args.hostname, __pillar__, __opts__['pepa']['resource'], __opts__['pepa']['sequence'])
 
-    result = ext_pillar(args.hostname, cfg['pillar'], cfg['pepa']['resource'], cfg['pepa']['sequence'])
-
-    noalias_dumper = yaml.dumper.SafeDumper
-    noalias_dumper.ignore_aliases = lambda self, data: True
-    print yaml.dump(result, indent = 4, default_flow_style = False, Dumper = noalias_dumper)
+    yaml.dumper.SafeDumper.ignore_aliases = lambda self, data: True
+    print yaml.safe_dump(result, indent = 4, default_flow_style = False)
