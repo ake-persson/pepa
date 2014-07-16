@@ -47,7 +47,8 @@ __opts__ = {
         'base': '/srv/salt'
     },
     'pepa_delimiter': '..',
-    'pepa_subkey': False
+    'pepa_subkey': False,
+    'pepa_subkey_only': False
 }
 
 # Import libraries
@@ -170,9 +171,14 @@ def ext_pillar(minion_id, pillar, resource, sequence):
                     output[key] = results[key]
 
     tree = key_value_to_tree(output)
-    pillar_data = tree
-    if __opts__['pepa_subkey']:
+    pillar_data = {}
+    if __opts__['pepa_subkey_only']:
         pillar_data['pepa'] = tree.copy()
+    elif __opts__['pepa_subkey']:
+        pillar_data = tree
+        pillar_data['pepa'] = tree.copy()
+    else:
+        pillar_data = tree
     return pillar_data
 
 if sys.stdout.isatty():

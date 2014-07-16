@@ -25,3 +25,6 @@ pepa_roots:
   dev: examples
   qa: examples
   prod: examples
+
+#pepa_subkey: True
+#pepa_subkey_only: True
