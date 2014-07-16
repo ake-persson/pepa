@@ -1,6 +1,6 @@
-dns..search:
+network..dns..search:
   - example.com
-dns..options:
+network..dns..options:
   - timeout:2
   - attempts:1
   - ndots:1

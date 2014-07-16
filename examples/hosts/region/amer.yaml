@@ -6,4 +6,4 @@ time..ntp..servers:
   - ntp2.amer.example.com
   - ntp3.amer.example.com
 time..timezone: America/Chihuahua
-yum..mirror: yum.amer.example.com
+pkgrepo..mirror: yum.amer.example.com

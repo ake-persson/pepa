@@ -6,4 +6,4 @@ network..dns..servers:
   - 10.1.0.1
   - 10.1.0.2
 time..timezone: Asia/Hong_Kong
-yum..mirror: yum.apac.example.com
+pkgrepo..mirror: yum.apac.example.com

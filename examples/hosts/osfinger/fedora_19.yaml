@@ -1,7 +1,8 @@
-yum..osabbr: fc19
-yum..repos..base..name: {{ osfinger }} - Base
-yum..repos..base..baseurl: http://{{ yum.mirror }}/pub/fedora/linux/releases/$releasever/Fedora/x86_64/os/
-yum..repos..updates..name: {{ osfinger }} - Updates
-yum..repos..updates..baseurl: http://{{ yum.mirror }}/pub/fedora/updates/$releasever/x86_64/
-yum..repos..everything..name: {{ osfinger }} - Everything
-yum..repos..everything..baseurl: http://{{ yum.mirror }}/pub/fedora/linux/releases/$releasever/Everything/x86_64/os/
+pkgrepo..type: yum
+pkgrepo..osabbr: fc19
+pkgrepo..repos..base..name: {{ osfinger }} - Base
+pkgrepo..repos..base..baseurl: http://{{ pkgrepo.mirror }}/pub/fedora/linux/releases/$releasever/Fedora/x86_64/os/
+pkgrepo..repos..updates..name: {{ osfinger }} - Updates
+pkgrepo..repos..updates..baseurl: http://{{ pkgrepo.mirror }}/pub/fedora/updates/$releasever/x86_64/
+pkgrepo..repos..everything..name: {{ osfinger }} - Everything
+pkgrepo..repos..everything..baseurl: http://{{ pkgrepo.mirror }}/pub/fedora/linux/releases/$releasever/Everything/x86_64/os/
