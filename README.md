@@ -1,3 +1,21 @@
+# Quick testing
+
+To easily test Pepa, you can do this from the Command Line.
+
+Make sure you have the required modules.
+
+```bash
+$ pip install pyyaml re jinja2 argparse
+```
+
+Clone and run Pepa.
+
+```bash
+$ git clone <uri>
+$ cd pepa
+$ ./pepa.py -c example/pepa test.example.com -d
+```
+
 # Installation
 
 - Create folder */srv/salt/ext/pillar*
@@ -107,7 +125,7 @@ In order to create nested dictionaries as output you can use double dot **".."**
 **Example:**
 
 ```yaml
-networ.dns.servers:
+network.dns.servers:
   - 10.0.0.1
   - 10.0.0.2
 network.dns.options:
@@ -133,3 +151,19 @@ network:
     search:
       - example.com
 ```
+
+# Logging
+
+If you want to use different level's of logging for Salt master and Pepa, you can do this in the salt master file.
+
+**File:** /etc/salt/master
+
+```yaml
+log_level: debug
+
+log_granular_levels:
+  salt: warning
+  salt.loaded.ext.pillar.pepa: debug
+```
+
+In order for this to work log_level needs lowest level and then you can override this, it's slightly non-intuitive.

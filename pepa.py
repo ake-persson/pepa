@@ -1,14 +1,41 @@
+#!/usr/bin/env python
+
 __author__ = 'Michael Persson <michael.ake.persson@gmail.com>'
 __copyright__ = 'Copyright (c) 2013 Michael Persson'
 __license__ = 'GPLv3'
 __version__ = '0.6.2'
 
 # Import python libs
-from salt.exceptions import SaltInvocationError
 import logging
+import sys
 
-# Set up logging
-log = logging.getLogger(__name__)
+log = None
+if sys.stdout.isatty():
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('hostname', help = 'Hostname')
+    parser.add_argument('-c', '--config', default = '/etc/salt/pepa', help = 'Configuration file')
+    parser.add_argument('-d', '--debug', action = 'store_true', help = 'Print debug info')
+    args = parser.parse_args()
+
+    LOG_LEVEL = logging.WARNING
+    if args.debug:
+        LOG_LEVEL = logging.DEBUG
+    LOGFORMAT = "[%(log_color)s%(levelname)-8s%(reset)s] %(log_color)s%(message)s%(reset)s"
+    from colorlog import ColoredFormatter
+
+    logging.root.setLevel(LOG_LEVEL)
+    formatter = ColoredFormatter(LOGFORMAT)
+    stream = logging.StreamHandler()
+    stream.setLevel(LOG_LEVEL)
+    stream.setFormatter(formatter)
+    log = logging.getLogger('pythonConfig')
+    log.setLevel(LOG_LEVEL)
+    log.addHandler(stream)
+else:
+    log = logging.getLogger(__name__)
+    from salt.exceptions import SaltInvocationError
 
 # Name
 __virtualname__ = 'pepa'
@@ -121,7 +148,7 @@ def ext_pillar(minion_id, pillar, resource, sequence):
             results = None
             fn = join(templdir, re.sub('\W', '_', entry.lower()) + '.yaml')
             if isfile(fn):
-                log.debug("Loading template: %s" % fn)
+                log.info("Loading template: %s" % fn)
                 template = jinja2.Template(open(fn).read())
                 output['pepa_templates'].append(fn)
                 data = key_value_to_tree(output)
@@ -129,15 +156,44 @@ def ext_pillar(minion_id, pillar, resource, sequence):
                 data['pillar'] = pillar.copy()
                 results = yaml.load(template.render(data))
             else:
-                log.debug("Template doesn't exist: %s" % fn)
+                log.info("Template doesn't exist: %s" % fn)
                 continue
 
             if results != None:
                 for key in results:
-                    log.debug("Substituting key: %s value: %s" % (key, results[key]))
+                    log.debug("Substituting key %s: %s" % (key, results[key]))
                     output[key] = results[key]
 
     tree = key_value_to_tree(output)
     pillar_data = tree
     pillar_data['pepa'] = tree.copy()
     return pillar_data
+
+if sys.stdout.isatty():
+    # Load configuration file
+    if not isfile(args.config):
+        log.critical("Configuration file doesn't exist: %s" % args.config)
+        sys.exit(1)
+
+    cfg = yaml.load(open(args.config).read())
+
+    # Get configuration
+    __grains__ = {}
+    if 'grains' in cfg:
+        __grains__ = cfg['grains']
+
+    if 'pillar' in cfg:
+        pillar = cfg['pillar']
+    else:
+        cfg['pillar'] = {}
+
+    if 'pepa_roots' in cfg:
+        __opts__['pepa_roots'] = cfg['pepa_roots']
+    if 'pepa_delimiter' in cfg:
+        __opts__['pepa_delimiter'] = cfg['pepa_delimiter']
+
+    result = ext_pillar(args.hostname, cfg['pillar'], cfg['pepa']['resource'], cfg['pepa']['sequence'])
+
+    noalias_dumper = yaml.dumper.SafeDumper
+    noalias_dumper.ignore_aliases = lambda self, data: True
+    print yaml.dump(result, indent = 4, default_flow_style = False, Dumper = noalias_dumper)
