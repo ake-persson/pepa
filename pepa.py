@@ -125,6 +125,7 @@ def ext_pillar(minion_id, pillar, resource, sequence):
 
     for name, info in [s.items()[0] for s in sequence]:
         if name not in input:
+            log.warn("Category is not defined: %s" % name)
             continue
 
         alias = None
@@ -143,7 +144,7 @@ def ext_pillar(minion_id, pillar, resource, sequence):
         if type(input[name]) is list:
             entries = input[name]
         elif not input[name]:
-            log.warn("Category is undefined: %s" % name)
+            log.warn("Category has no value set: %s" % name)
             continue
         else:
             entries = [ input[name] ]
