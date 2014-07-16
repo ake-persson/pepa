@@ -182,9 +182,7 @@ if sys.stdout.isatty():
     if 'grains' in cfg:
         __grains__ = cfg['grains']
 
-    if 'pillar' in cfg:
-        pillar = cfg['pillar']
-    else:
+    if not 'pillar' in cfg:
         cfg['pillar'] = {}
 
     if 'pepa_roots' in cfg:

@@ -5,7 +5,7 @@ To easily test Pepa, you can do this from the Command Line.
 Make sure you have the required modules.
 
 ```bash
-$ pip install pyyaml re jinja2 argparse
+$ pip install pyyaml re jinja2 argparse logging colorlog
 ```
 
 Clone and run Pepa.
