@@ -7,7 +7,6 @@ pepa:
     - hostname:
         name: host_input
         base_only: True
-        required: True
     - default:
     - environment:
     - location..region:

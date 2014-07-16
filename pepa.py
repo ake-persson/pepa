@@ -12,6 +12,7 @@ import sys
 log = None
 if sys.stdout.isatty():
     import argparse
+    from colorlog import ColoredFormatter
 
     parser = argparse.ArgumentParser()
     parser.add_argument('hostname', help = 'Hostname')
@@ -22,14 +23,14 @@ if sys.stdout.isatty():
     LOG_LEVEL = logging.WARNING
     if args.debug:
         LOG_LEVEL = logging.DEBUG
-    LOGFORMAT = "[%(log_color)s%(levelname)-8s%(reset)s] %(log_color)s%(message)s%(reset)s"
-    from colorlog import ColoredFormatter
 
-    logging.root.setLevel(LOG_LEVEL)
-    formatter = ColoredFormatter(LOGFORMAT)
+    LOG_FORMAT = "[%(log_color)s%(levelname)-8s%(reset)s] %(log_color)s%(message)s%(reset)s"
+    formatter = ColoredFormatter(LOG_FORMAT)
+
     stream = logging.StreamHandler()
     stream.setLevel(LOG_LEVEL)
     stream.setFormatter(formatter)
+
     log = logging.getLogger('pythonConfig')
     log.setLevel(LOG_LEVEL)
     log.addHandler(stream)
@@ -123,7 +124,6 @@ def ext_pillar(minion_id, pillar, resource, sequence):
     output['pepa_templates'] = []
 
     for name, info in [s.items()[0] for s in sequence]:
-
         if name not in input:
             continue
 
@@ -142,6 +142,9 @@ def ext_pillar(minion_id, pillar, resource, sequence):
         entries = []
         if type(input[name]) is list:
             entries = input[name]
+        elif not input[name]:
+            log.warn("Category is undefined: %s" % name)
+            continue
         else:
             entries = [ input[name] ]
 
