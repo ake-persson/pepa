@@ -1,25 +1,28 @@
 # Quick testing
 
-To easily test Pepa, you can do this from the Command Line.
+You can easily test Pepa from the Command Line.
 
-Make sure you have the required modules.
+Create a virtual env. and install the required modules.
 
 ```bash
-$ pip install pyyaml jinja2 argparse logging colorlog pygments
+virtualenv venv
+cd venv
+source bin/activate
+pip install pyyaml jinja2 argparse logging colorlog pygments
 ```
 
 Clone and run Pepa.
 
 ```bash
-$ git clone <uri>
-$ cd pepa
-$ ./pepa.py -c example/master test.example.com -d
+git clone https://github.com/mickep76/pepa.git
+cd pepa
+./pepa.py -c examples/pepa test.example.com -d
 ```
 
 You can also specify the Grains/Pillar as arguments.
 
 ```bash
-./pepa.py -c examples/pepa test.example.com -g '{ osfinger: Fedora 17, os: Fedora, osrelease: 17 }'
+./pepa.py -c examples/master test.example.com -g '{ osfinger: Fedora 17, os: Fedora, osrelease: 17 }'
 ```
 
 Normally Grains/Pillars are supplied from the Salt master/minion, this is mostly for testing and validation.
