@@ -18,6 +18,8 @@ if sys.stdout.isatty():
     parser.add_argument('hostname', help = 'Hostname')
     parser.add_argument('-c', '--config', default = '/etc/salt/pepa', help = 'Configuration file')
     parser.add_argument('-d', '--debug', action = 'store_true', help = 'Print debug info')
+    parser.add_argument('-g', '--grains', help = 'Input Grains as YAML')
+    parser.add_argument('-p', '--pillar', help = 'Input Pillar as YAML')
     args = parser.parse_args()
 
     LOG_LEVEL = logging.WARNING
@@ -193,10 +195,15 @@ if sys.stdout.isatty():
     __grains__ = {}
     if 'grains' in __opts__:
         __grains__ = __opts__['grains']
+    if args.grains:
+        __grains__.update(yaml.load(args.grains))
+
 
     __pillar__ = {}
     if 'pillar' in __opts__:
         __pillar__ = __opts__['pillar']
+    if args.pillar:
+        __pillar__.update(yaml.load(args.pillar))
 
     result = ext_pillar(args.hostname, __pillar__, __opts__['pepa']['resource'], __opts__['pepa']['sequence'])
 

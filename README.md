@@ -16,6 +16,14 @@ $ cd pepa
 $ ./pepa.py -c example/pepa test.example.com -d
 ```
 
+You can also specify the Grains/Pillar as arguments.
+
+```bash
+./pepa.py -c examples/pepa test.example.com -g '{ osfinger: Fedora 17, os: Fedora, osrelease: 17 }'
+```
+
+Normally Grains/Pillars are supplied from the Salt master/minion, this is mostly for testing and validation.
+
 # Installation
 
 - Create folder */srv/salt/ext/pillar*
