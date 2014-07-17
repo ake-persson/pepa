@@ -16,7 +16,7 @@ Clone and run Pepa.
 ```bash
 git clone https://github.com/mickep76/pepa.git
 cd pepa
-./pepa.py -c examples/pepa test.example.com -d
+./pepa.py -c examples/master test.example.com -d
 ```
 
 You can also specify the Grains/Pillar as arguments.
