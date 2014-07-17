@@ -54,11 +54,11 @@ __opts__ = {
 }
 
 # Import libraries
-try:
-    import yaml
-    HAS_YAML = True
-except ImportError:
-    HAS_YAML = False
+#try:
+import yaml
+HAS_YAML = True
+#except ImportError:
+#    HAS_YAML = False
 
 try:
     from os.path import isfile, join

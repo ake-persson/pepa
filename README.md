@@ -1,19 +1,22 @@
 # Quick testing
 
-To easily test Pepa, you can do this from the Command Line.
+You can easily test Pepa from the Command Line.
 
-Make sure you have the required modules.
+Create a virtual env. and install the required modules.
 
 ```bash
-$ pip install pyyaml re jinja2 argparse logging colorlog
+virtualenv venv
+cd venv
+source bin/activate
+pip install pyyaml jinja2 argparse logging colorlog
 ```
 
 Clone and run Pepa.
 
 ```bash
-$ git clone <uri>
-$ cd pepa
-$ ./pepa.py -c example/pepa test.example.com -d
+git clone https://github.com/mickep76/pepa.git
+cd pepa
+./pepa.py -c examples/pepa test.example.com -d
 ```
 
 You can also specify the Grains/Pillar as arguments.
