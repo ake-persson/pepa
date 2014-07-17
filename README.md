@@ -76,9 +76,17 @@ ext_pillar:
         - default:
         ...
 
-pepa_roots:                     # Base directory for each environment
+pepa_roots:                       # Base directory for each environment
   dev: /srv/salt/base
-  ...
+
+pepa_subkey: True                 # Present values in subkey 'pepa: ...'
+pepa_subkey_only: False           # Only present values in subkey 'pepa: ...'
+```
+
+Using pepa subkey has some advantages since you can easily see what was actually provided by Pepa using:
+
+```bash
+salt-call pillar.get pepa
 ```
 
 # Templates
