@@ -54,11 +54,11 @@ __opts__ = {
 }
 
 # Import libraries
-#try:
-import yaml
-HAS_YAML = True
-#except ImportError:
-#    HAS_YAML = False
+try:
+    import yaml
+    HAS_YAML = True
+except ImportError:
+    HAS_YAML = False
 
 try:
     from os.path import isfile, join
@@ -208,4 +208,4 @@ if sys.stdout.isatty():
     result = ext_pillar(args.hostname, __pillar__, __opts__['pepa']['resource'], __opts__['pepa']['sequence'])
 
     yaml.dumper.SafeDumper.ignore_aliases = lambda self, data: True
-    print yaml.safe_dump(result, indent = 4, default_flow_style = False)
+    print yaml.safe_dump(result, indent = 2, default_flow_style = False)
