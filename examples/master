@@ -38,14 +38,26 @@ ext_pillar:
         - hostname:
             base_only: True  
 
+pepa_grains:
+  osfinger: Fedora-19
+
+#pepa_roots:
+#  base: /srv/salt/base
+#  dev: /srv/salt/base
+#  qa: /srv/salt/qa
+#  prod: /srv/salt/prod
+
 pepa_roots:
-  base: /srv/salt/base
-  dev: /srv/salt/base
-  qa: /srv/salt/qa
-  prod: /srv/salt/prod
+  base: examples
+  dev: examples
+  qa: examples
+  prod: examples
 
-log_level: debug
+#pepa_subkey: True
+#pepa_subkey_only: True
 
-log_granular_levels:
-  salt: warning
-  salt.loaded.ext.pillar.pepa: debug
+#log_level: debug
+
+#log_granular_levels:
+#  salt: warning
+#  salt.loaded.ext.pillar.pepa: debug

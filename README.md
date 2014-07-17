@@ -13,7 +13,7 @@ Clone and run Pepa.
 ```bash
 $ git clone <uri>
 $ cd pepa
-$ ./pepa.py -c example/pepa test.example.com -d
+$ ./pepa.py -c example/master test.example.com -d
 ```
 
 You can also specify the Grains/Pillar as arguments.

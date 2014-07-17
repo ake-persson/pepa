@@ -16,7 +16,7 @@ if sys.stdout.isatty():
 
     parser = argparse.ArgumentParser()
     parser.add_argument('hostname', help = 'Hostname')
-    parser.add_argument('-c', '--config', default = '/etc/salt/pepa', help = 'Configuration file')
+    parser.add_argument('-c', '--config', default = '/etc/salt/master', help = 'Configuration file')
     parser.add_argument('-d', '--debug', action = 'store_true', help = 'Print debug info')
     parser.add_argument('-g', '--grains', help = 'Input Grains as YAML')
     parser.add_argument('-p', '--pillar', help = 'Input Pillar as YAML')
@@ -192,20 +192,25 @@ if sys.stdout.isatty():
     # Get configuration
     __opts__.update(yaml.load(open(args.config).read()))
 
+    loc = 0
+    for name in [e.keys()[0] for e in __opts__['ext_pillar']]:
+        if name == 'pepa':
+            break
+        loc += 1
+
     __grains__ = {}
-    if 'grains' in __opts__:
-        __grains__ = __opts__['grains']
+    if 'pepa_grains' in __opts__:
+        __grains__ = __opts__['pepa_grains']
     if args.grains:
         __grains__.update(yaml.load(args.grains))
 
-
     __pillar__ = {}
-    if 'pillar' in __opts__:
-        __pillar__ = __opts__['pillar']
+    if 'pepa_pillar' in __opts__:
+        __pillar__ = __opts__['pepa_pillar']
     if args.pillar:
         __pillar__.update(yaml.load(args.pillar))
 
-    result = ext_pillar(args.hostname, __pillar__, __opts__['pepa']['resource'], __opts__['pepa']['sequence'])
+    result = ext_pillar(args.hostname, __pillar__, __opts__['ext_pillar'][loc]['pepa']['resource'], __opts__['ext_pillar'][loc]['pepa']['sequence'])
 
     from pygments import highlight
     from pygments.lexers import YamlLexer
