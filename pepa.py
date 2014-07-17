@@ -207,5 +207,10 @@ if sys.stdout.isatty():
 
     result = ext_pillar(args.hostname, __pillar__, __opts__['pepa']['resource'], __opts__['pepa']['sequence'])
 
+    from pygments import highlight
+    from pygments.lexers import YamlLexer
+    from pygments.formatters import TerminalFormatter
+
     yaml.dumper.SafeDumper.ignore_aliases = lambda self, data: True
-    print yaml.safe_dump(result, indent = 2, default_flow_style = False)
+#    print yaml.safe_dump(result, indent = 4, default_flow_style = False)
+    print highlight(yaml.safe_dump(result), YamlLexer(), TerminalFormatter())

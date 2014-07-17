@@ -1,22 +1,19 @@
 # Quick testing
 
-You can easily test Pepa from the Command Line.
+To easily test Pepa, you can do this from the Command Line.
 
-Create a virtual env. and install the required modules.
+Make sure you have the required modules.
 
 ```bash
-virtualenv venv
-cd venv
-source bin/activate
-pip install pyyaml jinja2 argparse logging colorlog
+$ pip install pyyaml re jinja2 argparse logging colorlog pygments
 ```
 
 Clone and run Pepa.
 
 ```bash
-git clone https://github.com/mickep76/pepa.git
-cd pepa
-./pepa.py -c examples/pepa test.example.com -d
+$ git clone <uri>
+$ cd pepa
+$ ./pepa.py -c example/pepa test.example.com -d
 ```
 
 You can also specify the Grains/Pillar as arguments.
@@ -76,17 +73,9 @@ ext_pillar:
         - default:
         ...
 
-pepa_roots:                       # Base directory for each environment
+pepa_roots:                     # Base directory for each environment
   dev: /srv/salt/base
-
-pepa_subkey: True                 # Present values in subkey 'pepa: ...'
-pepa_subkey_only: False           # Only present values in subkey 'pepa: ...'
-```
-
-Using pepa subkey has some advantages since you can easily see what was actually provided by Pepa using:
-
-```bash
-salt-call pillar.get pepa
+  ...
 ```
 
 # Templates
