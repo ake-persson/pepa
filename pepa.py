@@ -117,7 +117,10 @@ def ext_pillar(minion_id, pillar, resource, sequence):
     input = {}
     input['default'] = 'default'
     input['hostname'] = minion_id
-    if 'environment' in __grains__:
+
+    if 'environment' in pillar:
+        input['environment'] = pillar['environment']
+    elif 'environment' in __grains__:
         input['environment'] = __grains__['environment']
     else:
         input['environment'] = 'base'
