@@ -389,8 +389,7 @@ timezone:
   module.run:
     - name: timezone.set_zone
     - timezone: {{ pillar.time.timezone }}
-  file:
-    - managed
+  file.managed:
     - name: /etc/sysconfig/clock
     - user: root
     - group: root
