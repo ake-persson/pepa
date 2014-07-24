@@ -249,7 +249,7 @@ Add the salt-update to Crontab, and make it run every other minute.
 **crontab -e**
 
 ```bash
-*/2 * * * * /etc/salt/bin/salt-update >/dev/null 2>&1
+*/2 * * * * /usr/bin/salt-update >/dev/null 2>&1
 ```
 
 # Setting up staging
