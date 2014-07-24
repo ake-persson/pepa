@@ -242,6 +242,16 @@ You should now be able to Clone/Pull the repository.
 sudo salt-update
 ```
 
+# Update repository regularly
+
+Add the salt-update to Crontab, and make it run every other minute.
+
+**crontab -e**
+
+```bash
+*/2 * * * * /etc/salt/bin/salt-update >/dev/null 2>&1
+```
+
 # Setting up staging
 
 In order to facilitate testing we need to stage our changes. The easiest way to do this is to create a separate Branch in Git for each environment.
