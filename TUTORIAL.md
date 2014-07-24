@@ -40,13 +40,14 @@ sudo pip install salt pyyaml jinja2 argparse logging colorlog pygments
 sudo mkdir -p /srv/salt/ext/pillar
 git clone git@github.com:mickep76/pepa.git
 sudo cp pepa/pepa.py /srv/salt/ext/pillar
+sudo ln -s /srv/salt/ext/pillar/pepa.py /usr/bin/pepa
 ```
 
 Verify you have the required Python modules for Pepa.
 
 ```bash
 cd pepa
-./pepa.py -c examples/master test.example.com -d
+pepa -c examples/master test.example.com -d
 ```
 
 # Configuring Salt'n'Pepa
@@ -550,7 +551,7 @@ sudo systemctl start salt-master
 ## Get Pepa output
 
 ```bash
-salt-call pillar.get pepa
+sudo salt-call pillar.get pepa
 ```
 
 ## Test single state
@@ -571,4 +572,12 @@ sudo salt-call state.sls timezone
 sudo salt-call state.highstate
 ```
 
+## Run Pepa without Salt
 
+```bash
+pepa <host> -d -g 'osfinger: Fedora-19'
+```
+
+*Obv. you have to replace \<host\> with hostname*
+
+This will evaluate the Pepa templates in debug mode without running Salt. This is usefull for validation and testing.
