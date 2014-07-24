@@ -59,7 +59,7 @@ Here is a Salt Master setup with 3 environments base, qa and prod.
 master: <hostname>
 ```
 
-*Obv. you need to replace <hostname>*
+*Obv. you need to replace \<hostname\>*
 
 **/etc/salt/master**
 
@@ -154,7 +154,7 @@ git add states pillar
 git commit -am'Added initial skeleton'
 ```
 
-*Git won't add empty folder's.*
+*Git won't add empty folders.*
 
 ## Add script for Git clone/pull
 
@@ -213,7 +213,7 @@ readonly SSH_KEY="${CONFDIR}/.ssh/id_dsa"
 readonly URI='<uri>'
 ```
 
-*Obv. you have to <uri> with the uri to your Git repository*
+*Obv. you have to \<uri\> with the uri to your Git repository*
 
 Enable scrips as executable.
 
