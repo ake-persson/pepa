@@ -1,26 +1,31 @@
 # Installing Salt'n'Pepa
 
-This Guide assumes you're using Fedora/RedHat/CentOS.
+## Install SaltStack and Python modules
 
-## Install SaltStack
+## Fedora
 
 ```bash
 sudo yum install salt-minion salt-master
-```
-
-## Install Pepa
-
-```bash
 sudo yum install python-pip PyYAML python-jinja2 python-logging python-pygments
 sudo pip install argparse colorlog
 ```
 
-Alt. using only pip.
+## Ubuntu
 
 ```bash
-sudo yum install python-pip
-sudo pip install pyyaml jinja2 argparse logging colorlog pygments
+sudo add-apt-repository ppa:saltstack/salt
+sudo apt-get update
+sudo apt-get install salt-minion salt-master
+# TBD: install modules
 ```
+
+## Other
+
+```bash
+sudo pip install salt pyyaml jinja2 argparse logging colorlog pygments
+```
+
+## Install Pepa
 
 ```bash
 sudo mkdir -p /srv/salt/ext/pillar
@@ -30,7 +35,7 @@ sudo cp pepa/pepa.py /srv/salt/ext/pillar
 
 # Configuring Salt'n'Pepa
 
-Here is a setup with 3 environments base, qa and prod.
+Here is a Salt Master setup with 3 environments base, qa and prod.
 
 **/etc/salt/minion**
 
@@ -38,11 +43,15 @@ Here is a setup with 3 environments base, qa and prod.
 master: <hostname>
 ```
 
+*Obv. you need to replace <hostname>*
+
 **/etc/salt/master**
 
 ```yaml
+# Accept ALL host's automatically
 auto_accept: True
 
+# Path for states
 file_roots:
   base:
 	- /srv/salt/base/states
@@ -51,6 +60,7 @@ file_roots:
   prod:
 	- /srv/salt/prod/states
 
+# Path for pillars
 pillar_roots:
   base:
 	- /srv/salt/base/pillars
@@ -59,8 +69,10 @@ pillar_roots:
   prod:
 	- /srv/salt/prod/pillars
 
+# Path to ext. pillars
 extension_modules: /srv/salt/ext
 
+# Configuration for ext. pillar Pepa
 ext_pillar:
   - pepa:
 	  resource: host
@@ -81,15 +93,23 @@ ext_pillar:
 			name: host
 			base_only: True
 
+# Delimiter used in Pepa templates for nested keys
 pepa_delimiter: ..
+
+# Include Pepa sub key in pillar output
 pepa_subkey: True
+
+# Path for Pepa templates
 pepa_roots:
   base: /srv/salt/base
   qa: /srv/salt/qa
   prod: /srv/salt/prod
 
+# Enable debug
 #log_level: debug
 
+# Enable debug, only for Pepa
+# Requires "log_level: debug" to be set
 #log_granular_levels:
 #  salt: warning
 #  salt.loaded.ext.pillar.pepa: debug
@@ -97,7 +117,7 @@ pepa_roots:
 
 # Creating Git repository
 
-Create a Git repository on GitHub.
+Create a Git repository on GitHub. Clone and do the initial commit.
 
 ```bash
 git clone <uri>
@@ -113,8 +133,12 @@ Create skeleton for Salt'n'Pepa.
 ```bash
 mkdir {states,pillar,host}
 mkdir hosts/{default,host_input,environment,region,country,os,roles,host}
-touch pillars/top.sls states/top.sls
+touch pillar/top.sls states/top.sls
+git add states pillar
+git commit -am'Added initial skeleton'
 ```
+
+*Git won't add empty folder's.*
 
 **/usr/local/bin/salt-update**
 
