@@ -479,3 +479,39 @@ enable stats
 statsdir /var/log/ntpstats/
 statistics loopstats peerstats
 ```
+
+# Configure top.sls
+
+Here is an example top.sls file for states, you can see that roles are included as if they we're states. This make's it very easy to include states without modifying the top.sls file.
+
+```yaml
+base:
+  'environment:base':
+    - match: pillar
+    - ntp
+{%- if pillar['roles'] is defined %}
+{%- for role in pillar['roles'] %}
+    - {{ role }}
+{%- endfor %}
+{%- endif %}
+
+qa:
+  'environment:qa':
+    - match: pillar
+    - ntp
+{%- if pillar['roles'] is defined %}
+{%- for role in pillar['roles'] %}
+    - {{ role }}
+{%- endfor %}
+{%- endif %}
+
+prod:
+  'environment:prod':
+    - match: pillar
+    - ntp
+{%- if pillar['roles'] is defined %}
+{%- for role in pillar['roles'] %}
+    - {{ role }}
+{%- endfor %}
+{%- endif %}
+```
