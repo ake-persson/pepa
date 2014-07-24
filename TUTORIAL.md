@@ -222,6 +222,26 @@ chmod +x /usr/bin/salt-update
 chmod +x /usr/bin/salt-update-git-ssh
 ```
 
+## Create ssh key for Github
+
+```bash
+sudo mkdir /etc/salt/.ssh
+sudo chmod 700 /etc/salt/.ssh
+sudo ssh-keygen -t dsa -f /etc/salt/.ssh/id_dsa
+```
+
+*Create the key without a password*
+
+Once you have created the SSH key add it to Deploy Keys in repository Settings.
+
+# Clone Git repository
+
+You should now be able to Clone/Pull the repository.
+
+```bash
+sudo salt-update
+```
+
 # Setting up staging
 
 In order to facilitate testing we need to stage our changes. The easiest way to do this is to create a separate Branch in Git for each environment.
