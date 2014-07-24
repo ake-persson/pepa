@@ -329,12 +329,10 @@ network..dns..options:
   - timeout:2
   - attempts:1
   - ndots:1
-mail..agent: sendmail
-mail..gateway: smtp.{{ location.region }}.example.com
 osfinger: {{ grains.osfinger }}
 salt..version: 2014.1.5
 salt..release: 1
-salt..master: salt.{{ location.region }}.example.com
+salt..master: salt.example.com
 ```
 
 Here is an example of a per host template.
@@ -359,6 +357,23 @@ cobbler..profile: fedora-19-x86_64
 
 *All extended characters in filenames are converted to underscore.*
 
+**hosts/region/amer.yaml**
 
+```yaml
+network..dns..servers:
+  - 10.0.0.1
+  - 10.0.0.2
+time..ntp..servers:
+  - ntp1.amer.example.com
+  - ntp2.amer.example.com
+  - ntp3.amer.example.com
+time..timezone: America/Chihuahua
+```
 
+So the templates are run in the order specified in the salt master configuration file.
 
+    default -> host_input -> environment -> region -> country -> os -> roles -> host
+
+This allow's for Hierarhical Substitution, additionally to this you have access to Jinja and Grains/Pillars.
+
+# Salt States
