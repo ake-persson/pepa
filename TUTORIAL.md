@@ -539,3 +539,36 @@ prod:
 {%- endfor %}
 {%- endif %}
 ```
+
+# Start Salt server
+
+```bash
+sudo salt-update
+sudo systemctl start salt-master
+```
+
+## Get Pepa output
+
+```bash
+salt-call pillar.get pepa
+```
+
+## Test single state
+
+```bash
+sudo salt-call state.sls timezone test=True
+```
+
+## Apply single state
+
+```bash
+sudo salt-call state.sls timezone
+```
+
+## Apply highstate
+
+```bash
+sudo salt-call state.highstate
+```
+
+
