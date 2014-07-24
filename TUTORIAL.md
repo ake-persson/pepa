@@ -64,7 +64,7 @@ master: <hostname>
 **/etc/salt/master**
 
 ```yaml
-# Accept ALL host's automatically
+# Accept ANY host automatically
 auto_accept: True
 
 # Path for states
@@ -91,7 +91,7 @@ extension_modules: /srv/salt/ext
 # Configuration for ext. pillar Pepa
 ext_pillar:
   - pepa:
-	  resource: host
+	  resource: hosts
 	  sequence:
 		- default:
 		- hostname:
@@ -147,7 +147,7 @@ git push -u origin master
 Create skeleton for Salt'n'Pepa.
 
 ```bash
-mkdir {states,pillar,host}
+mkdir {states,pillar,hosts}
 mkdir hosts/{default,host_input,environment,region,country,os,roles,host}
 touch pillar/top.sls states/top.sls
 git add states pillar
@@ -213,7 +213,7 @@ readonly SSH_KEY="${CONFDIR}/.ssh/id_dsa"
 readonly URI='<uri>'
 ```
 
-*Obv. you have to \<uri\> with the uri to your Git repository*
+*Obv. you have to replace \<uri\> with the uri to your Git repository*
 
 Enable scrips as executable.
 
@@ -309,3 +309,56 @@ git merge qa
 git push
 git checkout master
 ```
+
+This is normally done automatically after sucessfull tests, using a CI build server such as [Jenkins](http://jenkins-ci.org/).
+
+# Pepa templates
+
+Since you can chain Ext. Pillars Pepa can either be used for per host input or you can pull information from Cobbler or other system. This would require that you write your own Ext. Pillar.
+
+My recommendation would be to keep the info. as a Template and then populate other systems such as Cobbler using this.
+
+If you have external information you wan't to use in the hierarchical substitution you need to import them in the Default template. You can access both Grains and Pillars using Jinja like "{{ grains.osfinger }}" or "{{ pillar.region }}".
+
+**hosts/default/default.yaml**
+
+```yaml
+network..dns..search:
+  - example.com
+network..dns..options:
+  - timeout:2
+  - attempts:1
+  - ndots:1
+mail..agent: sendmail
+mail..gateway: smtp.{{ location.region }}.example.com
+osfinger: {{ grains.osfinger }}
+salt..version: 2014.1.5
+salt..release: 1
+salt..master: salt.{{ location.region }}.example.com
+```
+
+Here is an example of a per host template.
+
+**hosts/host_input/test_example_com.yaml**
+
+```yaml
+location..region: emea
+location..country: nl
+location..datacenter: foobar
+environment: dev
+roles:
+  - salt.master
+network..gateway: 10.0.0.254
+network..interfaces..eth0..hwaddr: 00:20:26:a1:12:12
+network..interfaces..eth0..dhcp: False
+network..interfaces..eth0..ipv4: 10.0.0.3
+network..interfaces..eth0..netmask: 255.255.255.0
+network..interfaces..eth0..fqdn: {{ hostname }}
+cobbler..profile: fedora-19-x86_64
+```
+
+*All extended characters in filenames are converted to underscore.*
+
+
+
+
