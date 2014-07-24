@@ -397,12 +397,6 @@ timezone:
     - mode: '0644'
     - source: salt://timezone/files/clock.jinja
     - template: jinja
-
-timezone-set-hwclock:
-  module.run:
-    - name: timezone.set_hwclock
-    - clock: UTC
-
 ```
 
 **states/files/clock.jinja**
