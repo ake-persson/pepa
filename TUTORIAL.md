@@ -398,7 +398,7 @@ timezone:
     - template: jinja
 ```
 
-**states/files/clock.jinja**
+**states/timezone/files/clock.jinja**
 
 ```yaml
 ZONE="{{ pillar.time.timezone }}"
@@ -424,7 +424,7 @@ ntpdate:
       - pkg: ntpdate
 ```
 
-**states/files/ntpdate.jinja**
+**states/ntpdate/files/ntpdate.jinja**
 
 ```yaml
 OPTIONS="-p2 -b {{ pillar.time.ntp.servers | join(' ') }}"
@@ -459,7 +459,7 @@ ntp:
       - pkg: ntp
 ```
 
-**states/ntp/ntp.conf**
+**states/ntp/files/ntp.conf.jinja**
 
 ```yaml
 {% for server in pillar.time.ntp.servers %}
@@ -476,6 +476,8 @@ statistics loopstats peerstats
 # Configure top.sls
 
 Here is an example top.sls file for states, you can see that roles are included as if they we're states. This make's it very easy to include states without modifying the top.sls file.
+
+**states/top.sls**
 
 ```yaml
 base:
