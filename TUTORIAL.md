@@ -376,4 +376,106 @@ So the templates are run in the order specified in the salt master configuration
 
 This allow's for Hierarhical Substitution, additionally to this you have access to Jinja and Grains/Pillars.
 
+Host input and host overrides are not staged since they are directly host related. To control if a category is staged, this can done with the configuration entry "base_only".
+
 # Salt States
+
+Here are some examples for configuring time on a Fedora host.
+
+**states/timezone**
+
+```yaml
+timezone:
+  module.run:
+    - name: timezone.set_zone
+    - timezone: {{ pillar.time.timezone }}
+  file:
+    - managed
+    - name: /etc/sysconfig/clock
+    - user: root
+    - group: root
+    - mode: '0644'
+    - source: salt://timezone/files/clock.jinja
+    - template: jinja
+
+timezone-set-hwclock:
+  module.run:
+    - name: timezone.set_hwclock
+    - clock: UTC
+
+```
+
+**states/files/clock.jinja**
+
+```yaml
+ZONE="{{ pillar.time.timezone }}"
+UTC=true
+```
+
+**states/ntpdate**
+
+```yaml
+include:
+  - timezone
+
+ntpdate:
+  pkg.installed:
+  file.managed:
+    - name: /etc/sysconfig/ntpdate
+    - user: root
+    - group: root
+    - mode: '0644'
+    - source: salt://ntpdate/files/ntpdate.jinja
+    - template: jinja
+    - require:
+      - pkg: ntpdate
+```
+
+**states/files/ntpdate.jinja**
+
+```yaml
+OPTIONS="-p2 -b {{ pillar.time.ntp.servers | join(' ') }}"
+RETRIES=2
+SYNC_HWCLOCK=yes
+```
+
+**states/ntp/init.sls**
+
+```yaml
+include:
+  - ntpdate
+
+ntp:
+  pkg.installed:
+  file.managed:
+    - name: /etc/ntp.conf
+    - user: root
+    - group: root
+    - mode: '0644'
+    - source: salt://ntp/files/ntp.conf.jinja
+    - template: jinja
+    - require:
+      - pkg: ntp
+  service.running:
+    - name: ntpd
+    - enable: True
+    - reload: True
+    - watch:
+      - file: ntp
+    - require:
+      - pkg: ntp
+```
+
+**states/ntp/ntp.conf**
+
+```yaml
+{% for server in pillar.time.ntp.servers %}
+server {{ server }} minpoll 3 maxpoll 7
+{%- endfor %}
+
+driftfile /var/lib/ntp/drift
+
+enable stats
+statsdir /var/log/ntpstats/
+statistics loopstats peerstats
+```
