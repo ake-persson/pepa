@@ -382,7 +382,7 @@ Host input and host overrides are not staged since they are directly host relate
 
 Here are some examples for configuring time on a Fedora host.
 
-**states/timezone**
+**states/timezone/init.sls**
 
 ```yaml
 timezone:
@@ -412,7 +412,7 @@ ZONE="{{ pillar.time.timezone }}"
 UTC=true
 ```
 
-**states/ntpdate**
+**states/ntpdate/init.sls**
 
 ```yaml
 include:
