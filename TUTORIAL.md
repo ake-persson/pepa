@@ -382,6 +382,25 @@ Host input and host overrides are not staged since they are directly host relate
 
 Here are some examples for configuring time on a Fedora host.
 
+**File structure**
+
+```
+states/
+  top.sls
+  ntp/
+    files/
+      ntp.conf.jinja
+    init.sls
+  ntpdate/
+    files/
+      ntpdate.jinja
+    init.sls
+  timezone/
+    files/
+      clock.jinja
+    init.sls
+```
+
 **states/timezone/init.sls**
 
 ```yaml
