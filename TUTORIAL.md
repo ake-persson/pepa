@@ -19,6 +19,15 @@ sudo apt-get install salt-minion salt-master
 # TBD: install modules
 ```
 
+## Mac OS X
+
+First you need to install Xcode Command Line tools.
+
+```bash
+sudo easy_install pip
+sudo pip install salt pyyaml jinja2 argparse logging colorlog pygments
+```
+
 ## Other
 
 ```bash
@@ -31,6 +40,13 @@ sudo pip install salt pyyaml jinja2 argparse logging colorlog pygments
 sudo mkdir -p /srv/salt/ext/pillar
 git clone git@github.com:mickep76/pepa.git
 sudo cp pepa/pepa.py /srv/salt/ext/pillar
+```
+
+Verify you have the required Python modules for Pepa.
+
+```bash
+cd pepa
+./pepa.py -c examples/master test.example.com -d
 ```
 
 # Configuring Salt'n'Pepa
@@ -115,9 +131,9 @@ pepa_roots:
 #  salt.loaded.ext.pillar.pepa: debug
 ```
 
-# Creating Git repository
+# Create Git repository
 
-Create a Git repository on GitHub. Clone and do the initial commit.
+Create a Git repository on GitHub. Clone it and do the initial commit.
 
 ```bash
 git clone <uri>
@@ -140,7 +156,9 @@ git commit -am'Added initial skeleton'
 
 *Git won't add empty folder's.*
 
-**/usr/local/bin/salt-update**
+## Add script for Git clone/pull
+
+**/usr/bin/salt-update**
 
 ```bash
 #!/bin/bash
@@ -148,9 +166,9 @@ git commit -am'Added initial skeleton'
 set -e
 set -u
 
-source /etc/sysconfig/salt-update
+source /etc/salt/salt-update.conf
 
-export GIT_SSH="/usr/local/bin/salt-update-git-ssh"
+export GIT_SSH="/usr/bin/salt-update-git-ssh"
 
 sync() {
 	local uri="$1" branch="$2" dir="$3"
@@ -172,7 +190,7 @@ for env in ${ENVIRONMENTS}; do
 done
 ```
 
-**/usr/local/bin/salt-update-git-ssh**
+**/usr/bin/salt-update-git-ssh**
 
 ```bash
 #!/bin/bash
@@ -180,12 +198,12 @@ done
 set -e
 set -u
 
-source /etc/sysconfig/salt-update
+source /etc/salt/salt-update.conf
 
 exec /usr/bin/ssh -i $SSH_KEY -p $PORT -o LogLevel=quiet -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no "$@"
 ```
 
-**/etc/sysconfig/salt-update**
+**/etc/salt/salt-update.conf**
 
 ```bash
 readonly USER='git'
@@ -195,9 +213,13 @@ readonly SSH_KEY="${CONFDIR}/.ssh/id_dsa"
 readonly URI='<uri>'
 ```
 
+*Obv. you have to <uri> with the uri to your Git repository*
+
+Enable scrips as executable.
+
 ```bash
-chmod +x /usr/local/bin/salt-update
-chmod +x /usr/local/bin/salt-update-ssh-git
+chmod +x /usr/bin/salt-update
+chmod +x /usr/bin/salt-update-git-ssh
 ```
 
 # Setting up staging
