@@ -61,7 +61,7 @@ def create_cobbler_system(host):
         host['network']['gateway'], 'eth0', host['network']['interfaces']['eth0']['hwaddr'],
         host['network']['interfaces']['eth0']['ipv4'], host['network']['interfaces']['eth0']['netmask'])
 
-    # Create system on Cobbler-dev
+    # Create system on Cobbler
     cd = cobbler.Cobbler(COBBLER_HOST, COBBLER_USER, COBBLER_PWD)
     cd.connect()
     cd.login()
