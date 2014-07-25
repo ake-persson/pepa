@@ -1,0 +1,1 @@
+Validate is a script that validates your host_input against a JSON schema. It also have a Cobbler module that can populate Cobbler with the correct info, normally this would be a job in Jenkins. The code is not generic at this point since it was written for a spec. use case. When I have time I will make it more usefull.
