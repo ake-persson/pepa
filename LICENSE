@@ -1,6 +1,6 @@
-   Salt - Remote execution system
+   Pepa - Configuration templating for SaltStack using Hierarchical substitution and Jinja
 
-   Copyright 2014 SaltStack Team
+   Copyright (c) 2013 Michael Persson
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
