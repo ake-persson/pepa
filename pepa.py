@@ -9,54 +9,11 @@ Documentation: https://github.com/mickep76/pepa
 __author__ = 'Michael Persson <michael.ake.persson@gmail.com>'
 __copyright__ = 'Copyright (c) 2013 Michael Persson'
 __license__ = 'Apache License, Version 2.0'
-__version__ = '0.6.2'
+__version__ = '0.6.3'
 
 # Import python libs
 import logging
 import sys
-
-log = None
-if sys.stdout.isatty():
-    import argparse
-    from colorlog import ColoredFormatter
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument('hostname', help='Hostname')
-    parser.add_argument('-c', '--config', default='/etc/salt/master', help='Configuration file')
-    parser.add_argument('-d', '--debug', action='store_true', help='Print debug info')
-    parser.add_argument('-g', '--grains', help='Input Grains as YAML')
-    parser.add_argument('-p', '--pillar', help='Input Pillar as YAML')
-    args = parser.parse_args()
-
-    LOG_LEVEL = logging.WARNING
-    if args.debug:
-        LOG_LEVEL = logging.DEBUG
-
-    LOG_FORMAT = "[%(log_color)s%(levelname)-8s%(reset)s] %(log_color)s%(message)s%(reset)s"
-    formatter = ColoredFormatter(LOG_FORMAT)
-
-    stream = logging.StreamHandler()
-    stream.setLevel(LOG_LEVEL)
-    stream.setFormatter(formatter)
-
-    log = logging.getLogger('pythonConfig')
-    log.setLevel(LOG_LEVEL)
-    log.addHandler(stream)
-else:
-    log = logging.getLogger(__name__)
-
-# Name
-__virtualname__ = 'pepa'
-
-# Options
-__opts__ = {
-    'pepa_roots': {
-        'base': '/srv/salt'
-    },
-    'pepa_delimiter': '..',
-    'pepa_subkey': False,
-    'pepa_subkey_only': False
-}
 
 # Import libraries
 try:
@@ -83,6 +40,74 @@ try:
 except ImportError:
     HAS_JINJA2 = False
 
+# Check for optional libraries, only used when called from a TTY (terminal)
+HAS_ARGPARSE = False
+HAS_COLORLOG = False
+HAS_PYGMENTS = False
+log = None
+if sys.stdout.isatty():
+    try:
+        import argparse
+        HAS_ARGPARSE = True
+    except ImportError:
+        HAS_ARGPARSE = False
+
+    try:
+        import colorlog
+        HAS_COLORLOG = True
+    except ImportError:
+        HAS_COLORLOG = False
+
+    try:
+        import pygments
+        import pygments.formatters
+        import pygments.lexers
+        HAS_PYGMENTS = True
+    except ImportError:
+        HAS_PYGMENTS = False
+
+    # Get arguments
+    parser = argparse.ArgumentParser()
+    parser.add_argument('hostname', help='Hostname')
+    parser.add_argument('-c', '--config', default='/etc/salt/master', help='Configuration file')
+    parser.add_argument('-d', '--debug', action='store_true', help='Print debug info')
+    parser.add_argument('-g', '--grains', help='Input Grains as YAML')
+    parser.add_argument('-p', '--pillar', help='Input Pillar as YAML')
+    args = parser.parse_args()
+
+    # Configure logging
+    LOG_LEVEL = logging.WARNING
+    if args.debug:
+        LOG_LEVEL = logging.DEBUG
+
+    formatter = None
+    if HAS_COLORLOG:
+        formatter = colorlog.ColoredFormatter("[%(log_color)s%(levelname)-8s%(reset)s] %(log_color)s%(message)s%(reset)s")
+    else:
+        formatter = logging.Formatter("[%(levelname)-8s] %(message)s")
+
+    stream = logging.StreamHandler()
+    stream.setLevel(LOG_LEVEL)
+    stream.setFormatter(formatter)
+
+    log = logging.getLogger('pythonConfig')
+    log.setLevel(LOG_LEVEL)
+    log.addHandler(stream)
+else:
+    log = logging.getLogger(__name__)
+
+# Name
+__virtualname__ = 'pepa'
+
+# Options
+__opts__ = {
+    'pepa_roots': {
+        'base': '/srv/salt'
+    },
+    'pepa_delimiter': '..',
+    'pepa_subkey': False,
+    'pepa_subkey_only': False
+}
 
 def __virtual__():
     '''
@@ -125,7 +150,7 @@ def key_value_to_tree(data):
 
 def ext_pillar(minion_id, pillar, resource, sequence):
     '''
-    Convert key/value to tree
+    Evaluate Pepa templats
     '''
     roots = __opts__['pepa_roots']
 
@@ -202,6 +227,7 @@ def ext_pillar(minion_id, pillar, resource, sequence):
         pillar_data = tree
     return pillar_data
 
+# Only used when called from a TTY (terminal)
 if sys.stdout.isatty():
     # Load configuration file
     if not isfile(args.config):
@@ -231,10 +257,8 @@ if sys.stdout.isatty():
 
     result = ext_pillar(args.hostname, __pillar__, __opts__['ext_pillar'][loc]['pepa']['resource'], __opts__['ext_pillar'][loc]['pepa']['sequence'])
 
-    from pygments import highlight
-    from pygments.lexers import YamlLexer
-    from pygments.formatters import TerminalFormatter
-
     yaml.dumper.SafeDumper.ignore_aliases = lambda self, data: True
-#    print yaml.safe_dump(result, indent = 4, default_flow_style = False)
-    print highlight(yaml.safe_dump(result), YamlLexer(), TerminalFormatter())
+    if HAS_PYGMENTS:
+        print pygments.highlight(yaml.safe_dump(result), pygments.lexers.YamlLexer(), pygments.formatters.TerminalFormatter())
+    else:
+        print yaml.safe_dump(result, indent = 4, default_flow_style = False)
