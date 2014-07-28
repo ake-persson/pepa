@@ -136,14 +136,14 @@ In order to create nested dictionaries as output you can use double dot **".."**
 **Example:**
 
 ```yaml
-network.dns.servers:
+network..dns..servers:
   - 10.0.0.1
   - 10.0.0.2
-network.dns.options:
+network..dns..options:
   - timeout:2
   - attempts:1
   - ndots:1
-network.dns.search:
+network..dns..search:
   - example.com
 ```
 
