@@ -1,0 +1,5 @@
+- Add PyGit2 to support Git checkouts similar to Salt
+- Improve Validation script in extras to also cover output
+- Make validation/cobbler script more generic
+
+Preferable the validation script should run as a post-commit job in a CI server like Jenkins and verify input/output then populate Cobbler. Could also be integrated to fire of a IPMI PXE on next boot and reboot the machine.
