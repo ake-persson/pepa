@@ -15,74 +15,32 @@ __version__ = '0.6.3'
 import logging
 import sys
 
-# Import libraries
-try:
-    import yaml
-    HAS_YAML = True
-except ImportError:
-    HAS_YAML = False
 
-try:
-    from os.path import isfile, join
-    HAS_OS_PATH = True
-except ImportError:
-    HAS_OS_PATH = False
-
-try:
-    import re
-    HAS_RE = True
-except ImportError:
-    HAS_RE = False
-
-try:
-    import jinja2
-    HAS_JINJA2 = True
-except ImportError:
-    HAS_JINJA2 = False
-
-# Check for optional libraries, only used when called from a TTY (terminal)
-HAS_ARGPARSE = False
-HAS_COLORLOG = False
-HAS_PYGMENTS = False
+# Only used when called from a TTY (terminal)
 log = None
-if sys.stdout.isatty():
-    try:
-        import argparse
-        HAS_ARGPARSE = True
-    except ImportError:
-        HAS_ARGPARSE = False
+if __name__ == '__main__' and sys.stdout.isatty():
+    import argparse
 
-    try:
-        import colorlog
-        HAS_COLORLOG = True
-    except ImportError:
-        HAS_COLORLOG = False
-
-    try:
-        import pygments
-        import pygments.formatters
-        import pygments.lexers
-        HAS_PYGMENTS = True
-    except ImportError:
-        HAS_PYGMENTS = False
-
-    # Get arguments
     parser = argparse.ArgumentParser()
     parser.add_argument('hostname', help='Hostname')
     parser.add_argument('-c', '--config', default='/etc/salt/master', help='Configuration file')
     parser.add_argument('-d', '--debug', action='store_true', help='Print debug info')
     parser.add_argument('-g', '--grains', help='Input Grains as YAML')
     parser.add_argument('-p', '--pillar', help='Input Pillar as YAML')
+    parser.add_argument('-n', '--no-color', action='store_true', help='No color output')
     args = parser.parse_args()
 
-    # Configure logging
     LOG_LEVEL = logging.WARNING
     if args.debug:
         LOG_LEVEL = logging.DEBUG
 
     formatter = None
-    if HAS_COLORLOG:
-        formatter = colorlog.ColoredFormatter("[%(log_color)s%(levelname)-8s%(reset)s] %(log_color)s%(message)s%(reset)s")
+    if not args.no_color:
+        try:
+            import colorlog
+            formatter = colorlog.ColoredFormatter("[%(log_color)s%(levelname)-8s%(reset)s] %(log_color)s%(message)s%(reset)s")
+        except ImportError:
+            formatter = logging.Formatter("[%(levelname)-8s] %(message)s")
     else:
         formatter = logging.Formatter("[%(levelname)-8s] %(message)s")
 
@@ -96,8 +54,6 @@ if sys.stdout.isatty():
 else:
     log = logging.getLogger(__name__)
 
-# Name
-__virtualname__ = 'pepa'
 
 # Options
 __opts__ = {
@@ -109,27 +65,27 @@ __opts__ = {
     'pepa_subkey_only': False
 }
 
+# Import libraries
+import yaml
+import jinja2
+import re
+
+try:
+    from os.path import isfile, join
+    HAS_OS_PATH = True
+except ImportError:
+    HAS_OS_PATH = False
+
+
+
 def __virtual__():
     '''
     Only return if all the modules are available
     '''
-    if not HAS_YAML:
-        log.error('Failed to load "yaml" library')
-        return False
-
     if not HAS_OS_PATH:
-        log.error('Failed to load "os.path" library')
         return False
 
-    if not HAS_RE:
-        log.error('Failed to load "re" library')
-        return False
-
-    if not HAS_JINJA2:
-        log.error('Failed to load "jinja2" library')
-        return False
-
-    return __virtualname__
+    return True
 
 
 def key_value_to_tree(data):
@@ -150,7 +106,7 @@ def key_value_to_tree(data):
 
 def ext_pillar(minion_id, pillar, resource, sequence):
     '''
-    Evaluate Pepa templats
+    Convert key/value to tree
     '''
     roots = __opts__['pepa_roots']
 
@@ -176,7 +132,7 @@ def ext_pillar(minion_id, pillar, resource, sequence):
             continue
 
         alias = None
-        if type(info) is dict and 'name' in info:
+        if isinstance(info, dict) and 'name' in info:
             alias = info['name']
         else:
             alias = name
@@ -188,7 +144,7 @@ def ext_pillar(minion_id, pillar, resource, sequence):
             templdir = join(roots[input['environment']], resource, alias)
 
         entries = []
-        if type(input[name]) is list:
+        if isinstance(input[name], list):
             entries = input[name]
         elif not input[name]:
             log.warn("Category has no value set: {0}".format(name))
@@ -228,7 +184,7 @@ def ext_pillar(minion_id, pillar, resource, sequence):
     return pillar_data
 
 # Only used when called from a TTY (terminal)
-if sys.stdout.isatty():
+if __name__ == '__main__' and sys.stdout.isatty():
     # Load configuration file
     if not isfile(args.config):
         log.critical("Configuration file doesn't exist: {0}".format(args.config))
@@ -258,7 +214,13 @@ if sys.stdout.isatty():
     result = ext_pillar(args.hostname, __pillar__, __opts__['ext_pillar'][loc]['pepa']['resource'], __opts__['ext_pillar'][loc]['pepa']['sequence'])
 
     yaml.dumper.SafeDumper.ignore_aliases = lambda self, data: True
-    if HAS_PYGMENTS:
-        print pygments.highlight(yaml.safe_dump(result), pygments.lexers.YamlLexer(), pygments.formatters.TerminalFormatter())
+    if not args.no_color:
+        try:
+            import pygments
+            import pygments.lexers
+            import pygments.formatters
+            print pygments.highlight(yaml.safe_dump(result), pygments.lexers.YamlLexer(), pygments.formatters.TerminalFormatter())
+        except ImportError:            
+            print yaml.safe_dump(result, indent = 4, default_flow_style = False)
     else:
         print yaml.safe_dump(result, indent = 4, default_flow_style = False)
