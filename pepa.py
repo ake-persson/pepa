@@ -105,7 +105,7 @@ def key_value_to_tree(data):
 
 def ext_pillar(minion_id, pillar, resource, sequence):
     '''
-    Convert key/value to tree
+    Evalutae Pepa templates
     '''
     roots = __opts__['pepa_roots']
 
