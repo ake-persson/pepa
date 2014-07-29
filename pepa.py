@@ -198,18 +198,21 @@ if __name__ == '__main__' and sys.stdout.isatty():
             break
         loc += 1
 
+    # Get grains
     __grains__ = {}
     if 'pepa_grains' in __opts__:
         __grains__ = __opts__['pepa_grains']
     if args.grains:
         __grains__.update(yaml.load(args.grains))
 
+    # Get pillars
     __pillar__ = {}
     if 'pepa_pillar' in __opts__:
         __pillar__ = __opts__['pepa_pillar']
     if args.pillar:
         __pillar__.update(yaml.load(args.pillar))
 
+    # Print results
     result = ext_pillar(args.hostname, __pillar__, __opts__['ext_pillar'][loc]['pepa']['resource'], __opts__['ext_pillar'][loc]['pepa']['sequence'])
 
     yaml.dumper.SafeDumper.ignore_aliases = lambda self, data: True
