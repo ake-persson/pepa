@@ -131,8 +131,8 @@ def ext_pillar(minion_id, pillar, resource, sequence):
             continue
 
         alias = None
-        if isinstance(info, dict) and 'categ' in info:
-            alias = info['categ']
+        if isinstance(info, dict) and 'name' in info:
+            alias = info['name']
         else:
             alias = categ
 
