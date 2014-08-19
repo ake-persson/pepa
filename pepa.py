@@ -60,9 +60,7 @@ __opts__ = {
     'pepa_roots': {
         'base': '/srv/salt'
     },
-    'pepa_delimiter': '..',
-    'pepa_subkey': False,
-    'pepa_subkey_only': False
+    'pepa_delimiter': '..'
 }
 
 # Import libraries
@@ -103,7 +101,7 @@ def key_value_to_tree(data):
     return tree
 
 
-def ext_pillar(minion_id, pillar, resource, sequence):
+def ext_pillar(minion_id, pillar, resource, sequence, subkey = False, subkey_only = False):
     '''
     Evaluate Pepa templates
     '''
@@ -173,9 +171,9 @@ def ext_pillar(minion_id, pillar, resource, sequence):
 
     tree = key_value_to_tree(output)
     pillar_data = {}
-    if __opts__['pepa_subkey_only']:
+    if subkey_only:
         pillar_data[resource] = tree.copy()
-    elif __opts__['pepa_subkey']:
+    elif subkey:
         pillar_data = tree
         pillar_data[resource] = tree.copy()
     else:
