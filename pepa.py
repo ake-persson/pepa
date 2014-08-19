@@ -174,10 +174,10 @@ def ext_pillar(minion_id, pillar, resource, sequence):
     tree = key_value_to_tree(output)
     pillar_data = {}
     if __opts__['pepa_subkey_only']:
-        pillar_data['pepa'] = tree.copy()
+        pillar_data[resource] = tree.copy()
     elif __opts__['pepa_subkey']:
         pillar_data = tree
-        pillar_data['pepa'] = tree.copy()
+        pillar_data[resource] = tree.copy()
     else:
         pillar_data = tree
     return pillar_data
