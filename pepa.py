@@ -101,7 +101,7 @@ def key_value_to_tree(data):
     return tree
 
 
-def ext_pillar(minion_id, pillar, resource, sequence, subkey = False, subkey_only = False):
+def ext_pillar(minion_id, pillar, resource, sequence, subkey=False, subkey_only=False):
     '''
     Evaluate Pepa templates
     '''
