@@ -1,0 +1,64 @@
+cobbler:
+    profile: fedora-19-x86_64
+default: default
+environment: dev
+hostname: test.example.com
+location:
+    country: nl
+    datacenter: foobar
+    region: emea
+mail:
+    agent: sendmail
+    gateway: smtp.emea.example.com
+network:
+    dns:
+        options:
+        - timeout:2
+        - attempts:1
+        - ndots:1
+        search:
+        - example.com
+        servers:
+        - 10.2.0.1
+        - 10.2.0.2
+    gateway: 10.0.0.254
+    interfaces:
+        eth0:
+            dhcp: false
+            fqdn: test.example.com
+            hwaddr: 00:20:26:a1:12:12
+            ipv4: 10.0.0.3
+            netmask: 255.255.255.0
+osfinger: Fedora-19
+pepa_templates:
+- examples/hosts/host_input/test_example_com.yaml
+- examples/hosts/default/default.yaml
+- examples/hosts/region/emea.yaml
+- examples/hosts/osfinger/fedora_19.yaml
+pkgrepo:
+    mirror: yum.emea.example.com
+    osabbr: fc19
+    repos:
+        base:
+            baseurl: http://yum.emea.example.com/pub/fedora/linux/releases/$releasever/Fedora/x86_64/os/
+            name: Fedora-19 - Base
+        everything:
+            baseurl: http://yum.emea.example.com/pub/fedora/linux/releases/$releasever/Everything/x86_64/os/
+            name: Fedora-19 - Everything
+        updates:
+            baseurl: http://yum.emea.example.com/pub/fedora/updates/$releasever/x86_64/
+            name: Fedora-19 - Updates
+    type: yum
+roles:
+- salt.master
+salt:
+    master: salt.emea.example.com
+    release: 1
+    version: 2014.1.5
+time:
+    ntp:
+        servers:
+        - ntp1.amer.example.com
+        - ntp2.amer.example.com
+        - ntp3.amer.example.com
+    timezone: Europe/Stockholm

@@ -18,7 +18,7 @@ import sys
 
 # Only used when called from a TTY (terminal)
 log = None
-if __name__ == '__main__' and sys.stdout.isatty():
+if __name__ == '__main__':
     import argparse
 
     parser = argparse.ArgumentParser()
@@ -181,7 +181,7 @@ def ext_pillar(minion_id, pillar, resource, sequence, subkey=False, subkey_only=
     return pillar_data
 
 # Only used when called from a TTY (terminal)
-if __name__ == '__main__' and sys.stdout.isatty():
+if __name__ == '__main__':
     # Load configuration file
     if not isfile(args.config):
         log.critical("Configuration file doesn't exist: {0}".format(args.config))
