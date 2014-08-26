@@ -9,7 +9,7 @@ import sys
 
 # Validate calling Pepa from TTY
 expected = yaml.load(open('tests/output.yaml').read())
-proc = subprocess.Popen(['./pepa.py', '--config', 'examples/master', 'test.example.com'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+proc = subprocess.Popen(['./pepa.py', '-n', '-c', 'examples/master', 'test.example.com'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 actual = yaml.load(proc.communicate()[0])
 
 if cmp(expected, actual) == 0:
