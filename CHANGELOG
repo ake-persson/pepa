@@ -1,5 +1,0 @@
-0.6.3
-2014-07-28
-- Fixed library imports
-- Made color output on the Terminal optional
-- Fixed isatty to include __main__ check
