@@ -163,6 +163,24 @@ network:
       - example.com
 ```
 
+# Operators
+
+Operators can be used merge a list/hash or set the key as immutable, so it can't be changed.
+
+| Operator | Description |
+| -------- | ----------- |
+| merge()  | Merge list or hash |
+| immutable() | Set the key as immutable, so it can't be changed |
+| imerge | Set immutable merge |
+
+**Example:**
+
+```yaml
+network.dns.search.merge():
+  - foobar.com
+  - dummy.nl
+```
+
 # Logging
 
 If you want to use different level's of logging for Salt master and Pepa, you can do this in the salt master file.
