@@ -9,7 +9,7 @@ Documentation: https://github.com/mickep76/pepa
 __author__ = 'Michael Persson <michael.ake.persson@gmail.com>'
 __copyright__ = 'Copyright (c) 2013 Michael Persson'
 __license__ = 'Apache License, Version 2.0'
-__version__ = '0.6.3'
+__version__ = '0.6.4'
 
 # Import python libs
 import logging
