@@ -180,7 +180,14 @@ def ext_pillar(minion_id, pillar, resource, sequence, subkey=False, subkey_only=
                         log.warning("Key {0} is immutable, changes are not allowed".format(rkey))
                     elif operator == 'merge()':
                         log.debug("Merge key {0}: {1}".format(rkey, results[key]))
-                        output[rkey].extend(results[key])
+                        if rkey in output and type(results[key]) != type(output[rkey]):
+                            log.warning('You can''t merge different types for key {0}'.format(rkey))
+                        elif type(results[key]) is dict:
+                            output[rkey].update(results[key])
+                        elif type(results[key]) is list:
+                            output[rkey].extend(results[key])
+                        else:
+                            log.warning('Unsupported type need to be list or dict for key {0}'.format(rkey))
                     elif operator == 'unset()':
                         log.debug("Unset key {0}".format(rkey))
                         try:
@@ -194,7 +201,14 @@ def ext_pillar(minion_id, pillar, resource, sequence, subkey=False, subkey_only=
                     elif operator == 'imerge()':
                         log.debug("Set immutable and merge key {0}: {1}".format(rkey, results[key]))
                         immutable[rkey] = True
-                        output[rkey].extend(results[key])
+                        if rkey in output and type(results[key]) != type(output[rkey]):
+                            log.warning('You can''t merge different types for key {0}'.format(rkey))
+                        elif type(results[key]) is dict:
+                            output[rkey].update(results[key])
+                        elif type(results[key]) is list:
+                            output[rkey].extend(results[key])
+                        else:
+                            log.warning('Unsupported type need to be list or dict for key {0}'.format(rkey))
                     elif operator == 'iunset()':
                         log.debug("Set immutable and unset key {0}".format(rkey))
                         immutable[rkey] = True
