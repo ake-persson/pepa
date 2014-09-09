@@ -14,10 +14,6 @@ location:
 mail:
     agent: sendmail
     gateway: smtp.emea.example.com
-mcdonalds:
-    burgers:
-    - Big Mac
-    - Quarter Pounder with Cheese
 network:
     dns:
         options:
