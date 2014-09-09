@@ -1,3 +1,7 @@
+Pepa - Configuration templating using Hierarchical substitution and Jinja.
+
+[![Build Status](https://drone.io/github.com/mickep76/pepa/status.png)](https://drone.io/github.com/mickep76/pepa/latest)
+
 # Quick testing
 
 You can easily test Pepa from the Command Line.
