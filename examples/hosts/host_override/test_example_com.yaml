@@ -1,0 +1,4 @@
+burgerking..burgers:
+  - Rodeo Burger
+mcdonalds..burgers..merge():
+  - Filet-O-Fish

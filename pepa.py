@@ -16,7 +16,7 @@ import logging
 import sys
 
 
-# Only used when called from a TTY (terminal)
+# Only used when called from a terminal
 log = None
 if __name__ == '__main__':
     import argparse
@@ -122,6 +122,7 @@ def ext_pillar(minion_id, pillar, resource, sequence, subkey=False, subkey_only=
     # Load templates
     output = inp
     output['pepa_templates'] = []
+    immutable = {}
 
     for categ, info in [s.items()[0] for s in sequence]:
         if categ not in inp:
@@ -166,8 +167,33 @@ def ext_pillar(minion_id, pillar, resource, sequence, subkey=False, subkey_only=
 
             if results is not None:
                 for key in results:
-                    log.debug("Substituting key {0}: {1}".format(key, results[key]))
-                    output[key] = results[key]
+                    skey = key.rsplit(__opts__['pepa_delimiter'], 1)
+                    rkey = None
+                    operator = None
+                    if len(skey) > 1 and key.rfind('()') > 0:
+                        rkey = skey[0].rstrip(__opts__['pepa_delimiter'])
+                        operator = skey[1]
+
+                    if key in immutable:
+                        log.warning('Key {0} is immutable, changes are not allowed'.format(key))
+                    elif rkey in immutable:
+                        log.warning("Key {0} is immutable, changes are not allowed".format(rkey))
+                    elif operator == 'merge()':
+                        log.debug("Merge key {0}: {1}".format(rkey, results[key]))
+                        output[rkey].extend(results[key])
+                    elif operator == 'immutable()':
+                        log.debug("Substituting immutable key {0}: {1}".format(rkey, results[key]))
+                        immutable[rkey] = True
+                        output[rkey] = results[key]
+                    elif operator == 'imerge()':
+                        log.debug("Merge immutable key {0}: {1}".format(rkey, results[key]))
+                        immutable[rkey] = True
+                        output[rkey].extend(results[key])
+                    elif operator != None:
+                        log.warning('Unsupported operator {0}, skipping key {1}'.format(operator, rkey))
+                    else:
+                        log.debug("Substituting key {0}: {1}".format(key, results[key]))
+                        output[key] = results[key]
 
     tree = key_value_to_tree(output)
     pillar_data = {}
@@ -180,7 +206,7 @@ def ext_pillar(minion_id, pillar, resource, sequence, subkey=False, subkey_only=
         pillar_data = tree
     return pillar_data
 
-# Only used when called from a TTY (terminal)
+# Only used when called from a terminal
 if __name__ == '__main__':
     # Load configuration file
     if not isfile(args.config):

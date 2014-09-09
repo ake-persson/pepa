@@ -7,3 +7,7 @@ time..ntp..servers:
   - ntp3.amer.example.com
 time..timezone: Europe/Stockholm
 pkgrepo..mirror: yum.emea.example.com
+mcdonalds..burgers..imerge():
+  - Quarter Pounder with Cheese
+burgerking..burgers:
+  - Big King

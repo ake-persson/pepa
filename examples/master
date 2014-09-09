@@ -36,6 +36,7 @@ ext_pillar:
         - roles:
         - osfinger:
         - hostname:
+            name: host_override
             base_only: True  
 
 pepa_grains:
