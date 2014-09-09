@@ -7,10 +7,6 @@ cobbler:
 default: default
 environment: dev
 hostname: test.example.com
-jack_in_the_box:
-    burgers:
-    - Sirloin Cheeseburger
-    - Sourdough Jack
 location:
     country: nl
     datacenter: foobar
