@@ -2,3 +2,5 @@ burgerking..burgers:
   - Rodeo Burger
 mcdonalds..burgers..merge():
   - Filet-O-Fish
+jack_in_the_box..burgers..unset():
+mcdonalds..burgers..unset():

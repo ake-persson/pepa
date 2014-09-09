@@ -181,18 +181,31 @@ def ext_pillar(minion_id, pillar, resource, sequence, subkey=False, subkey_only=
                     elif operator == 'merge()':
                         log.debug("Merge key {0}: {1}".format(rkey, results[key]))
                         output[rkey].extend(results[key])
+                    elif operator == 'unset()':
+                        log.debug("Unset key {0}".format(rkey))
+                        try:
+                            del output[rkey]
+                        except KeyError:
+                            pass
                     elif operator == 'immutable()':
-                        log.debug("Substituting immutable key {0}: {1}".format(rkey, results[key]))
+                        log.debug("Set immutable and substitute key {0}: {1}".format(rkey, results[key]))
                         immutable[rkey] = True
                         output[rkey] = results[key]
                     elif operator == 'imerge()':
-                        log.debug("Merge immutable key {0}: {1}".format(rkey, results[key]))
+                        log.debug("Set immutable and merge key {0}: {1}".format(rkey, results[key]))
                         immutable[rkey] = True
                         output[rkey].extend(results[key])
+                    elif operator == 'iunset()':
+                        log.debug("Set immutable and unset key {0}".format(rkey))
+                        immutable[rkey] = True
+                        try:
+                            del output[rkey]
+                        except KeyError:
+                            pass
                     elif operator != None:
                         log.warning('Unsupported operator {0}, skipping key {1}'.format(operator, rkey))
                     else:
-                        log.debug("Substituting key {0}: {1}".format(key, results[key]))
+                        log.debug("Substitute key {0}: {1}".format(key, results[key]))
                         output[key] = results[key]
 
     tree = key_value_to_tree(output)

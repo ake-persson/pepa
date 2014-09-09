@@ -165,13 +165,15 @@ network:
 
 # Operators
 
-Operators can be used merge a list/hash or set the key as immutable, so it can't be changed.
+Operators can be used to merge/unset a list/hash or set the key as immutable, so it can't be changed.
 
 | Operator | Description |
 | -------- | ----------- |
 | merge()  | Merge list or hash |
+| unset() | Unset key |
 | immutable() | Set the key as immutable, so it can't be changed |
-| imerge | Set immutable merge |
+| imerge() | Set immutable and merge |
+| iunset() | Set immutable and unset |
 
 **Example:**
 
