@@ -182,7 +182,7 @@ network..dns..search..merge():
   - foobar.com
   - dummy.nl
 owner..immutable(): Operations
-host..printers.unset():
+host..printers..unset():
 ```
 
 # Logging
