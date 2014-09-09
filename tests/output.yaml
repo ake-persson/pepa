@@ -1,8 +1,16 @@
+burgerking:
+    burgers:
+    - WHOPPER
+    - DOUBLE WHOPPER
 cobbler:
     profile: fedora-19-x86_64
 default: default
 environment: dev
 hostname: test.example.com
+jack_in_the_box:
+    burgers:
+    - Sirloin Cheeseburger
+    - Sourdough Jack
 location:
     country: nl
     datacenter: foobar
@@ -10,6 +18,10 @@ location:
 mail:
     agent: sendmail
     gateway: smtp.emea.example.com
+mcdonalds:
+    burgers:
+    - Big Mac
+    - Quarter Pounder with Cheese
 network:
     dns:
         options:
@@ -35,6 +47,7 @@ pepa_templates:
 - examples/hosts/default/default.yaml
 - examples/hosts/region/emea.yaml
 - examples/hosts/osfinger/fedora_19.yaml
+- examples/hosts/host_override/test_example_com.yaml
 pkgrepo:
     mirror: yum.emea.example.com
     osabbr: fc19
@@ -62,3 +75,4 @@ time:
         - ntp2.amer.example.com
         - ntp3.amer.example.com
     timezone: Europe/Stockholm
+
