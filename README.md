@@ -178,9 +178,11 @@ Operators can be used to merge/unset a list/hash or set the key as immutable, so
 **Example:**
 
 ```yaml
-network.dns.search.merge():
+network..dns..search..merge():
   - foobar.com
   - dummy.nl
+owner..immutable(): Operations
+host..printers.unset():
 ```
 
 # Logging
