@@ -1,4 +1,4 @@
-Pepa - Configuration templating using Hierarchical substitution and Jinja.
+Pepa - Configuration templating for SaltStack using Hierarchical substitution and Jinja.
 
 [![Build Status](https://drone.io/github.com/mickep76/pepa/status.png)](https://drone.io/github.com/mickep76/pepa/latest)
 
