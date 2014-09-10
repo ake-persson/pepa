@@ -240,6 +240,9 @@ def ext_pillar(minion_id, pillar, resource, sequence, subkey=False, subkey_only=
     return pillar_data
 
 def validate(output, resource):
+    '''
+    Validate Pepa templates
+    '''
     roots = __opts__['pepa_roots']
 
     valdir = join(roots['base'], resource, 'validate')
