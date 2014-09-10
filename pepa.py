@@ -14,6 +14,7 @@ __version__ = '0.6.4'
 # Import python libs
 import logging
 import sys
+import cerberus
 
 
 # Only used when called from a terminal
@@ -28,6 +29,7 @@ if __name__ == '__main__':
     parser.add_argument('-g', '--grains', help='Input Grains as YAML')
     parser.add_argument('-p', '--pillar', help='Input Pillar as YAML')
     parser.add_argument('-n', '--no-color', action='store_true', help='No color output')
+    parser.add_argument('-v', '--validate', action='store_true', help='Validate output')
     args = parser.parse_args()
 
     LOG_LEVEL = logging.WARNING
@@ -60,7 +62,8 @@ __opts__ = {
     'pepa_roots': {
         'base': '/srv/salt'
     },
-    'pepa_delimiter': '..'
+    'pepa_delimiter': '..',
+    'pepa_validate': False
 }
 
 # Import libraries
@@ -231,7 +234,23 @@ def ext_pillar(minion_id, pillar, resource, sequence, subkey=False, subkey_only=
         pillar_data[resource] = tree.copy()
     else:
         pillar_data = tree
+    if __opts__['pepa_validate']:
+        pillar_data['pepa_keys'] = output.copy()
     return pillar_data
+
+def validate(output, resource):
+    roots = __opts__['pepa_roots']
+
+    valdir = join(roots['base'], resource, 'validate')
+
+    fn = join(valdir, 'network.yaml')
+    schema = yaml.load(open(fn).read())
+
+    val = cerberus.Validator()
+    if not val.validate(output['pepa_keys'], schema):
+        for ekey, error in val.errors.items():
+            log.warning('Validation failed for key {0}: {1}'.format(ekey, error))
+
 
 # Only used when called from a terminal
 if __name__ == '__main__':
@@ -263,8 +282,15 @@ if __name__ == '__main__':
     if args.pillar:
         __pillar__.update(yaml.load(args.pillar))
 
+    # Validate or not
+    if args.validate:
+        __opts__['pepa_validate'] = True
+
     # Print results
     result = ext_pillar(args.hostname, __pillar__, __opts__['ext_pillar'][loc]['pepa']['resource'], __opts__['ext_pillar'][loc]['pepa']['sequence'])
+
+    if __opts__['pepa_validate']:
+        validate(result, __opts__['ext_pillar'][loc]['pepa']['resource'])
 
     yaml.dumper.SafeDumper.ignore_aliases = lambda self, data: True
     if not args.no_color:
@@ -277,4 +303,3 @@ if __name__ == '__main__':
             print yaml.safe_dump(result, indent=4, default_flow_style=False)
     else:
         print yaml.safe_dump(result, indent=4, default_flow_style=False)
-
