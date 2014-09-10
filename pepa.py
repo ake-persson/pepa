@@ -248,6 +248,7 @@ def validate(output, resource):
     valdir = join(roots['base'], resource, 'validate')
 
     all_schemas = {}
+    pepa_schemas = []
     for fn in glob.glob(valdir + '/*.yaml'):
         log.info("Loading schema: {0}".format(fn))
         template = jinja2.Template(open(fn).read())
@@ -256,13 +257,15 @@ def validate(output, resource):
         data['pillar'] = __pillar__.copy()
         schema = yaml.load(template.render(data))
         all_schemas.update(schema)
-
-#    print yaml.safe_dump(all_schemas, indent=4, default_flow_style=False)
+        pepa_schemas.append(fn)
 
     val = cerberus.Validator()
     if not val.validate(output['pepa_keys'], all_schemas):
         for ekey, error in val.errors.items():
             log.warning('Validation failed for key {0}: {1}'.format(ekey, error))
+
+    output['pepa_schema_keys'] = all_schemas
+    output['pepa_schemas'] = pepa_schemas
 
 
 # Only used when called from a terminal
