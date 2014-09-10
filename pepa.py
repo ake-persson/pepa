@@ -15,6 +15,7 @@ __version__ = '0.6.4'
 import logging
 import sys
 import cerberus
+import glob
 
 
 # Only used when called from a terminal
@@ -243,11 +244,20 @@ def validate(output, resource):
 
     valdir = join(roots['base'], resource, 'validate')
 
-    fn = join(valdir, 'network.yaml')
-    schema = yaml.load(open(fn).read())
+    all_schemas = {}
+    for fn in glob.glob(valdir + '/*.yaml'):
+        log.info("Loading schema: {0}".format(fn))
+        template = jinja2.Template(open(fn).read())
+        data = output
+        data['grains'] = __grains__.copy()
+        data['pillar'] = __pillar__.copy()
+        schema = yaml.load(template.render(data))
+        all_schemas.update(schema)
+
+#    print yaml.safe_dump(all_schemas, indent=4, default_flow_style=False)
 
     val = cerberus.Validator()
-    if not val.validate(output['pepa_keys'], schema):
+    if not val.validate(output['pepa_keys'], all_schemas):
         for ekey, error in val.errors.items():
             log.warning('Validation failed for key {0}: {1}'.format(ekey, error))
 
