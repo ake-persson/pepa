@@ -1,0 +1,25 @@
+pkgrepo..mirror:
+  type: string
+  regex: ^([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+[a-zA-Z]{2,6}$
+
+pkgrepo..osabbr:
+  type: string
+  regex: ^(fc|el)[0-9]+$
+
+pkgrepo..type:
+  type: string
+  allowed: ['yum']
+
+{% if pkgrepo.repos is defined %}
+{% for pkgrepo in pkgrepo.repos %}
+
+pkgrepo..repos..{{ pkgrepo }}..baseurl:
+  type: string
+  regex: (\b(https?|http)://)?[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]
+
+pkgrepo..repos..{{ pkgrepo }}..name:
+  type: string
+  regex: ^[A-Za-z0-9-\ ]+$
+
+{% endfor %}
+{% endif %}
