@@ -3,7 +3,6 @@
 '''
 Configuration templating using Hierarchical substitution and Jinja.
 
-
 Configuring Pepa
 ================
 
@@ -50,6 +49,31 @@ pepa_roots:                         # Base directory for each environment
 #  salt: warning
 #  salt.loaded.ext.pillar.pepa: debug
 .. code-block:: yaml
+
+Pepa can also be used in Master-less SaltStack setup.
+
+Command line
+============
+
+.. code-block:: bash
+usage: pepa.py [-h] [-c CONFIG] [-d] [-g GRAINS] [-p PILLAR] [-n] [-v]
+               hostname
+
+positional arguments:
+  hostname              Hostname
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -c CONFIG, --config CONFIG
+                        Configuration file
+  -d, --debug           Print debug info
+  -g GRAINS, --grains GRAINS
+                        Input Grains as YAML
+  -p PILLAR, --pillar PILLAR
+                        Input Pillar as YAML
+  -n, --no-color        No color output
+  -v, --validate        Validate output
+.. code-block:: bash
 
 Templates
 =========
@@ -158,6 +182,68 @@ network..dns..search..merge():
   - dummy.nl
 owner..immutable(): Operations
 host..printers..unset():
+.. code-block:: yaml
+
+Validation
+==========
+
+Since it's very hard to test Jinja as is, the best approach is to run all the permutations of input and validate the output, i.e. Unit Testing.
+
+To facilitate this in Pepa we use YAML, Jinja and Cerberus <https://github.com/nicolaiarocci/cerberus>.
+
+Schema
+======
+
+So this is a validation schema for network configuration, as you see it can be customized with Jinja just as Pepa templates.
+
+This can be run in master-less setup or without SaltStack. If you run it without SaltStack you can provide Grains/Pillar input using either the config file or command line arguments.
+
+**File Example: host/validation/network.yaml**
+
+.. code-block:: yaml
+network..dns..search:
+  type: list
+  allowed:
+    - example.com
+
+# Should be list of hash values
+network..dns..options:
+  type: list
+  allowed: ['timeout:2', 'attempts:1', 'ndots:1']
+
+network..dns..servers:
+  type: list
+  schema:
+    regex: ^([0-9]{1,3}\.){3}[0-9]{1,3}$
+
+network..gateway:
+  type: string
+  regex: ^([0-9]{1,3}\.){3}[0-9]{1,3}$
+
+{% if network.interfaces is defined %}
+{% for interface in network.interfaces %}
+
+network..interfaces..{{ interface }}..dhcp:
+  type: boolean
+
+network..interfaces..{{ interface }}..fqdn:
+  type: string
+  regex: ^([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+[a-zA-Z]{2,6}$
+
+network..interfaces..{{ interface }}..hwaddr:
+  type: string
+  regex: ^([0-9a-f]{1,2}\:){5}[0-9a-f]{1,2}$
+
+network..interfaces..{{ interface }}..ipv4:
+  type: string
+  regex: ^([0-9]{1,3}\.){3}[0-9]{1,3}$
+
+network..interfaces..{{ interface }}..netmask:
+  type: string
+  regex: ^([0-9]{1,3}\.){3}[0-9]{1,3}$
+
+{% endfor %}
+{% endif %}
 .. code-block:: yaml
 
 Links
