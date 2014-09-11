@@ -260,9 +260,10 @@ __version__ = '0.6.4'
 # Import python libs
 import logging
 import sys
-import cerberus
 import glob
-
+import yaml
+import jinja2
+import re
 
 # Only used when called from a terminal
 log = None
@@ -313,17 +314,17 @@ __opts__ = {
     'pepa_validate': False
 }
 
-# Import libraries
-import yaml
-import jinja2
-import re
-
 try:
     from os.path import isfile, join
     HAS_OS_PATH = True
 except ImportError:
     HAS_OS_PATH = False
 
+try:
+    import cerberus
+    HAS_CERBERUS = True
+except ImportError:
+    HAS_CERBERUS = False
 
 def __virtual__():
     '''
