@@ -15,7 +15,7 @@ Create a virtual env. and install the required modules.
   virtualenv venv
   cd venv
   source bin/activate
-  pip install pyyaml jinja2 argparse logging colorlog pygments
+  pip install pyyaml jinja2 argparse logging colorlog pygments cerberus
 
 Clone and run Pepa.
 
