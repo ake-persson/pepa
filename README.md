@@ -65,6 +65,16 @@ pepa_roots:
   dev: /srv/salt/base
   qa: /srv/salt/qa
   prod: /srv/salt/prod
+  
+#pepa_subkey: True
+#pepa_subkey_only: True
+
+# Enable debug for Pepa, and keep Salt on warning
+#log_level: debug
+  
+#log_granular_levels:
+#  salt: warning
+#  salt.loaded.ext.pillar.pepa: debug
 ```
 
 # Configuration
