@@ -214,11 +214,11 @@ network..dns..options:
 network..dns..servers:
   type: list
   schema:
-    regex: ^([0-9]{1,3}\.){3}[0-9]{1,3}$
+    regex: ^([0-9]{1,3}\\.){3}[0-9]{1,3}$
 
 network..gateway:
   type: string
-  regex: ^([0-9]{1,3}\.){3}[0-9]{1,3}$
+  regex: ^([0-9]{1,3}\\.){3}[0-9]{1,3}$
 
 {% if network.interfaces is defined %}
 {% for interface in network.interfaces %}
@@ -228,19 +228,19 @@ network..interfaces..{{ interface }}..dhcp:
 
 network..interfaces..{{ interface }}..fqdn:
   type: string
-  regex: ^([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+[a-zA-Z]{2,6}$
+  regex: ^([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\\.)+[a-zA-Z]{2,6}$
 
 network..interfaces..{{ interface }}..hwaddr:
   type: string
-  regex: ^([0-9a-f]{1,2}\:){5}[0-9a-f]{1,2}$
+  regex: ^([0-9a-f]{1,2}\\:){5}[0-9a-f]{1,2}$
 
 network..interfaces..{{ interface }}..ipv4:
   type: string
-  regex: ^([0-9]{1,3}\.){3}[0-9]{1,3}$
+  regex: ^([0-9]{1,3}\\.){3}[0-9]{1,3}$
 
 network..interfaces..{{ interface }}..netmask:
   type: string
-  regex: ^([0-9]{1,3}\.){3}[0-9]{1,3}$
+  regex: ^([0-9]{1,3}\\.){3}[0-9]{1,3}$
 
 {% endfor %}
 {% endif %}
