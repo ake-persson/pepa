@@ -1,4 +1,37 @@
-Configuration templating using Hierarchical substitution and Jinja.
+Pepa
+====
+
+Configuration templating for SaltStack using Hierarchical substitution and Jinja.
+
+Quick testing
+=============
+
+You can easily test Pepa from the Command Line.
+
+Create a virtual env. and install the required modules.
+
+.. code-block:: bash
+
+  virtualenv venv
+  cd venv
+  source bin/activate
+  pip install pyyaml jinja2 argparse logging colorlog pygments
+
+Clone and run Pepa.
+
+.. code-block:: bash
+
+  git clone https://github.com/mickep76/pepa.git
+  cd pepa
+  ./pepa.py -c examples/master test.example.com -d
+
+You can also specify the Grains/Pillar as arguments.
+
+.. code-block:: bash
+
+  ./pepa.py -c examples/master test.example.com -g '{ osfinger: Fedora 17, os: Fedora, osrelease: 17 }'
+
+Normally Grains/Pillars are supplied from the Salt master/minion, this is mostly for testing and validation.
 
 Configuring Pepa
 ================

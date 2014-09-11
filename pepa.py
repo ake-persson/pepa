@@ -1,7 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 '''
-Configuration templating using Hierarchical substitution and Jinja.
+Pepa
+====
+
+Configuration templating for SaltStack using Hierarchical substitution and Jinja.
 
 Configuring Pepa
 ================
