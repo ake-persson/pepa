@@ -85,7 +85,7 @@ Templates
 
 Templates is configuration for a host or software, that can use information from Grains or Pillars. These can then be used for hierarchically substitution.
 
-**Example File:** host/input/test.example.com.yaml
+**Example File:** host/input/test_example_com.yaml
 
 .. code-block:: yaml
 
@@ -151,6 +151,7 @@ In order to create nested dictionaries as output you can use double dot **".."**
 **Would become:**
 
 .. code-block:: yaml
+
     network:
       dns:
         servers:
@@ -181,6 +182,7 @@ iunset()    Set immutable and unset
 **Example:**
 
 .. code-block:: yaml
+
     network..dns..search..merge():
       - foobar.com
       - dummy.nl
@@ -210,7 +212,6 @@ This was designed to be run as a build job in Jenkins or similar tool. You can p
       allowed:
         - example.com
 
-    # Should be list of hash values
     network..dns..options:
       type: list
       allowed: ['timeout:2', 'attempts:1', 'ndots:1']
