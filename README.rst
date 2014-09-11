@@ -180,3 +180,65 @@ iunset()    Set immutable and unset
     - dummy.nl
   owner..immutable(): Operations
   host..printers..unset():
+
+Validation
+==========
+
+Since it's very hard to test Jinja as is, the best approach is to run all the permutations of input and validate the output, i.e. Unit Testing.
+
+To facilitate this in Pepa we use YAML, Jinja and Cerberus <https://github.com/nicolaiarocci/cerberus>.
+
+Schema
+======
+
+So this is a validation schema for network configuration, as you see it can be customized with Jinja just as Pepa templates.
+
+This can be run in master-less setup or without SaltStack. If you run it without SaltStack you can provide Grains/Pillar input using either the config file or command line arguments.
+
+**File Example: host/validation/network.yaml**
+
+.. code-block:: yaml
+
+  network..dns..search:
+    type: list
+    allowed:
+      - example.com
+
+  # Should be list of hash values
+  network..dns..options:
+    type: list
+    allowed: ['timeout:2', 'attempts:1', 'ndots:1']
+
+  network..dns..servers:
+    type: list
+    schema:
+      regex: ^([0-9]{1,3}\.){3}[0-9]{1,3}$
+
+  network..gateway:
+    type: string
+    regex: ^([0-9]{1,3}\.){3}[0-9]{1,3}$
+
+  {% if network.interfaces is defined %}
+  {% for interface in network.interfaces %}
+
+  network..interfaces..{{ interface }}..dhcp:
+    type: boolean
+
+  network..interfaces..{{ interface }}..fqdn:
+    type: string
+    regex: ^([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+[a-zA-Z]{2,6}$
+
+  network..interfaces..{{ interface }}..hwaddr:
+    type: string
+    regex: ^([0-9a-f]{1,2}\:){5}[0-9a-f]{1,2}$
+
+  network..interfaces..{{ interface }}..ipv4:
+    type: string
+    regex: ^([0-9]{1,3}\.){3}[0-9]{1,3}$
+
+  network..interfaces..{{ interface }}..netmask:
+    type: string
+    regex: ^([0-9]{1,3}\.){3}[0-9]{1,3}$
+
+  {% endfor %}
+  {% endif %}
