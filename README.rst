@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-'''
 Configuration templating using Hierarchical substitution and Jinja.
 
 Configuring Pepa
