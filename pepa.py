@@ -39,13 +39,13 @@ pepa_roots:                         # Base directory for each environment
   dev: /srv/pepa/base               # Associate dev with base
   qa: /srv/pepa/qa
   prod: /srv/pepa/prod
-  
+
 # Use a different delimiter for nested dictionaries, defaults to '..' since some keys may use '.' in the name
 #pepa_delimiter: ..
-  
+
 # Enable debug for Pepa, and keep Salt on warning
 #log_level: debug
-  
+
 #log_granular_levels:
 #  salt: warning
 #  salt.loaded.ext.pillar.pepa: debug
