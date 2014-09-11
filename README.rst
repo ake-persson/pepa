@@ -47,8 +47,6 @@ pepa_roots:                         # Base directory for each environment
 #  salt: warning
 #  salt.loaded.ext.pillar.pepa: debug
 
-.. code-block:: yaml
-
 Pepa can also be used in Master-less SaltStack setup.
 
 Command line
@@ -74,8 +72,6 @@ optional arguments:
   -n, --no-color        No color output
   -v, --validate        Validate output
 
-.. code-block:: bash
-
 Templates
 =========
 
@@ -99,8 +95,6 @@ network..interfaces..eth0..netmask: 255.255.255.0
 network..interfaces..eth0..fqdn: {{ hostname }}
 cobbler..profile: fedora-19-x86_64
 
-.. code-block:: yaml
-
 As you see in this example you can use Jinja directly inside the template.
 
 **Example File:** host/region/amer.yaml
@@ -116,8 +110,6 @@ time..ntp..servers:
   - ntp3.amer.example.com
 time..timezone: America/Chihuahua
 yum..mirror: yum.amer.example.com
-
-.. code-block:: yaml
 
 Each template is named after the value of the key using lowercase and all extended characters are replaced with underscore.
 
@@ -148,8 +140,6 @@ network..dns..options:
 network..dns..search:
   - example.com
 
-.. code-block:: yaml
-
 **Would become:**
 
 .. code-block:: yaml
@@ -165,8 +155,6 @@ network:
       - ndots:1
     search:
       - example.com
-
-.. code-block:: yaml
 
 Operators
 =========
@@ -192,8 +180,6 @@ network..dns..search..merge():
   - dummy.nl
 owner..immutable(): Operations
 host..printers..unset():
-
-.. code-block:: yaml
 
 Validation
 ==========
@@ -256,5 +242,3 @@ network..interfaces..{{ interface }}..netmask:
 
 {% endfor %}
 {% endif %}
-
-.. code-block:: yaml
