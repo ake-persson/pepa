@@ -180,8 +180,3 @@ iunset()    Set immutable and unset
     - dummy.nl
   owner..immutable(): Operations
   host..printers..unset():
-
-Links
-=====
-
-For more examples and information see <https://github.com/mickep76/pepa>.
