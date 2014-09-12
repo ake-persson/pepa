@@ -571,9 +571,20 @@ if __name__ == '__main__':
     headers={'X-Auth-Token': token, 'Accept': 'application/json'}
     request = requests.get(args.url + '/minions', headers=headers)
     response = request.json().get('return', [{}])[0]
-    print response
 
-    sys.exit(0)
+    for host in response:
+        print '\n\n### Grains: {0} ###\n\n'.format(host)
+        __grains__ = response[host]
+        print yaml.safe_dump(__grains__, indent=4, default_flow_style=False)
+
+        print '\n\n### Template: {0} ###\n\n'.format(host)
+        result = ext_pillar(host, __pillar__, __opts__['ext_pillar'][loc]['pepa']['resource'], __opts__['ext_pillar'][loc]['pepa']['sequence'])
+        print yaml.safe_dump(result, indent=4, default_flow_style=False)
+
+        print '\n\n### Validate: {0} ###\n\n'.format(host)
+        validate(result, __opts__['ext_pillar'][loc]['pepa']['resource'])
+
+        sys.exit(0)
 
     # Print results
     result = ext_pillar(args.hostname, __pillar__, __opts__['ext_pillar'][loc]['pepa']['resource'], __opts__['ext_pillar'][loc]['pepa']['sequence'])
