@@ -291,7 +291,7 @@ if __name__ == '__main__':
     parser.add_argument('-v', '--validate', action='store_true', help='Validate output')
     parser.add_argument('--url', default='https://salt:8000', help='URL for SaltStack REST API')
     parser.add_argument('-u', '--username', help='Username for SaltStack REST API')
-    parser.add_argument('-p', '--password', help='Password for SaltStack REST API')
+    parser.add_argument('-P', '--password', help='Password for SaltStack REST API')
     parser.add_argument('-t', '--teamcity', action='store_true', help='Output validation in TeamCity format')
     args = parser.parse_args()
 
@@ -549,9 +549,31 @@ if __name__ == '__main__':
     if args.validate:
         __opts__['pepa_validate'] = True
 
+    import requests
+    from requests.auth import HTTPBasicAuth
+    from requests.auth import HTTPDigestAuth
 
-# Get all hosts REST
-# Move import here
+    username = args.username
+    password = args.password
+    if username == None:
+        username = getpass.getuser()
+    if password == None:
+        password = getpass.getpass()
+
+    auth = { 'username': username, 'password': password, 'eauth': 'pam' }
+    request = requests.post(args.url + '/login', auth)
+
+# Detect error
+
+    response = request.json()
+    token = response['return'][0]['token']
+
+    headers={'X-Auth-Token': token, 'Accept': 'application/json'}
+    request = requests.get(args.url + '/minions', headers=headers)
+    response = request.json().get('return', [{}])[0]
+    print response
+
+    sys.exit(0)
 
     # Print results
     result = ext_pillar(args.hostname, __pillar__, __opts__['ext_pillar'][loc]['pepa']['resource'], __opts__['ext_pillar'][loc]['pepa']['sequence'])
