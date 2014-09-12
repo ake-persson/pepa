@@ -289,6 +289,10 @@ if __name__ == '__main__':
     parser.add_argument('-p', '--pillar', help='Input Pillar as YAML')
     parser.add_argument('-n', '--no-color', action='store_true', help='No color output')
     parser.add_argument('-v', '--validate', action='store_true', help='Validate output')
+    parser.add_argument('--url', default='https://salt:8000', help='URL for SaltStack REST API')
+    parser.add_argument('-u', '--username', help='Username for SaltStack REST API')
+    parser.add_argument('-p', '--password', help='Password for SaltStack REST API')
+    parser.add_argument('-t', '--teamcity', action='store_true', help='Output validation in TeamCity format')
     args = parser.parse_args()
 
     LOG_LEVEL = logging.WARNING
@@ -477,7 +481,13 @@ def validate(output, resource):
     try:
         import cerberus
     except ImportError:
-        log.critical('You need module cerberus in order to use validation')
+        log.critical('You need cerberus module in order to use validation')
+        return
+
+    try:
+        import requests
+    except ImportError:
+        log.critical('You need requests module in order to use validation')
         return
 
     roots = __opts__['pepa_roots']
@@ -538,6 +548,10 @@ if __name__ == '__main__':
     # Validate or not
     if args.validate:
         __opts__['pepa_validate'] = True
+
+
+# Get all hosts REST
+# Move import here
 
     # Print results
     result = ext_pillar(args.hostname, __pillar__, __opts__['ext_pillar'][loc]['pepa']['resource'], __opts__['ext_pillar'][loc]['pepa']['sequence'])

@@ -1,1 +1,5 @@
 - Add PyGit2 backend
+- Add support for fetching Grains/Pillars using API for validation
+- TeamCity output for validate
+- Validate method prob. needs to be part of ext_pillar, so it can run during SaltStack run.
+- How to run multiple run's from terminal using REST API as source?
