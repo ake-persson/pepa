@@ -90,8 +90,12 @@ for name in [e.keys()[0] for e in __opts__['ext_pillar']]:
         break
     loc += 1
 
+roots = __opts__['pepa_roots']
+resource = __opts__['ext_pillar'][loc]['pepa']['resource']
+sequence = __opts__['ext_pillar'][loc]['pepa']['sequence']
+
 # Load defaults file
-fn = join(basedir, resource, 'validate', 'default.yaml')
+fn = join(roots['base'], resource, 'validate', 'default.yaml')
 log.debug('Load defaults file {0}'.format(fn))
 if not isfile(fn):
     log.critical('Defaults file doesn\'t exist {0}'.format(fn))
@@ -105,10 +109,6 @@ except yaml.YAMLError, e:
     sys.exit(1)
 
 # Parse Pepa templates
-roots = __opts__['pepa_roots']
-resource = __opts__['ext_pillar'][loc]['pepa']['resource']
-sequence = __opts__['ext_pillar'][loc]['pepa']['sequence']
-
 for categ, info in [s.items()[0] for s in sequence]:
     templdir = join(roots['base'], resource, categ)
     if isinstance(info, dict) and 'name' in info:
