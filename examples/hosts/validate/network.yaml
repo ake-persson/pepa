@@ -3,7 +3,6 @@ network..dns..search:
   allowed:
     - example.com
 
-# Should be list of hash values
 network..dns..options:
   type: list
   allowed: ['timeout:2', 'attempts:1', 'ndots:1']
