@@ -19,10 +19,17 @@ import re
 from os.path import isfile, join, dirname, basename
 import argparse
 
+# Options
+__opts__ = {
+    'pepa_roots': {
+        'base': '/srv/salt'
+    },
+    'pepa_delimiter': '..'
+}
+
 log = None
 
 parser = argparse.ArgumentParser()
-parser.add_argument('hostname', help='Hostname')
 parser.add_argument('-c', '--config', default='/etc/salt/master', help='Configuration file')
 parser.add_argument('-d', '--debug', action='store_true', help='Print debug info')
 parser.add_argument('-n', '--no-color', action='store_true', help='No color output')
@@ -54,16 +61,6 @@ log.addHandler(stream)
 basedir = 'examples'
 resource = 'hosts'
 
-#def _jinja2_filter_pepa_def(var, default=''):
-#    try:
-#        var
-#    except NameError:
-#        return default
-#    return var
-
-#def _jinja_define_pepadef(var, default=''):
-#    return ''
-
 def key_value_to_tree(data):
     '''
     Convert key/value to tree
@@ -79,27 +76,55 @@ def key_value_to_tree(data):
                 t = t.setdefault(key, {})
     return tree
 
+# Load configuration file
+if not isfile(args.config):
+    log.critical('Configuration file doesn\'t exist {0}'.format(args.config))
+    sys.exit(1)
 
-defaults = key_value_to_tree(yaml.load(open(basedir + '/' + resource + '/validate/default.yaml').read()))
+# Get configuration
+__opts__.update(yaml.load(open(args.config).read()))
 
-for fn in glob.glob(basedir + '/' + resource + '/*/*.yaml'):
-    print('\n\n### Load template {0} ###\n\n'.format(fn))
+loc = 0
+for name in [e.keys()[0] for e in __opts__['ext_pillar']]:
+    if name == 'pepa':
+        break
+    loc += 1
 
-#    env = jinja2.Environment(loader=jinja2.FileSystemLoader(dirname(fn)))
-#    env.filters['pepa_def'] = _jinja2_filter_pepa_def
-#    env.globals.update(pepadef=_jinja_define_pepadef)
-#    tmpl = env.get_template(basename(fn))
-#    tmpl.render()
+# Load defaults file
+fn = join(basedir, resource, 'validate', 'default.yaml')
+log.debug('Load defaults file {0}'.format(fn))
+if not isfile(fn):
+    log.critical('Defaults file doesn\'t exist {0}'.format(fn))
+    sys.exit(1)
 
-    template = jinja2.Template(open(fn).read())
-    result = None
-    try:
-        result = template.render(defaults)
-        print result
-    except jinja2.UndefinedError, e:
-        print e
+defaults = None
+try:
+    defaults = key_value_to_tree(yaml.load(open(fn).read()))
+except yaml.YAMLError, e:
+    log.critical('Failed to parse YAML file {0}\n{1}'.format(fn, e))
+    sys.exit(1)
 
-    try:
-        yaml.load(result)
-    except yaml.YAMLError, e:
-       print e
+# Parse Pepa templates
+roots = __opts__['pepa_roots']
+resource = __opts__['ext_pillar'][loc]['pepa']['resource']
+sequence = __opts__['ext_pillar'][loc]['pepa']['sequence']
+
+for categ, info in [s.items()[0] for s in sequence]:
+    templdir = join(roots['base'], resource, categ)
+    if isinstance(info, dict) and 'name' in info:
+        templdir = join(roots['base'], resource, info['name'])
+
+    for fn in glob.glob(templdir + '/*.yaml'):
+        log.debug('Load template {0}'.format(fn))
+
+        template = jinja2.Template(open(fn).read())
+        result = None
+        try:
+            result = template.render(defaults)
+        except jinja2.UndefinedError, e:
+            log.error('Failed to parse JINJA template {0}\n{1}'.format(fn, e))
+
+        try:
+            yaml.load(result)
+        except yaml.YAMLError, e:
+            log.error('Failed to parse YAML file {0}\n{1}'.format(fn, e))
