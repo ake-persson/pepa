@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 '''
-Validate shit!
+Validate Pepa templates
 '''
 
 __author__ = 'Michael Persson <michael.ake.persson@gmail.com>'
@@ -28,6 +28,67 @@ __opts__ = {
 }
 
 log = None
+
+def key_value_to_tree(data):
+    '''
+    Convert key/value to tree
+    '''
+    tree = {}
+    for flatkey, value in data.items():
+        t = tree
+        keys = flatkey.split('..')
+        for key in keys:
+            if key == keys[-1]:
+                t[key] = value
+            else:
+                t = t.setdefault(key, {})
+    return tree
+
+def validate_template(deffn, defaults):
+    '''
+    Parse Pepa templates
+    '''
+    success = True
+    if args.teamcity:
+        print "##teamcity[testSuiteStarted name='Validate Pepa Templates using defaults {0}' captureStandardOutput='true']".format(deffn)
+    for categ, info in [s.items()[0] for s in sequence]:
+        templdir = join(roots['base'], resource, categ)
+        if isinstance(info, dict) and 'name' in info:
+            templdir = join(roots['base'], resource, info['name'])
+
+        for fn in glob.glob(templdir + '/*.yaml'):
+            if args.teamcity:
+                print "##teamcity[testStarted name='Parse JINJA file {0}' captureStandardOutput='true']".format(fn)
+            else:
+                log.debug('Load template {0}'.format(fn))
+
+            template = jinja2.Template(open(fn).read())
+            result = None
+            try:
+                result = template.render(defaults)
+            except jinja2.UndefinedError, e:
+                success = False
+                if args.teamcity:
+                    print "##teamcity[testFailed name='Parse JINJA template {0}' message='Failed to parse JINJA template']\n{1}".format(fn, e)
+                else:
+                    log.error('Failed to parse JINJA template {0}\n{1}'.format(fn, e))
+
+            if args.teamcity:
+                print "##teamcity[testFinished name='Parse JINJA template {0}']".format(fn)
+                print "##teamcity[testStarted name='Parse YAML in template {0}' captureStandardOutput='true']".format(fn)
+            try:
+                yaml.load(result)
+            except yaml.YAMLError, e:
+                success = False
+                if args.teamcity:
+                    print "##teamcity[testFailed name='Parse YAML in template {0}' message='Failed to parse YAML in template']\n{1}".format(fn, e)
+                else:
+                    log.error('Failed to parse YAML in template {0}\n{1}'.format(fn, e))
+
+    if args.teamcity:
+        print "##teamcity[testSuiteFinished name='Validate Pepa Templates using defaults {0}']".format(deffn)
+
+    return success
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-c', '--config', default='/etc/salt/master', help='Configuration file')
@@ -58,21 +119,6 @@ log = logging.getLogger('pythonConfig')
 log.setLevel(LOG_LEVEL)
 log.addHandler(stream)
 
-def key_value_to_tree(data):
-    '''
-    Convert key/value to tree
-    '''
-    tree = {}
-    for flatkey, value in data.items():
-        t = tree
-        keys = flatkey.split('..')
-        for key in keys:
-            if key == keys[-1]:
-                t[key] = value
-            else:
-                t = t.setdefault(key, {})
-    return tree
-
 # Load configuration file
 if not isfile(args.config):
     log.critical('Configuration file doesn\'t exist {0}'.format(args.config))
@@ -91,59 +137,11 @@ roots = __opts__['pepa_roots']
 resource = __opts__['ext_pillar'][loc]['pepa']['resource']
 sequence = __opts__['ext_pillar'][loc]['pepa']['sequence']
 
-# Load defaults file
-fn = join(roots['base'], resource, 'validate', 'default.yaml')
-log.debug('Load defaults file {0}'.format(fn))
-if not isfile(fn):
-    log.critical('Defaults file doesn\'t exist {0}'.format(fn))
-    sys.exit(1)
-
-defaults = None
-try:
-    defaults = key_value_to_tree(yaml.load(open(fn).read()))
-except yaml.YAMLError, e:
-    log.critical('Failed to parse YAML file {0}\n{1}'.format(fn, e))
-    sys.exit(1)
-
-# Parse Pepa templates
-exit_code = 0
-if args.teamcity:
-    print "##teamcity[testSuiteStarted name='Pepa Template Syntax' captureStandardOutput='true']"
-for categ, info in [s.items()[0] for s in sequence]:
-    templdir = join(roots['base'], resource, categ)
-    if isinstance(info, dict) and 'name' in info:
-        templdir = join(roots['base'], resource, info['name'])
-
-    for fn in glob.glob(templdir + '/*.yaml'):
-        if args.teamcity:
-            print "##teamcity[testStarted name='Parse JINJA file {0}' captureStandardOutput='true']".format(fn)
-        else:
-            log.debug('Load template {0}'.format(fn))
-
-        template = jinja2.Template(open(fn).read())
-        result = None
-        try:
-            result = template.render(defaults)
-        except jinja2.UndefinedError, e:
-            exit_code = 1
-            if args.teamcity:
-                print "##teamcity[testFailed name='Parse JINJA template {0}' message='Failed to parse JINJA template']\n{1}".format(fn, e)
-            else:
-                log.error('Failed to parse JINJA template {0}\n{1}'.format(fn, e))
-
-        if args.teamcity:
-            print "##teamcity[testFinished name='Parse JINJA template {0}']".format(fn)
-            print "##teamcity[testStarted name='Parse YAML in template {0}' captureStandardOutput='true']".format(fn)
-        try:
-            yaml.load(result)
-        except yaml.YAMLError, e:
-            exit_code = 1
-            if args.teamcity:
-                print "##teamcity[testFailed name='Parse YAML in template {0}' message='Failed to parse YAML in template']\n{1}".format(fn, e)
-            else:
-                log.error('Failed to parse YAML in template {0}\n{1}'.format(fn, e))
-
-if args.teamcity:
-    print "##teamcity[testSuiteFinished name='Pepa Template Syntax']"
-
-sys.exit(exit_code)
+# Load default test values
+defdir = join(roots['base'], resource, 'test/defaults')
+for fn in glob.glob(defdir + '/*.yaml'):
+    try:
+        validate_template(fn, key_value_to_tree(yaml.load(open(fn).read())))
+    except yaml.YAMLError, e:
+        log.critical('Failed to parse YAML file {0}\n{1}'.format(fn, e))
+        sys.exit(1)

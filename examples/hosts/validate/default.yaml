@@ -1,6 +1,0 @@
-default..grains..osfinger: Fedora-19
-default..hostname: test.example.com
-default..interface: eth0
-default..location..region: emea
-default..osfinger: Fedora-19
-default..pkgrepo..mirror: yum-emea.trading.imc.intra
