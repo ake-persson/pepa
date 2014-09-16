@@ -109,22 +109,44 @@ except yaml.YAMLError, e:
     sys.exit(1)
 
 # Parse Pepa templates
+exit_code = 0
+if args.teamcity:
+    print "##teamcity[testSuiteStarted name='Pepa Template Syntax' captureStandardOutput='true']"
 for categ, info in [s.items()[0] for s in sequence]:
     templdir = join(roots['base'], resource, categ)
     if isinstance(info, dict) and 'name' in info:
         templdir = join(roots['base'], resource, info['name'])
 
     for fn in glob.glob(templdir + '/*.yaml'):
-        log.debug('Load template {0}'.format(fn))
+        if args.teamcity:
+            print "##teamcity[testStarted name='Parse JINJA file {0}' captureStandardOutput='true']".format(fn)
+        else:
+            log.debug('Load template {0}'.format(fn))
 
         template = jinja2.Template(open(fn).read())
         result = None
         try:
             result = template.render(defaults)
         except jinja2.UndefinedError, e:
-            log.error('Failed to parse JINJA template {0}\n{1}'.format(fn, e))
+            exit_code = 1
+            if args.teamcity:
+                print "##teamcity[testFailed name='Parse JINJA template {0}' message='Failed to parse JINJA template']\n{1}".format(fn, e)
+            else:
+                log.error('Failed to parse JINJA template {0}\n{1}'.format(fn, e))
 
+        if args.teamcity:
+            print "##teamcity[testFinished name='Parse JINJA template {0}']".format(fn)
+            print "##teamcity[testStarted name='Parse YAML in template {0}' captureStandardOutput='true']".format(fn)
         try:
             yaml.load(result)
         except yaml.YAMLError, e:
-            log.error('Failed to parse YAML file {0}\n{1}'.format(fn, e))
+            exit_code = 1
+            if args.teamcity:
+                print "##teamcity[testFailed name='Parse YAML in template {0}' message='Failed to parse YAML in template']\n{1}".format(fn, e)
+            else:
+                log.error('Failed to parse YAML in template {0}\n{1}'.format(fn, e))
+
+if args.teamcity:
+    print "##teamcity[testSuiteFinished name='Pepa Template Syntax']"
+
+sys.exit(exit_code)
