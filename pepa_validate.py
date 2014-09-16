@@ -58,9 +58,6 @@ log = logging.getLogger('pythonConfig')
 log.setLevel(LOG_LEVEL)
 log.addHandler(stream)
 
-basedir = 'examples'
-resource = 'hosts'
-
 def key_value_to_tree(data):
     '''
     Convert key/value to tree

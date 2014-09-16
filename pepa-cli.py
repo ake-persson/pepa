@@ -63,6 +63,29 @@ Configuring Pepa
 
 Pepa can also be used in Master-less SaltStack setup.
 
+Command line
+============
+
+.. code-block:: bash
+
+    usage: pepa.py [-h] [-c CONFIG] [-d] [-g GRAINS] [-p PILLAR] [-n] [-v]
+                   hostname
+
+    positional arguments:
+      hostname              Hostname
+
+    optional arguments:
+      -h, --help            show this help message and exit
+      -c CONFIG, --config CONFIG
+                            Configuration file
+      -d, --debug           Print debug info
+      -g GRAINS, --grains GRAINS
+                            Input Grains as YAML
+      -p PILLAR, --pillar PILLAR
+                            Input Pillar as YAML
+      -n, --no-color        No color output
+      -v, --validate        Validate output
+
 Templates
 =========
 
@@ -172,6 +195,67 @@ iunset()    Set immutable and unset
     owner..immutable(): Operations
     host..printers..unset():
 
+Validation
+==========
+
+Since it's very hard to test Jinja as is, the best approach is to run all the permutations of input and validate the output, i.e. Unit Testing.
+
+To facilitate this in Pepa we use YAML, Jinja and Cerberus <https://github.com/nicolaiarocci/cerberus>.
+
+Schema
+======
+
+So this is a validation schema for network configuration, as you see it can be customized with Jinja just as Pepa templates.
+
+This was designed to be run as a build job in Jenkins or similar tool. You can provide Grains/Pillar input using either the config file or command line arguments.
+
+**File Example: host/validation/network.yaml**
+
+.. code-block:: yaml
+
+    network..dns..search:
+      type: list
+      allowed:
+        - example.com
+
+    network..dns..options:
+      type: list
+      allowed: ['timeout:2', 'attempts:1', 'ndots:1']
+
+    network..dns..servers:
+      type: list
+      schema:
+        regex: ^([0-9]{1,3}\\.){3}[0-9]{1,3}$
+
+    network..gateway:
+      type: string
+      regex: ^([0-9]{1,3}\\.){3}[0-9]{1,3}$
+
+    {% if network.interfaces is defined %}
+    {% for interface in network.interfaces %}
+
+    network..interfaces..{{ interface }}..dhcp:
+      type: boolean
+
+    network..interfaces..{{ interface }}..fqdn:
+      type: string
+      regex: ^([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\\.)+[a-zA-Z]{2,6}$
+
+    network..interfaces..{{ interface }}..hwaddr:
+      type: string
+      regex: ^([0-9a-f]{1,2}\\:){5}[0-9a-f]{1,2}$
+
+    network..interfaces..{{ interface }}..ipv4:
+      type: string
+      regex: ^([0-9]{1,3}\\.){3}[0-9]{1,3}$
+
+    network..interfaces..{{ interface }}..netmask:
+      type: string
+      regex: ^([0-9]{1,3}\\.){3}[0-9]{1,3}$
+
+    {% endfor %}
+    {% endif %}
+
 Links
 =====
 
@@ -181,7 +265,7 @@ For more examples and information see <https://github.com/mickep76/pepa>.
 __author__ = 'Michael Persson <michael.ake.persson@gmail.com>'
 __copyright__ = 'Copyright (c) 2013 Michael Persson'
 __license__ = 'Apache License, Version 2.0'
-__version__ = '0.6.6'
+__version__ = '0.6.5'
 
 # Import python libs
 import logging
@@ -192,8 +276,49 @@ import jinja2
 import re
 from os.path import isfile, join
 
-# Logging
-log = logging.getLogger(__name__)
+# Only used when called from a terminal
+log = None
+if __name__ == '__main__':
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('hostname', help='Hostname')
+    parser.add_argument('-c', '--config', default='/etc/salt/master', help='Configuration file')
+    parser.add_argument('-d', '--debug', action='store_true', help='Print debug info')
+    parser.add_argument('-g', '--grains', help='Input Grains as YAML')
+    parser.add_argument('-p', '--pillar', help='Input Pillar as YAML')
+    parser.add_argument('-n', '--no-color', action='store_true', help='No color output')
+    parser.add_argument('-v', '--validate', action='store_true', help='Validate output')
+    parser.add_argument('--url', default='https://salt:8000', help='URL for SaltStack REST API')
+    parser.add_argument('-u', '--username', help='Username for SaltStack REST API')
+    parser.add_argument('-P', '--password', help='Password for SaltStack REST API')
+    parser.add_argument('-t', '--teamcity', action='store_true', help='Output validation in TeamCity format')
+    args = parser.parse_args()
+
+    LOG_LEVEL = logging.WARNING
+    if args.debug:
+        LOG_LEVEL = logging.DEBUG
+
+    formatter = None
+    if not args.no_color:
+        try:
+            import colorlog
+            formatter = colorlog.ColoredFormatter("[%(log_color)s%(levelname)-8s%(reset)s] %(log_color)s%(message)s%(reset)s")
+        except ImportError:
+            formatter = logging.Formatter("[%(levelname)-8s] %(message)s")
+    else:
+        formatter = logging.Formatter("[%(levelname)-8s] %(message)s")
+
+    stream = logging.StreamHandler()
+    stream.setLevel(LOG_LEVEL)
+    stream.setFormatter(formatter)
+
+    log = logging.getLogger('pythonConfig')
+    log.setLevel(LOG_LEVEL)
+    log.addHandler(stream)
+else:
+    log = logging.getLogger(__name__)
+
 
 # Options
 __opts__ = {
@@ -348,3 +473,133 @@ def ext_pillar(minion_id, pillar, resource, sequence, subkey=False, subkey_only=
     if __opts__['pepa_validate']:
         pillar_data['pepa_keys'] = output.copy()
     return pillar_data
+
+def validate(output, resource):
+    '''
+    Validate Pepa templates
+    '''
+    try:
+        import cerberus
+    except ImportError:
+        log.critical('You need cerberus module in order to use validation')
+        return
+
+    try:
+        import requests
+    except ImportError:
+        log.critical('You need requests module in order to use validation')
+        return
+
+    roots = __opts__['pepa_roots']
+
+    valdir = join(roots['base'], resource, 'validate')
+
+    all_schemas = {}
+    pepa_schemas = []
+    for fn in glob.glob(valdir + '/*.yaml'):
+        log.info("Loading schema: {0}".format(fn))
+        template = jinja2.Template(open(fn).read())
+        data = output
+        data['grains'] = __grains__.copy()
+        data['pillar'] = __pillar__.copy()
+        schema = yaml.load(template.render(data))
+        all_schemas.update(schema)
+        pepa_schemas.append(fn)
+
+    val = cerberus.Validator()
+    if not val.validate(output['pepa_keys'], all_schemas):
+        for ekey, error in val.errors.items():
+            log.warning('Validation failed for key {0}: {1}'.format(ekey, error))
+
+    output['pepa_schema_keys'] = all_schemas
+    output['pepa_schemas'] = pepa_schemas
+
+
+# Only used when called from a terminal
+if __name__ == '__main__':
+    # Load configuration file
+    if not isfile(args.config):
+        log.critical("Configuration file doesn't exist: {0}".format(args.config))
+        sys.exit(1)
+
+    # Get configuration
+    __opts__.update(yaml.load(open(args.config).read()))
+
+    loc = 0
+    for name in [e.keys()[0] for e in __opts__['ext_pillar']]:
+        if name == 'pepa':
+            break
+        loc += 1
+
+    # Get grains
+    __grains__ = {}
+    if 'pepa_grains' in __opts__:
+        __grains__ = __opts__['pepa_grains']
+    if args.grains:
+        __grains__.update(yaml.load(args.grains))
+
+    # Get pillars
+    __pillar__ = {}
+    if 'pepa_pillar' in __opts__:
+        __pillar__ = __opts__['pepa_pillar']
+    if args.pillar:
+        __pillar__.update(yaml.load(args.pillar))
+
+    # Validate or not
+    if args.validate:
+        __opts__['pepa_validate'] = True
+
+    import requests
+    from requests.auth import HTTPBasicAuth
+    from requests.auth import HTTPDigestAuth
+
+    username = args.username
+    password = args.password
+    if username == None:
+        username = getpass.getuser()
+    if password == None:
+        password = getpass.getpass()
+
+    auth = { 'username': username, 'password': password, 'eauth': 'pam' }
+    request = requests.post(args.url + '/login', auth)
+
+# Detect error
+
+    response = request.json()
+    token = response['return'][0]['token']
+
+    headers={'X-Auth-Token': token, 'Accept': 'application/json'}
+    request = requests.get(args.url + '/minions', headers=headers)
+    response = request.json().get('return', [{}])[0]
+
+    for host in response:
+        print '\n\n### Grains: {0} ###\n\n'.format(host)
+        __grains__ = response[host]
+        print yaml.safe_dump(__grains__, indent=4, default_flow_style=False)
+
+        print '\n\n### Template: {0} ###\n\n'.format(host)
+        result = ext_pillar(host, __pillar__, __opts__['ext_pillar'][loc]['pepa']['resource'], __opts__['ext_pillar'][loc]['pepa']['sequence'])
+        print yaml.safe_dump(result, indent=4, default_flow_style=False)
+
+        print '\n\n### Validate: {0} ###\n\n'.format(host)
+        validate(result, __opts__['ext_pillar'][loc]['pepa']['resource'])
+
+        sys.exit(0)
+
+    # Print results
+    result = ext_pillar(args.hostname, __pillar__, __opts__['ext_pillar'][loc]['pepa']['resource'], __opts__['ext_pillar'][loc]['pepa']['sequence'])
+
+    if __opts__['pepa_validate']:
+        validate(result, __opts__['ext_pillar'][loc]['pepa']['resource'])
+
+    yaml.dumper.SafeDumper.ignore_aliases = lambda self, data: True
+    if not args.no_color:
+        try:
+            import pygments
+            import pygments.lexers
+            import pygments.formatters
+            print pygments.highlight(yaml.safe_dump(result), pygments.lexers.YamlLexer(), pygments.formatters.TerminalFormatter())
+        except ImportError:
+            print yaml.safe_dump(result, indent=4, default_flow_style=False)
+    else:
+        print yaml.safe_dump(result, indent=4, default_flow_style=False)
