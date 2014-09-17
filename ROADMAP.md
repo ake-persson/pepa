@@ -11,7 +11,7 @@ Instead of using Salt master config. file, I will implement a top.sls file for c
 
   - Only key/values
   - No Jinja support
-  - Backends for inputs such as ims and etcd
+  - Backends for inputs such as etcd
   - Resource tagging
 
 Since Pillar values are not available from the REST API, we can't easily validate templates or resource configuration when we use data from IMS.
