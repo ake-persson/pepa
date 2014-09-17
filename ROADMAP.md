@@ -5,7 +5,7 @@
   - top.sls file
   - Option for getting Grains using REST API
 
-Instead of using Salt master config. file, I will implement a top.sls file for consistency with Salt and allow for staging.
+Instead of using Salt master config. file, I will implement a top.sls file for consistency with Salt.
 
 ## Resource Inputs
 
