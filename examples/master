@@ -38,7 +38,7 @@ ext_pillar:
         - hostname:
             name: host_override
             base_only: True  
-      subkey: True
+#      subkey: True
 #      subkey_only: True
 
 pepa_grains:
