@@ -540,7 +540,9 @@ if __name__ == '__main__':
         __opts__['pepa_validate'] = True
 
     # Print results
-    result = ext_pillar(args.hostname, __pillar__, __opts__['ext_pillar'][loc]['pepa']['resource'], __opts__['ext_pillar'][loc]['pepa']['sequence'])
+    result = ext_pillar(args.hostname, __pillar__, __opts__['ext_pillar'][loc]['pepa']['resource'],
+        __opts__['ext_pillar'][loc]['pepa']['sequence'], __opts__['ext_pillar'][loc]['pepa']['subkey'],
+        __opts__['ext_pillar'][loc]['pepa']['subkey_only'])
 
     if __opts__['pepa_validate']:
         validate(result, __opts__['ext_pillar'][loc]['pepa']['resource'])
