@@ -540,15 +540,15 @@ if __name__ == '__main__':
         __opts__['pepa_validate'] = True
 
     # Print results
-    subkey = False
-    subkey_only = False
+    ex_subkey = False
+    ex_subkey_only = False
     if 'subkey' in __opts__['ext_pillar'][loc]['pepa']:
-        subkey = __opts__['ext_pillar'][loc]['pepa']['subkey']
+        ex_subkey = __opts__['ext_pillar'][loc]['pepa']['subkey']
     if 'subkey_only' in __opts__['ext_pillar'][loc]['pepa']:
-        subkey_only = __opts__['ext_pillar'][loc]['pepa']['subkey_only']
+        ex_subkey_only = __opts__['ext_pillar'][loc]['pepa']['subkey_only']
 
     result = ext_pillar(args.hostname, __pillar__, __opts__['ext_pillar'][loc]['pepa']['resource'],
-        __opts__['ext_pillar'][loc]['pepa']['sequence'], subkey, subkey_only)
+                        __opts__['ext_pillar'][loc]['pepa']['sequence'], ex_subkey, ex_subkey_only)
 
     if __opts__['pepa_validate']:
         validate(result, __opts__['ext_pillar'][loc]['pepa']['resource'])
