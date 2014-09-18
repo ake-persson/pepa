@@ -39,7 +39,7 @@ ext_pillar:
             name: host_override
             base_only: True  
       subkey: True
-      subkey_only: True
+#      subkey_only: True
 
 pepa_grains:
   osfinger: Fedora-19
