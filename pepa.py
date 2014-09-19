@@ -398,16 +398,26 @@ def ext_pillar(minion_id, pillar, resource, sequence, subkey=False, subkey_only=
             entries = [inp[categ]]
 
         for entry in entries:
+            results_jinja = None
             results = None
             fn = join(templdir, re.sub(r'\W', '_', entry.lower()) + '.yaml')
             if isfile(fn):
                 log.info("Loading template: {0}".format(fn))
                 template = jinja2.Template(open(fn).read())
                 output['pepa_templates'].append(fn)
-                data = key_value_to_tree(output)
-                data['grains'] = __grains__.copy()
-                data['pillar'] = pillar.copy()
-                results = yaml.load(template.render(data))
+
+		try:
+		    data = key_value_to_tree(output)
+		    data['grains'] = __grains__.copy()
+		    data['pillar'] = pillar.copy()
+		    results_jinja = template.render(data)
+		except jinja2.UndefinedError, e:
+                    log.error('Failed to parse JINJA template: {0}\n{1}'.format(fn, e))
+
+                try:
+		    results = yaml.load(results_jinja)
+                except yaml.YAMLError, e:
+                    log.error('Failed to parse YAML in template: {0}\n{1}'.format(fn, e))
             else:
                 log.info("Template doesn't exist: {0}".format(fn))
                 continue
@@ -431,14 +441,16 @@ def ext_pillar(minion_id, pillar, resource, sequence, subkey=False, subkey_only=
                         else:
                             log.debug("Set immutable and merge key {0}: {1}".format(rkey, results[key]))
                             immutable[rkey] = True
-                        if rkey in output and type(results[key]) != type(output[rkey]):
-                            log.warning('You can''t merge different types for key {0}'.format(rkey))
+                        if rkey not in output:
+                            log.error('Cant\'t merge key {0} with non-existing key {1}'.format(key, rkey))
+                        elif type(results[key]) != type(output[rkey]):
+                            log.error('Can\'t merge different types for key {0}'.format(rkey))
                         elif type(results[key]) is dict:
                             output[rkey].update(results[key])
                         elif type(results[key]) is list:
                             output[rkey].extend(results[key])
                         else:
-                            log.warning('Unsupported type need to be list or dict for key {0}'.format(rkey))
+                            log.error('Unsupported type need to be list or dict for key {0}'.format(rkey))
                     elif operator == 'unset()' or operator == 'iunset()':
                         if operator == 'unset()':
                             log.debug("Unset key {0}".format(rkey))
@@ -452,7 +464,7 @@ def ext_pillar(minion_id, pillar, resource, sequence, subkey=False, subkey_only=
                         immutable[rkey] = True
                         output[rkey] = results[key]
                     elif operator is not None:
-                        log.warning('Unsupported operator {0}, skipping key {1}'.format(operator, rkey))
+                        log.error('Unsupported operator {0}, skipping key {1}'.format(operator, rkey))
                     else:
                         log.debug("Substitute key {0}: {1}".format(key, results[key]))
                         output[key] = results[key]
