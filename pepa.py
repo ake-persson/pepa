@@ -406,18 +406,18 @@ def ext_pillar(minion_id, pillar, resource, sequence, subkey=False, subkey_only=
                 template = jinja2.Template(open(fn).read())
                 output['pepa_templates'].append(fn)
 
-		try:
-		    data = key_value_to_tree(output)
-		    data['grains'] = __grains__.copy()
-		    data['pillar'] = pillar.copy()
-		    results_jinja = template.render(data)
-		except jinja2.UndefinedError, e:
-                    log.error('Failed to parse JINJA template: {0}\n{1}'.format(fn, e))
+                try:
+                    data = key_value_to_tree(output)
+                    data['grains'] = __grains__.copy()
+                    data['pillar'] = pillar.copy()
+                    results_jinja = template.render(data)
+                except jinja2.UndefinedError, err:
+                    log.error('Failed to parse JINJA template: {0}\n{1}'.format(fn, err))
 
                 try:
-		    results = yaml.load(results_jinja)
-                except yaml.YAMLError, e:
-                    log.error('Failed to parse YAML in template: {0}\n{1}'.format(fn, e))
+                    results = yaml.load(results_jinja)
+                except yaml.YAMLError, err:
+                    log.error('Failed to parse YAML in template: {0}\n{1}'.format(fn, err))
             else:
                 log.info("Template doesn't exist: {0}".format(fn))
                 continue
