@@ -289,6 +289,10 @@ if __name__ == '__main__':
     parser.add_argument('-p', '--pillar', help='Input Pillar as YAML')
     parser.add_argument('-n', '--no-color', action='store_true', help='No color output')
     parser.add_argument('-v', '--validate', action='store_true', help='Validate output')
+    parser.add_argument('-q', '--query-api', action='store_true', help='Query Saltstack REST API for Grains')
+    parser.add_argument('--url', default='https://salt:8000', help='URL for SaltStack REST API')
+    parser.add_argument('-u', '--username', help='Username for SaltStack REST API')
+    parser.add_argument('-P', '--password', help='Password for SaltStack REST API')
     args = parser.parse_args()
 
     LOG_LEVEL = logging.WARNING
@@ -411,11 +415,9 @@ def ext_pillar(minion_id, pillar, resource, sequence, subkey=False, subkey_only=
                     data['grains'] = __grains__.copy()
                     data['pillar'] = pillar.copy()
                     results_jinja = template.render(data)
+                    results = yaml.load(results_jinja)
                 except jinja2.UndefinedError, err:
                     log.error('Failed to parse JINJA template: {0}\n{1}'.format(fn, err))
-
-                try:
-                    results = yaml.load(results_jinja)
                 except yaml.YAMLError, err:
                     log.error('Failed to parse YAML in template: {0}\n{1}'.format(fn, err))
             else:
@@ -550,6 +552,33 @@ if __name__ == '__main__':
     # Validate or not
     if args.validate:
         __opts__['pepa_validate'] = True
+
+    if args.query_api:
+        import requests
+        import getpass
+
+	username = args.username
+	password = args.password
+	if username == None:
+	    username = input_var = input('Username:')
+	if password == None:
+	    password = getpass.getpass()
+
+        auth = { 'username': username, 'password': password, 'eauth': 'pam' }
+        request = requests.post(args.url + '/login', auth)
+
+# Detect error
+
+        response = request.json()
+        token = response['return'][0]['token']
+
+        headers={'X-Auth-Token': token, 'Accept': 'application/json'}
+        request = requests.get(args.url + '/minions/' + args.hostname, headers=headers)
+	print request.text
+#        response = request.json().get('return', [{}])[0]
+
+#        __grains__ = response
+#        print yaml.safe_dump(__grains__, indent=4, default_flow_style=False)
 
     # Print results
     ex_subkey = False
