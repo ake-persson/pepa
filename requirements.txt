@@ -5,3 +5,4 @@ logging
 colorlog
 pygments
 cerberus
+requests
