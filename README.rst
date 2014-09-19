@@ -3,6 +3,12 @@ Pepa
 
 Configuration templating for SaltStack using Hierarchical substitution and Jinja.
 
+https://drone.io/github.com/mickep76/pepa/status.png
+
+.. image:: https://drone.io/github.com/mickep76/pepa/status.png
+  :alt: drone.io build status
+  :target: https://drone.io/github.com/mickep76/pepa
+
 Quick testing
 =============
 
