@@ -557,14 +557,14 @@ if __name__ == '__main__':
         import requests
         import getpass
 
-	username = args.username
-	password = args.password
-	if username == None:
-	    username = input_var = input('Username:')
-	if password == None:
-	    password = getpass.getpass()
+        username = args.username
+        password = args.password
+        if username == None:
+            username = input_var = input('Username:')
+        if password == None:
+            password = getpass.getpass()
 
-        auth = { 'username': username, 'password': password, 'eauth': 'pam' }
+        auth = {'username': username, 'password': password, 'eauth': 'pam'}
         request = requests.post(args.url + '/login', auth)
 
 # Detect error
@@ -572,9 +572,12 @@ if __name__ == '__main__':
         response = request.json()
         token = response['return'][0]['token']
 
-        headers={'X-Auth-Token': token, 'Accept': 'application/json'}
+        headers = {'X-Auth-Token': token, 'Accept': 'application/json'}
         request = requests.get(args.url + '/minions/' + args.hostname, headers=headers)
-	print request.text
+
+# Detect error
+
+        print request.text
 #        response = request.json().get('return', [{}])[0]
 
 #        __grains__ = response
