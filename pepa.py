@@ -560,27 +560,29 @@ if __name__ == '__main__':
         username = args.username
         password = args.password
         if username == None:
-            username = input_var = input('Username:')
+            username = raw_input('Username: ')
         if password == None:
             password = getpass.getpass()
 
+        log.info('Authenticate REST API')
         auth = {'username': username, 'password': password, 'eauth': 'pam'}
         request = requests.post(args.url + '/login', auth)
 
-# Detect error
+        if not request.ok:
+            raise RuntimeError('Failed to authenticate to SaltStack REST API: {0}'.format(request.text))
 
         response = request.json()
         token = response['return'][0]['token']
 
+        log.info('Request Grains from REST API')
         headers = {'X-Auth-Token': token, 'Accept': 'application/json'}
         request = requests.get(args.url + '/minions/' + args.hostname, headers=headers)
 
-# Detect error
+        result = request.json().get('return', [{}])[0]
+        if not args.hostname in result:
+            raise RuntimeError('Failed to get Grains from SaltStack REST API')
 
-        print request.text
-#        response = request.json().get('return', [{}])[0]
-
-#        __grains__ = response
+        __grains__ = result[args.hostname]
 #        print yaml.safe_dump(__grains__, indent=4, default_flow_style=False)
 
     # Print results
