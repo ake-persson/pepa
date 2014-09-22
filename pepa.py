@@ -276,50 +276,6 @@ import jinja2
 import re
 from os.path import isfile, join
 
-# Only used when called from a terminal
-log = None
-if __name__ == '__main__':
-    import argparse
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument('hostname', help='Hostname')
-    parser.add_argument('-c', '--config', default='/etc/salt/master', help='Configuration file')
-    parser.add_argument('-d', '--debug', action='store_true', help='Print debug info')
-    parser.add_argument('-g', '--grains', help='Input Grains as YAML')
-    parser.add_argument('-p', '--pillar', help='Input Pillar as YAML')
-    parser.add_argument('-n', '--no-color', action='store_true', help='No color output')
-    parser.add_argument('-v', '--validate', action='store_true', help='Validate output')
-    parser.add_argument('-q', '--query-api', action='store_true', help='Query Saltstack REST API for Grains')
-    parser.add_argument('--url', default='https://salt:8000', help='URL for SaltStack REST API')
-    parser.add_argument('-u', '--username', help='Username for SaltStack REST API')
-    parser.add_argument('-P', '--password', help='Password for SaltStack REST API')
-    args = parser.parse_args()
-
-    LOG_LEVEL = logging.WARNING
-    if args.debug:
-        LOG_LEVEL = logging.DEBUG
-
-    formatter = None
-    if not args.no_color:
-        try:
-            import colorlog
-            formatter = colorlog.ColoredFormatter("[%(log_color)s%(levelname)-8s%(reset)s] %(log_color)s%(message)s%(reset)s")
-        except ImportError:
-            formatter = logging.Formatter("[%(levelname)-8s] %(message)s")
-    else:
-        formatter = logging.Formatter("[%(levelname)-8s] %(message)s")
-
-    stream = logging.StreamHandler()
-    stream.setLevel(LOG_LEVEL)
-    stream.setFormatter(formatter)
-
-    log = logging.getLogger('pythonConfig')
-    log.setLevel(LOG_LEVEL)
-    log.addHandler(stream)
-else:
-    log = logging.getLogger(__name__)
-
-
 # Options
 __opts__ = {
     'pepa_roots': {
@@ -329,11 +285,8 @@ __opts__ = {
     'pepa_validate': False
 }
 
-def __virtual__():
-    '''
-    Only return if all the modules are available
-    '''
-    return True
+# Set up logging
+log = logging.getLogger(__name__)
 
 
 def key_value_to_tree(data):
@@ -484,6 +437,7 @@ def ext_pillar(minion_id, pillar, resource, sequence, subkey=False, subkey_only=
         pillar_data['pepa_keys'] = output.copy()
     return pillar_data
 
+
 def validate(output, resource):
     '''
     Validate Pepa templates
@@ -518,9 +472,46 @@ def validate(output, resource):
     output['pepa_schema_keys'] = all_schemas
     output['pepa_schemas'] = pepa_schemas
 
-
 # Only used when called from a terminal
 if __name__ == '__main__':
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('hostname', help='Hostname')
+    parser.add_argument('-c', '--config', default='/etc/salt/master', help='Configuration file')
+    parser.add_argument('-d', '--debug', action='store_true', help='Print debug info')
+    parser.add_argument('-g', '--grains', help='Input Grains as YAML')
+    parser.add_argument('-p', '--pillar', help='Input Pillar as YAML')
+    parser.add_argument('-n', '--no-color', action='store_true', help='No color output')
+    parser.add_argument('-v', '--validate', action='store_true', help='Validate output')
+    parser.add_argument('-q', '--query-api', action='store_true', help='Query Saltstack REST API for Grains')
+    parser.add_argument('--url', default='https://salt:8000', help='URL for SaltStack REST API')
+    parser.add_argument('-u', '--username', help='Username for SaltStack REST API')
+    parser.add_argument('-P', '--password', help='Password for SaltStack REST API')
+    args = parser.parse_args()
+
+    LOG_LEVEL = logging.WARNING
+    if args.debug:
+        LOG_LEVEL = logging.DEBUG
+
+    formatter = None
+    if not args.no_color:
+        try:
+            import colorlog
+            formatter = colorlog.ColoredFormatter("[%(log_color)s%(levelname)-8s%(reset)s] %(log_color)s%(message)s%(reset)s")
+        except ImportError:
+            formatter = logging.Formatter("[%(levelname)-8s] %(message)s")
+    else:
+        formatter = logging.Formatter("[%(levelname)-8s] %(message)s")
+
+    stream = logging.StreamHandler()
+    stream.setLevel(LOG_LEVEL)
+    stream.setFormatter(formatter)
+
+    log = logging.getLogger('pythonConfig')
+    log.setLevel(LOG_LEVEL)
+    log.addHandler(stream)
+
     # Load configuration file
     if not isfile(args.config):
         log.critical("Configuration file doesn't exist: {0}".format(args.config))
@@ -583,7 +574,6 @@ if __name__ == '__main__':
             raise RuntimeError('Failed to get Grains from SaltStack REST API')
 
         __grains__ = result[args.hostname]
-#        print yaml.safe_dump(__grains__, indent=4, default_flow_style=False)
 
     # Print results
     ex_subkey = False
