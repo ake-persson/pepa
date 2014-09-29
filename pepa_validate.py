@@ -140,6 +140,8 @@ sequence = __opts__['ext_pillar'][loc]['pepa']['sequence']
 # Load default test values
 defdir = join(roots['base'], resource, 'test/defaults')
 for fn in glob.glob(defdir + '/*.yaml'):
+    if not args.teamcity:
+        log.info('Validating using YAML input {0}'.format(fn))
     try:
         validate_template(fn, key_value_to_tree(yaml.load(open(fn).read())))
     except yaml.YAMLError, e:
