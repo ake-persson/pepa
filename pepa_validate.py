@@ -28,6 +28,7 @@ __opts__ = {
 }
 
 log = None
+success = True
 
 def key_value_to_tree(data):
     '''
@@ -48,7 +49,7 @@ def validate_template(deffn, defaults):
     '''
     Parse Pepa templates
     '''
-    success = True
+    global success
     if args.teamcity:
         print "##teamcity[testSuiteStarted name='Validate Pepa Templates using defaults {0}' captureStandardOutput='true']".format(deffn)
     for categ, info in [s.items()[0] for s in sequence]:
@@ -88,8 +89,6 @@ def validate_template(deffn, defaults):
 
     if args.teamcity:
         print "##teamcity[testSuiteFinished name='Validate Pepa Templates using defaults {0}']".format(deffn)
-
-    return success
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-c', '--config', default='/etc/salt/master', help='Configuration file')
@@ -141,9 +140,14 @@ sequence = __opts__['ext_pillar'][loc]['pepa']['sequence']
 # Load default test values
 defdir = join(roots['base'], resource, 'validate/defaults')
 for fn in glob.glob(defdir + '/*.yaml'):
+    ecode = True
     if not args.teamcity:
         log.info('Validating using YAML input {0}'.format(fn))
     try:
         validate_template(fn, key_value_to_tree(yaml.load(open(fn).read())))
     except Exception, e:
         log.critical('Failed to parse YAML file {0}\n{1}'.format(fn, e))
+        success = False
+
+if not success:
+    sys.exit(1)
