@@ -66,19 +66,20 @@ def validate_template(deffn, defaults):
             result = None
             try:
                 result = template.render(defaults)
-            except jinja2.UndefinedError, e:
+            except Exception, e:
                 success = False
                 if args.teamcity:
                     print "##teamcity[testFailed name='Parse JINJA template {0}' message='Failed to parse JINJA template']\n{1}".format(fn, e)
                 else:
                     log.error('Failed to parse JINJA template {0}\n{1}'.format(fn, e))
+                continue
 
             if args.teamcity:
                 print "##teamcity[testFinished name='Parse JINJA template {0}']".format(fn)
                 print "##teamcity[testStarted name='Parse YAML in template {0}' captureStandardOutput='true']".format(fn)
             try:
                 yaml.load(result)
-            except yaml.YAMLError, e:
+            except Exception, e:
                 success = False
                 if args.teamcity:
                     print "##teamcity[testFailed name='Parse YAML in template {0}' message='Failed to parse YAML in template']\n{1}".format(fn, e)
@@ -144,6 +145,5 @@ for fn in glob.glob(defdir + '/*.yaml'):
         log.info('Validating using YAML input {0}'.format(fn))
     try:
         validate_template(fn, key_value_to_tree(yaml.load(open(fn).read())))
-    except yaml.YAMLError, e:
+    except Exception, e:
         log.critical('Failed to parse YAML file {0}\n{1}'.format(fn, e))
-        sys.exit(1)
