@@ -50,7 +50,7 @@ def key_value_to_tree(data):
 
 def validate_templates():
     '''
-    Parse Pepa templates
+    Validate Pepa templates
     '''
     success = True
     resdir = join(roots['base'], resource)
@@ -65,6 +65,7 @@ def validate_templates():
             templdir = join(roots['base'], resource, info['name'])
 
         if not isdir(templdir + '/tests'):
+            log.warning('No tests defined for category {0}'.format(categ))
             continue
 
         for testf in glob.glob(templdir + '/tests/*.yaml'):
