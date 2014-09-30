@@ -7,7 +7,7 @@ Validate Pepa templates
 __author__ = 'Michael Persson <michael.ake.persson@gmail.com>'
 __copyright__ = 'Copyright (c) 2013 Michael Persson'
 __license__ = 'Apache License, Version 2.0'
-__version__ = '0.0.1'
+__version__ = '0.0.2'
 
 # Import python libs
 import logging
@@ -16,7 +16,7 @@ import glob
 import yaml
 import jinja2
 import re
-from os.path import isfile, join, dirname, basename
+from os.path import isfile, isdir, join, dirname, basename
 import argparse
 
 # Options
@@ -28,7 +28,6 @@ __opts__ = {
 }
 
 log = None
-success = True
 
 def key_value_to_tree(data):
     '''
@@ -45,50 +44,42 @@ def key_value_to_tree(data):
                 t = t.setdefault(key, {})
     return tree
 
-def validate_template(deffn, defaults):
+def validate_templates():
     '''
     Parse Pepa templates
     '''
-    global success
-    if args.teamcity:
-        print "##teamcity[testSuiteStarted name='Validate Pepa Templates using defaults {0}' captureStandardOutput='true']".format(deffn)
+    success = True
     for categ, info in [s.items()[0] for s in sequence]:
         templdir = join(roots['base'], resource, categ)
         if isinstance(info, dict) and 'name' in info:
             templdir = join(roots['base'], resource, info['name'])
 
-        for fn in glob.glob(templdir + '/*.yaml'):
-            if args.teamcity:
-                print "##teamcity[testStarted name='Parse JINJA file {0}' captureStandardOutput='true']".format(fn)
-            else:
+        if not isdir(templdir + '/tests'):
+            continue
+
+        for testf in glob.glob(templdir + '/tests/*.yaml'):
+            log.debug('Load input {0}'.format(testf))
+
+            defaults = key_value_to_tree(yaml.load(open(testf).read()))
+
+            for fn in glob.glob(templdir + '/*.yaml'):
                 log.debug('Load template {0}'.format(fn))
 
-            template = jinja2.Template(open(fn).read())
-            result = None
-            try:
-                result = template.render(defaults)
-            except Exception, e:
-                success = False
-                if args.teamcity:
-                    print "##teamcity[testFailed name='Parse JINJA template {0}' message='Failed to parse JINJA template']\n{1}".format(fn, e)
-                else:
+                template = jinja2.Template(open(fn).read())
+                result = None
+                try:
+                    result = template.render(defaults)
+                except Exception, e:
+                    success = False
                     log.error('Failed to parse JINJA template {0}\n{1}'.format(fn, e))
-                continue
-
-            if args.teamcity:
-                print "##teamcity[testFinished name='Parse JINJA template {0}']".format(fn)
-                print "##teamcity[testStarted name='Parse YAML in template {0}' captureStandardOutput='true']".format(fn)
-            try:
-                yaml.load(result)
-            except Exception, e:
-                success = False
-                if args.teamcity:
-                    print "##teamcity[testFailed name='Parse YAML in template {0}' message='Failed to parse YAML in template']\n{1}".format(fn, e)
-                else:
+                    continue
+                try:
+                    yaml.load(result)
+                except Exception, e:
+                    success = False
                     log.error('Failed to parse YAML in template {0}\n{1}'.format(fn, e))
 
-    if args.teamcity:
-        print "##teamcity[testSuiteFinished name='Validate Pepa Templates using defaults {0}']".format(deffn)
+    return success
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-c', '--config', default='/etc/salt/master', help='Configuration file')
@@ -137,17 +128,5 @@ roots = __opts__['pepa_roots']
 resource = __opts__['ext_pillar'][loc]['pepa']['resource']
 sequence = __opts__['ext_pillar'][loc]['pepa']['sequence']
 
-# Load default test values
-defdir = join(roots['base'], resource, 'validate/defaults')
-for fn in glob.glob(defdir + '/*.yaml'):
-    ecode = True
-    if not args.teamcity:
-        log.info('Validating using YAML input {0}'.format(fn))
-    try:
-        validate_template(fn, key_value_to_tree(yaml.load(open(fn).read())))
-    except Exception, e:
-        log.critical('Failed to parse YAML file {0}\n{1}'.format(fn, e))
-        success = False
-
-if not success:
+if not validate_templates():
     sys.exit(1)
