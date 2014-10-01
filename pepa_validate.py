@@ -57,7 +57,14 @@ def validate_templates():
     schema = {}
     if isfile(resdir + '/schema.yaml'):
         log.debug('Load schema {0}'.format(resdir + '/schema.yaml'))
-        schema = yaml.load(open(resdir + '/schema.yaml').read())
+#        schema = yaml.load(open(resdir + '/schema.yaml').read())
+        template = jinja2.Template(open(resdir + '/schema.yaml').read())
+        res_jinja = template.render()
+        schema = yaml.load(res_jinja)
+
+    if args.show:
+        print '### Schema: {0} ###\n'.format(resdir + '/schema.yaml')
+        print pygments.highlight(yaml.safe_dump(schema), pygments.lexers.YamlLexer(), pygments.formatters.TerminalFormatter())
 
     for categ, info in [s.items()[0] for s in sequence]:
         templdir = join(roots['base'], resource, categ)
@@ -71,7 +78,15 @@ def validate_templates():
         for testf in glob.glob(templdir + '/tests/*.yaml'):
             log.debug('Load input {0}'.format(testf))
 
-            defaults = key_value_to_tree(yaml.load(open(testf).read()))
+            # Load defaults
+            template = jinja2.Template(open(testf).read())
+            res_jinja = template.render()
+            res_yaml = yaml.load(res_jinja)
+            defaults = key_value_to_tree(res_yaml)
+
+            if args.show:
+                print '### Defaults: {0} ###\n'.format(testf)
+                print pygments.highlight(yaml.safe_dump(defaults), pygments.lexers.YamlLexer(), pygments.formatters.TerminalFormatter())
 
             for fn in glob.glob(templdir + '/*.yaml'):
                 log.debug('Load template {0}'.format(fn))
@@ -113,6 +128,7 @@ def validate_templates():
                         log.warning('Unsupported operator {0}'.format(operator, rkey))
 
                 if args.show:
+                    print '### Template: {0} ###\n'.format(fn)
                     print pygments.highlight(yaml.safe_dump(res_yaml), pygments.lexers.YamlLexer(), pygments.formatters.TerminalFormatter())
 
                 val = cerberus.Validator()
