@@ -76,6 +76,7 @@ def validate_templates():
             for fn in glob.glob(templdir + '/*.yaml'):
                 log.debug('Load template {0}'.format(fn))
 
+                # Parse Jinja
                 template = jinja2.Template(open(fn).read())
                 res_jinja = None
                 res_yaml = None
@@ -83,13 +84,33 @@ def validate_templates():
                     res_jinja = template.render(defaults)
                 except Exception, e:
                     success = False
-                    log.error('Failed to parse JINJA template {0}\n{1}'.format(fn, e))
+                    log.error('Failed to parse Jinja template {0}\n{1}'.format(fn, e))
                     continue
+
+                # Parse YAML
                 try:
                     res_yaml = yaml.load(res_jinja)
                 except Exception, e:
                     success = False
                     log.error('Failed to parse YAML in template {0}\n{1}'.format(fn, e))
+
+                # Validate operators
+                for key in res_yaml:
+                    skey = key.rsplit(__opts__['pepa_delimiter'], 1)
+                    rkey = None
+                    operator = None
+                    if len(skey) > 1 and key.rfind('()') > 0:
+                        rkey = skey[0].rstrip(__opts__['pepa_delimiter'])
+                        operator = skey[1]
+
+                    if operator == 'merge()' or operator == 'imerge()' or operator == 'immutable()':
+                        res_yaml[rkey] = res_yaml[key]
+                        del res_yaml[key]
+                    elif operator == 'unset' or operator == 'iunset':
+                        del res_yaml[key]
+                    elif operator is not None:
+#                        success = False
+                        log.warning('Unsupported operator {0}'.format(operator, rkey))
 
                 if args.show:
                     print pygments.highlight(yaml.safe_dump(res_yaml), pygments.lexers.YamlLexer(), pygments.formatters.TerminalFormatter())
@@ -98,9 +119,11 @@ def validate_templates():
                 try:
                     status = val.validate(res_yaml, schema)
                     if not status:
+#                        success = False
                         for ekey, error in val.errors.items():
                             log.warning('Validation failed for key {0}: {1}'.format(ekey, error))
                 except Exception, e:
+#                    success = False
                     log.warn('Failed to validate output for template {0}\n{1}'.format(fn, e))
 
     return success
