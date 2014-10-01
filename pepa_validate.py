@@ -112,6 +112,9 @@ def validate_templates():
                     log.error('Failed to parse YAML in template {0}\n{1}'.format(fn, e))
 
                 # Validate operators
+                if not res_yaml:
+                    continue
+
                 for key in res_yaml:
                     skey = key.rsplit(__opts__['pepa_delimiter'], 1)
                     rkey = None
