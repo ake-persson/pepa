@@ -68,11 +68,13 @@ def validate_templates():
 
     for categ, info in [s.items()[0] for s in sequence]:
         templdir = join(roots['base'], resource, categ)
+        alias = categ
         if isinstance(info, dict) and 'name' in info:
-            templdir = join(roots['base'], resource, info['name'])
+            alias = info['name']
+            templdir = join(roots['base'], resource, alias)
 
         if not isdir(templdir + '/tests'):
-            log.warning('No tests defined for category {0}'.format(categ))
+            log.warning('No tests defined for category {0}'.format(alias))
             continue
 
         for testf in glob.glob(templdir + '/tests/*.yaml'):
