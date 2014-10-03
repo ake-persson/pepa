@@ -7,7 +7,7 @@ Validate Pepa templates
 __author__ = 'Michael Persson <michael.ake.persson@gmail.com>'
 __copyright__ = 'Copyright (c) 2013 Michael Persson'
 __license__ = 'Apache License, Version 2.0'
-__version__ = '0.0.2'
+__version__ = '0.0.3'
 
 # Import python libs
 import logging
@@ -73,6 +73,7 @@ def validate_templates():
             templdir = join(roots['base'], resource, alias)
 
         if not isdir(templdir + '/tests'):
+            success = False
             log.error('No tests defined for category {0}'.format(alias))
             continue
 
@@ -100,7 +101,7 @@ def validate_templates():
                     res_jinja = template.render(defaults)
                 except Exception, e:
                     success = False
-                    log.error('Failed to parse Jinja template {0}\n{1}'.format(fn, e))
+                    log.critical('Failed to parse Jinja template {0}\n{1}'.format(fn, e))
                     continue
 
                 # Parse YAML
@@ -108,7 +109,7 @@ def validate_templates():
                     res_yaml = yaml.load(res_jinja)
                 except Exception, e:
                     success = False
-                    log.error('Failed to parse YAML in template {0}\n{1}'.format(fn, e))
+                    log.critical('Failed to parse YAML in template {0}\n{1}'.format(fn, e))
 
                 # Validate operators
                 if not res_yaml:
@@ -129,7 +130,7 @@ def validate_templates():
                         del res_yaml[key]
                     elif operator is not None:
                         success = False
-                        log.error('Unsupported operator {0}'.format(operator, rkey))
+                        log.error('Unsupported operator {0} in template {1}'.format(operator, rkey, fn))
 
                 if args.show:
                     print '### Template: {0} ###\n'.format(fn)
@@ -141,10 +142,10 @@ def validate_templates():
                     if not status:
                         success = False
                         for ekey, error in val.errors.items():
-                            log.error('Validation failed for key {0}: {1}'.format(ekey, error))
+                            log.error('Incorrect key {0} in template {1}: {2}'.format(ekey, fn, error))
                 except Exception, e:
                     success = False
-                    log.error('Failed to validate output for template {0}\n{1}'.format(fn, e))
+                    log.error('Failed to validate output for template {0}: {1}'.format(fn, e))
 
     return success
 
