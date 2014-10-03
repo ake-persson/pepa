@@ -73,7 +73,7 @@ def validate_templates():
             templdir = join(roots['base'], resource, alias)
 
         if not isdir(templdir + '/tests'):
-            log.warning('No tests defined for category {0}'.format(alias))
+            log.error('No tests defined for category {0}'.format(alias))
             continue
 
         for testf in glob.glob(templdir + '/tests/*.yaml'):
@@ -129,7 +129,7 @@ def validate_templates():
                         del res_yaml[key]
                     elif operator is not None:
                         success = False
-                        log.warning('Unsupported operator {0}'.format(operator, rkey))
+                        log.error('Unsupported operator {0}'.format(operator, rkey))
 
                 if args.show:
                     print '### Template: {0} ###\n'.format(fn)
@@ -141,10 +141,10 @@ def validate_templates():
                     if not status:
                         success = False
                         for ekey, error in val.errors.items():
-                            log.warning('Validation failed for key {0}: {1}'.format(ekey, error))
+                            log.error('Validation failed for key {0}: {1}'.format(ekey, error))
                 except Exception, e:
                     success = False
-                    log.warn('Failed to validate output for template {0}\n{1}'.format(fn, e))
+                    log.error('Failed to validate output for template {0}\n{1}'.format(fn, e))
 
     return success
 
@@ -161,7 +161,9 @@ if args.debug:
     LOG_LEVEL = logging.DEBUG
 
 formatter = None
-if not args.no_color:
+if args.teamcity:
+    formatter = logging.Formatter("##teamcity[message text='%(message)s' status='%(levelname)s']")
+elif not args.no_color:
     try:
         import colorlog
         formatter = colorlog.ColoredFormatter("[%(log_color)s%(levelname)-8s%(reset)s] %(log_color)s%(message)s%(reset)s")
