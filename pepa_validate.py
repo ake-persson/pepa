@@ -57,7 +57,6 @@ def validate_templates():
     schema = {}
     if isfile(resdir + '/schema.yaml'):
         log.debug('Load schema {0}'.format(resdir + '/schema.yaml'))
-#        schema = yaml.load(open(resdir + '/schema.yaml').read())
         template = jinja2.Template(open(resdir + '/schema.yaml').read())
         res_jinja = template.render()
         schema = yaml.load(res_jinja)
@@ -129,7 +128,7 @@ def validate_templates():
                     elif operator == 'unset' or operator == 'iunset':
                         del res_yaml[key]
                     elif operator is not None:
-#                        success = False
+                        success = False
                         log.warning('Unsupported operator {0}'.format(operator, rkey))
 
                 if args.show:
@@ -140,11 +139,11 @@ def validate_templates():
                 try:
                     status = val.validate(res_yaml, schema)
                     if not status:
-#                        success = False
+                        success = False
                         for ekey, error in val.errors.items():
                             log.warning('Validation failed for key {0}: {1}'.format(ekey, error))
                 except Exception, e:
-#                    success = False
+                    success = False
                     log.warn('Failed to validate output for template {0}\n{1}'.format(fn, e))
 
     return success
