@@ -91,7 +91,9 @@ def validate_templates():
                 print pygments.highlight(yaml.safe_dump(defaults), pygments.lexers.YamlLexer(), pygments.formatters.TerminalFormatter())
 
             for fn in glob.glob(templdir + '/*.yaml'):
-                log.debug('Load template {0}'.format(fn))
+                sfn = categ + '/' + basename(fn)
+
+                log.debug('Load template {0}'.format(sfn))
 
                 # Parse Jinja
                 template = jinja2.Template(open(fn).read())
@@ -101,7 +103,7 @@ def validate_templates():
                     res_jinja = template.render(defaults)
                 except Exception, e:
                     success = False
-                    log.critical('Failed to parse Jinja template {0}\n{1}'.format(fn, e))
+                    log.critical('Failed to parse Jinja template {0}\n{1}'.format(sfn, e))
                     continue
 
                 # Parse YAML
@@ -109,7 +111,7 @@ def validate_templates():
                     res_yaml = yaml.load(res_jinja)
                 except Exception, e:
                     success = False
-                    log.critical('Failed to parse YAML in template {0}\n{1}'.format(fn, e))
+                    log.critical('Failed to parse YAML in template {0}\n{1}'.format(sfn, e))
 
                 # Validate operators
                 if not res_yaml:
@@ -130,7 +132,7 @@ def validate_templates():
                         del res_yaml[key]
                     elif operator is not None:
                         success = False
-                        log.error('Unsupported operator {0} in template {1}'.format(operator, rkey, fn))
+                        log.error('Unsupported operator {0} in template {1}'.format(operator, rkey, sfn))
 
                 if args.show:
                     print '### Template: {0} ###\n'.format(fn)
@@ -142,10 +144,10 @@ def validate_templates():
                     if not status:
                         success = False
                         for ekey, error in val.errors.items():
-                            log.error('Incorrect key {0} in template {1}: {2}'.format(ekey, fn, error))
+                            log.error('Incorrect key {0} in template {1}: {2}'.format(ekey, sfn, error))
                 except Exception, e:
                     success = False
-                    log.error('Failed to validate output for template {0}: {1}'.format(fn, e))
+                    log.error('Failed to validate output for template {0}: {1}'.format(sfn, e))
 
     return success
 
