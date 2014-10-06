@@ -7,7 +7,7 @@ Validate Pepa templates
 __author__ = 'Michael Persson <michael.ake.persson@gmail.com>'
 __copyright__ = 'Copyright (c) 2013 Michael Persson'
 __license__ = 'Apache License, Version 2.0'
-__version__ = '0.0.3'
+__version__ = '0.0.4'
 
 # Import python libs
 import logging
@@ -72,9 +72,12 @@ def validate_templates():
             sys.exit(1)
         schema.update(res_yaml)
 
-    if args.show:
-        print '### Schema: {0} ###\n'.format(resdir + '/schema.yaml')
-        print pygments.highlight(yaml.safe_dump(schema), pygments.lexers.YamlLexer(), pygments.formatters.TerminalFormatter())
+        if args.show:
+            print '### Schema: {0} ###\n'.format(resdir + '/schema.yaml')
+            if args.no_color:
+                print yaml.safe_dump(res_yaml, indent=4, default_flow_style=False)
+            else:
+                print pygments.highlight(yaml.safe_dump(res_yaml), pygments.lexers.YamlLexer(), pygments.formatters.TerminalFormatter())
 
     for categ, info in [s.items()[0] for s in sequence]:
         templdir = join(roots['base'], resource, categ)
@@ -109,7 +112,10 @@ def validate_templates():
 
             if args.show:
                 print '### Test: {0} ###\n'.format(stestf)
-                print pygments.highlight(yaml.safe_dump(defaults), pygments.lexers.YamlLexer(), pygments.formatters.TerminalFormatter())
+                if args.no_color:
+                    print yaml.safe_dump(res_yaml, indent=4, default_flow_style=False)
+                else:
+                    print pygments.highlight(yaml.safe_dump(res_yaml), pygments.lexers.YamlLexer(), pygments.formatters.TerminalFormatter())
 
             for fn in glob.glob(templdir + '/*.yaml'):
                 sfn = alias + '/' + basename(fn)
@@ -157,7 +163,10 @@ def validate_templates():
 
                 if args.show:
                     print '### Template: {0} ###\n'.format(fn)
-                    print pygments.highlight(yaml.safe_dump(res_yaml), pygments.lexers.YamlLexer(), pygments.formatters.TerminalFormatter())
+                    if args.no_color:
+                        print yaml.safe_dump(res_yaml, indent=4, default_flow_style=False)
+                    else:
+                        print pygments.highlight(yaml.safe_dump(res_yaml), pygments.lexers.YamlLexer(), pygments.formatters.TerminalFormatter())
 
                 val = cerberus.Validator()
                 try:
@@ -195,6 +204,8 @@ elif not args.no_color:
         formatter = logging.Formatter("[%(levelname)-8s] %(message)s")
 else:
     formatter = logging.Formatter("[%(levelname)-8s] %(message)s")
+
+yaml.dumper.SafeDumper.ignore_aliases = lambda self, data: True
 
 stream = logging.StreamHandler()
 stream.setLevel(LOG_LEVEL)
