@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python -u
 # -*- coding: utf-8 -*-
 '''
 Validate Pepa templates
@@ -55,11 +55,22 @@ def validate_templates():
     success = True
     resdir = join(roots['base'], resource)
     schema = {}
-    if isfile(resdir + '/schema.yaml'):
-        log.debug('Load schema {0}'.format(resdir + '/schema.yaml'))
-        template = jinja2.Template(open(resdir + '/schema.yaml').read())
-        res_jinja = template.render()
-        schema = yaml.load(res_jinja)
+    for fn in glob.glob(resdir + '/schemas/*.yaml'):
+        sfn = 'schemas/' + basename(fn)
+        log.debug('Load schema {0}'.format(sfn))
+
+        template = jinja2.Template(open(fn).read())
+        try:
+            res_jinja = template.render()
+        except Exception, e:
+            log.critical('Failed to parse YAML in schema {0}\n{1}'.format(sfn, e))
+            sys.exit(1)
+        try:
+            res_yaml = yaml.load(res_jinja)
+        except Exception, e:
+            log.critical('Failed to parse YAML in test {0}\n{1}'.format(stestf, e))
+            sys.exit(1)
+        schema.update(res_yaml)
 
     if args.show:
         print '### Schema: {0} ###\n'.format(resdir + '/schema.yaml')
@@ -78,20 +89,30 @@ def validate_templates():
             continue
 
         for testf in glob.glob(templdir + '/tests/*.yaml'):
-            log.debug('Load input {0}'.format(testf))
+            stestf = alias + '/tests/' + basename(testf)
+            log.debug('Load test {0}'.format(stestf))
 
-            # Load defaults
+            # Load tests
             template = jinja2.Template(open(testf).read())
-            res_jinja = template.render()
-            res_yaml = yaml.load(res_jinja)
+            try:
+                res_jinja = template.render()
+            except Exception, e:
+                log.critical('Failed to parse Jinja test {0}\n{1}'.format(stestf, e))
+                sys.exit(1)
+            try:
+                res_yaml = yaml.load(res_jinja)
+            except:
+                log.critical('Failed to parse YAML in test {0}\n{1}'.format(stestf, e))
+                sys.exit(1)
+
             defaults = key_value_to_tree(res_yaml)
 
             if args.show:
-                print '### Defaults: {0} ###\n'.format(testf)
+                print '### Test: {0} ###\n'.format(stestf)
                 print pygments.highlight(yaml.safe_dump(defaults), pygments.lexers.YamlLexer(), pygments.formatters.TerminalFormatter())
 
             for fn in glob.glob(templdir + '/*.yaml'):
-                sfn = categ + '/' + basename(fn)
+                sfn = alias + '/' + basename(fn)
 
                 log.debug('Load template {0}'.format(sfn))
 
