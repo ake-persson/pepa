@@ -71,7 +71,7 @@ def validate_templates():
 
         if args.show:
             print '### Schema: {0} ###\n'.format(resdir + '/schema.yaml')
-            print yaml.safe_dump(res_yaml, indent=4, default_flow_style=False)
+            print yaml.safe_dump(res_yaml, default_flow_style=False)
 
     for categ, info in [s.items()[0] for s in sequence]:
         templdir = join(roots['base'], resource, categ)
@@ -104,7 +104,7 @@ def validate_templates():
 
             if args.show:
                 print '### Test: {0} ###\n'.format(stestf)
-                print yaml.safe_dump(res_yaml, indent=4, default_flow_style=False)
+                print yaml.safe_dump(res_yaml, default_flow_style=False)
 
             defaults = key_value_to_tree(res_yaml)
 
@@ -154,7 +154,7 @@ def validate_templates():
 
                 if args.show:
                     print '### Template: {0} ###\n'.format(fn)
-                    print yaml.safe_dump(res_yaml, indent=4, default_flow_style=False)
+                    print yaml.safe_dump(res_yaml, default_flow_style=False)
 
                 val = cerberus.Validator()
                 try:
