@@ -65,12 +65,12 @@ def validate_templates():
         try:
             res_yaml = yaml.load(res_jinja)
         except Exception, e:
-            log.critical('Failed to parse YAML in test {0}\n{1}'.format(stestf, e))
+            log.critical('Failed to parse YAML in test {0}\n{1}'.format(sfn, e))
             sys.exit(1)
         schema.update(res_yaml)
 
         if args.show:
-            print '### Schema: {0} ###\n'.format(resdir + '/schema.yaml')
+            print '### Schema: {0} ###\n'.format(sfn)
             print yaml.safe_dump(res_yaml, default_flow_style=False)
 
     for categ, info in [s.items()[0] for s in sequence]:
@@ -153,7 +153,7 @@ def validate_templates():
                         log.error('Unsupported operator {0} in template {1}'.format(operator, rkey, sfn))
 
                 if args.show:
-                    print '### Template: {0} ###\n'.format(fn)
+                    print '### Template: {0} ###\n'.format(sfn)
                     print yaml.safe_dump(res_yaml, default_flow_style=False)
 
                 val = cerberus.Validator()
