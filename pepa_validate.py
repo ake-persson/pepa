@@ -19,9 +19,6 @@ import re
 from os.path import isfile, isdir, join, dirname, basename
 import argparse
 import cerberus
-import pygments
-import pygments.lexers
-import pygments.formatters
 
 # Options
 __opts__ = {
@@ -74,10 +71,7 @@ def validate_templates():
 
         if args.show:
             print '### Schema: {0} ###\n'.format(resdir + '/schema.yaml')
-            if args.no_color:
-                print yaml.safe_dump(res_yaml, indent=4, default_flow_style=False)
-            else:
-                print pygments.highlight(yaml.safe_dump(res_yaml), pygments.lexers.YamlLexer(), pygments.formatters.TerminalFormatter())
+            print yaml.safe_dump(res_yaml, indent=4, default_flow_style=False)
 
     for categ, info in [s.items()[0] for s in sequence]:
         templdir = join(roots['base'], resource, categ)
@@ -108,14 +102,11 @@ def validate_templates():
                 log.critical('Failed to parse YAML in test {0}\n{1}'.format(stestf, e))
                 sys.exit(1)
 
-            defaults = key_value_to_tree(res_yaml)
-
             if args.show:
                 print '### Test: {0} ###\n'.format(stestf)
-                if args.no_color:
-                    print yaml.safe_dump(res_yaml, indent=4, default_flow_style=False)
-                else:
-                    print pygments.highlight(yaml.safe_dump(res_yaml), pygments.lexers.YamlLexer(), pygments.formatters.TerminalFormatter())
+                print yaml.safe_dump(res_yaml, indent=4, default_flow_style=False)
+
+            defaults = key_value_to_tree(res_yaml)
 
             for fn in glob.glob(templdir + '/*.yaml'):
                 sfn = alias + '/' + basename(fn)
@@ -163,10 +154,7 @@ def validate_templates():
 
                 if args.show:
                     print '### Template: {0} ###\n'.format(fn)
-                    if args.no_color:
-                        print yaml.safe_dump(res_yaml, indent=4, default_flow_style=False)
-                    else:
-                        print pygments.highlight(yaml.safe_dump(res_yaml), pygments.lexers.YamlLexer(), pygments.formatters.TerminalFormatter())
+                    print yaml.safe_dump(res_yaml, indent=4, default_flow_style=False)
 
                 val = cerberus.Validator()
                 try:
