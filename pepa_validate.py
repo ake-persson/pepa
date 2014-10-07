@@ -49,6 +49,10 @@ def validate_templates():
     '''
     Validate Pepa templates
     '''
+
+    if args.teamcity:
+        print "##teamcity[testSuiteStarted name='Validate Pepa Templates']"
+
     success = True
     resdir = join(roots['base'], resource)
     schema = {}
@@ -107,9 +111,6 @@ def validate_templates():
                 print yaml.safe_dump(res_yaml, default_flow_style=False)
 
             defaults = key_value_to_tree(res_yaml)
-
-            if args.teamcity:
-                print "##teamcity[testSuiteStarted name='Validate Template']"
 
             for fn in glob.glob(templdir + '/*.yaml'):
                 sfn = alias + '/' + basename(fn)
@@ -189,6 +190,9 @@ def validate_templates():
                         print "##teamcity[testFailed name='{0}' message='Failed to validate output for template: {1}']".format(sfn, e)
                     else:
                         log.error('Failed to validate output for template {0}: {1}'.format(sfn, e))
+
+    if args.teamcity:
+        print "##teamcity[testSuiteFinished name='Validate Pepa Templates']"
 
     return success
 
