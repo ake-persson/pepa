@@ -191,6 +191,9 @@ def validate_templates():
                     else:
                         log.error('Failed to validate output for template {0}: {1}'.format(sfn, e))
 
+                if args.teamcity:
+                    print "##teamcity[testFinished name='{0}']".format(sfn)
+
     if args.teamcity:
         print "##teamcity[testSuiteFinished name='Validate Pepa Templates']"
 
