@@ -108,10 +108,15 @@ def validate_templates():
 
             defaults = key_value_to_tree(res_yaml)
 
+            if args.teamcity:
+                print "##teamcity[testSuiteStarted name='Validate Template']"
+
             for fn in glob.glob(templdir + '/*.yaml'):
                 sfn = alias + '/' + basename(fn)
 
                 log.debug('Load template {0}'.format(sfn))
+                if args.teamcity:
+                    print "##teamcity[testStarted name='{0}']".format(sfn)
 
                 # Parse Jinja
                 template = jinja2.Template(open(fn).read())
@@ -121,7 +126,11 @@ def validate_templates():
                     res_jinja = template.render(defaults)
                 except Exception, e:
                     success = False
-                    log.critical('Failed to parse Jinja template {0}\n{1}'.format(sfn, e))
+                    if args.teamcity:
+                        print "##teamcity[testFailed name='{0}' message='{1}']".format(sfn, e)
+                        print "##teamcity[testFinished name='{0}']".format(sfn)
+                    else:
+                        log.critical('Failed to parse Jinja template {0}\n{1}'.format(sfn, e))
                     continue
 
                 # Parse YAML
@@ -129,7 +138,12 @@ def validate_templates():
                     res_yaml = yaml.load(res_jinja)
                 except Exception, e:
                     success = False
-                    log.critical('Failed to parse YAML in template {0}\n{1}'.format(sfn, e))
+                    if args.teamcity:
+                        print "##teamcity[testFailed name='{0}' message='{1}']".format(sfn, e)
+                        print "##teamcity[testFinished name='{0}']".format(sfn)
+                    else:
+                        log.critical('Failed to parse YAML in template {0}\n{1}'.format(sfn, e))
+                    continue
 
                 # Validate operators
                 if not res_yaml:
@@ -150,7 +164,10 @@ def validate_templates():
                         del res_yaml[key]
                     elif operator is not None:
                         success = False
-                        log.error('Unsupported operator {0} in template {1}'.format(operator, rkey, sfn))
+                        if args.teamcity:
+                            print "##teamcity[testFailed name='{0}' message='Unsupported operator {1}']".format(sfn, operator)
+                        else:
+                            log.error('Unsupported operator {0} in template {1}'.format(operator, sfn))
 
                 if args.show:
                     print '### Template: {0} ###\n'.format(sfn)
@@ -162,10 +179,16 @@ def validate_templates():
                     if not status:
                         success = False
                         for ekey, error in val.errors.items():
-                            log.error('Incorrect key {0} in template {1}: {2}'.format(ekey, sfn, error))
+                            if args.teamcity:
+                                print "##teamcity[testFailed name='{0}' message='Incorrect key {1}: {2}']".format(sfn, ekey, error)
+                            else:
+                                log.error('Incorrect key {0} in template {1}: {2}'.format(ekey, sfn, error))
                 except Exception, e:
                     success = False
-                    log.error('Failed to validate output for template {0}: {1}'.format(sfn, e))
+                    if args.teamcity:
+                        print "##teamcity[testFailed name='{0}' message='Failed to validate output for template: {1}']".format(sfn, e)
+                    else:
+                        log.error('Failed to validate output for template {0}: {1}'.format(sfn, e))
 
     return success
 
