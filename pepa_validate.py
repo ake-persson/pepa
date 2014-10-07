@@ -128,7 +128,7 @@ def validate_templates():
                 except Exception, e:
                     success = False
                     if args.teamcity:
-                        print "##teamcity[testFailed name='{0}' message='{1}']".format(sfn, e)
+                        print "##teamcity[testFailed name='{0}' message='Failed to parse Jinja: {1}']".format(sfn, e)
                         print "##teamcity[testFinished name='{0}']".format(sfn)
                     else:
                         log.critical('Failed to parse Jinja template {0}\n{1}'.format(sfn, e))
@@ -140,7 +140,7 @@ def validate_templates():
                 except Exception, e:
                     success = False
                     if args.teamcity:
-                        print "##teamcity[testFailed name='{0}' message='{1}']".format(sfn, e)
+                        print "##teamcity[testFailed name='{0}' message='Failed to parse YAML: {1}']".format(sfn, e)
                         print "##teamcity[testFinished name='{0}']".format(sfn)
                     else:
                         log.critical('Failed to parse YAML in template {0}\n{1}'.format(sfn, e))
@@ -181,7 +181,7 @@ def validate_templates():
                         success = False
                         for ekey, error in val.errors.items():
                             if args.teamcity:
-                                print "##teamcity[testFailed name='{0}' message='Incorrect key {1}: {2}']".format(sfn, ekey, error)
+                                print "##teamcity[testFailed name='{0}' message='{1}: {2}']".format(sfn, ekey, error)
                             else:
                                 log.error('Incorrect key {0} in template {1}: {2}'.format(ekey, sfn, error))
                 except Exception, e:
