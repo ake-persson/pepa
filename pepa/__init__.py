@@ -9,36 +9,16 @@ __license__ = 'Apache License, Version 2.0'
 __version__ = '0.6.6'
 
 # Import python libs
-import logging
 import sys
 import glob
 import yaml
 import jinja2
 import re
 from os.path import isfile, join
+import logging
+import __main__
 
-# Set up logging
-#log = logging.getLogger(__name__)
-
-#LOG_LEVEL = logging.WARNING
-LOG_LEVEL = logging.DEBUG
-
-formatter = None
-try:
-    import colorlog
-    formatter = colorlog.ColoredFormatter("[%(log_color)s%(levelname)-8s%(reset)s] %(log_color)s%(message)s%(reset)s")
-except ImportError:
-    formatter = logging.Formatter("[%(levelname)-8s] %(message)s")
-#else:
-#    formatter = logging.Formatter("[%(levelname)-8s] %(message)s")
-
-stream = logging.StreamHandler()
-stream.setLevel(LOG_LEVEL)
-stream.setFormatter(formatter)
-
-log = logging.getLogger('pythonConfig')
-log.setLevel(LOG_LEVEL)
-log.addHandler(stream)
+logger = logging.getLogger(__name__)
 
 def key_value_to_tree(data, delimiter):
     '''
@@ -80,7 +60,7 @@ class Template():
 
         for categ, cdata in [s.items()[0] for s in self.sequence]:
             if categ not in output:
-                log.warn("Category is not defined: {0}".format(categ))
+                logger.warn("Category is not defined: {0}".format(categ))
                 continue
 
             # Category alias
@@ -97,7 +77,7 @@ class Template():
             if isinstance(output[categ], list):
                 entries = output[categ]
             elif not output[categ]:
-                log.warn("Category has no value set: {0}".format(categ))
+                logger.warn("Category has no value set: {0}".format(categ))
                 continue
             else:
                 entries = [output[categ]]
@@ -106,10 +86,10 @@ class Template():
             for entry in entries:
                 fn = join(tdir, re.sub(r'\W', '_', entry.lower()) + '.yaml')
                 if not isfile(fn):
-                    log.info("Template doesn't exist: {0}".format(fn))
+                    logger.info("Template doesn't exist: {0}".format(fn))
                     continue
 
-                log.info("Loading template: {0}".format(fn))
+                logger.info("Loading template: {0}".format(fn))
                 template = jinja2.Template(open(fn).read())
 
                 inp = key_value_to_tree(output, self.delimiter)
@@ -118,16 +98,16 @@ class Template():
                 try:
                     res_jinja = template.render(inp)
                 except Exception, e:
-                    log.error('Failed to parse JINJA in template: {0}\n{1}'.format(fn, e))
+                    logger.error('Failed to parse JINJA in template: {0}\n{1}'.format(fn, e))
 
                 try:
                     res_yaml = yaml.load(res_jinja)
                 except Exception, e:
-                    log.error('Failed to parse YAML in template: {0}\n{1}'.format(fn, e))
+                    logger.error('Failed to parse YAML in template: {0}\n{1}'.format(fn, e))
 
                 if res_yaml:
                     for key in res_yaml:
-                        log.debug("Substitute key {0}: {1}".format(key, res_yaml[key]))
+                        logger.debug("Substitute key {0}: {1}".format(key, res_yaml[key]))
                         output[key] = res_yaml[key]
 
         return key_value_to_tree(output, self.delimiter)
