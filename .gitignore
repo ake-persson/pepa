@@ -1,2 +1,9 @@
 .DS_Store
 *.pyc
+*.swp
+
+# Ignore virtualenv
+bin/
+include/
+lib/
+lib64/
