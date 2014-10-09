@@ -129,3 +129,5 @@ class Template():
                     for key in res_yaml:
                         log.debug("Substitute key {0}: {1}".format(key, res_yaml[key]))
                         output[key] = res_yaml[key]
+
+        return output

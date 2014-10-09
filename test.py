@@ -19,5 +19,9 @@ roots = {
   'base': 'examples'
 }
 
+grains = {
+  'osfinger': 'Fedora 19'
+}
+
 templ = pepa.Template(resource='hosts', roots=roots, sequence=sequence)
-templ.compile(minion_id='test.example.com')
+print templ.compile(minion_id='test.example.com', grains=grains)
