@@ -130,4 +130,4 @@ class Template():
                         log.debug("Substitute key {0}: {1}".format(key, res_yaml[key]))
                         output[key] = res_yaml[key]
 
-        return output
+        return key_value_to_tree(output, self.delimiter)
