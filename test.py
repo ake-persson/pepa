@@ -15,5 +15,9 @@ sequence = [
     { 'hostname': { 'name': 'host_override', 'base_only': True } }
 ]
 
-templ = pepa.Template(sequence=sequence)
+roots = {
+  'base': 'examples'
+}
+
+templ = pepa.Template(resource='hosts', roots=roots, sequence=sequence)
 templ.compile(minion_id='test.example.com')

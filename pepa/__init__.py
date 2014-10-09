@@ -18,7 +18,27 @@ import re
 from os.path import isfile, join
 
 # Set up logging
-log = logging.getLogger(__name__)
+#log = logging.getLogger(__name__)
+
+#LOG_LEVEL = logging.WARNING
+LOG_LEVEL = logging.DEBUG
+
+formatter = None
+try:
+    import colorlog
+    formatter = colorlog.ColoredFormatter("[%(log_color)s%(levelname)-8s%(reset)s] %(log_color)s%(message)s%(reset)s")
+except ImportError:
+    formatter = logging.Formatter("[%(levelname)-8s] %(message)s")
+#else:
+#    formatter = logging.Formatter("[%(levelname)-8s] %(message)s")
+
+stream = logging.StreamHandler()
+stream.setLevel(LOG_LEVEL)
+stream.setFormatter(formatter)
+
+log = logging.getLogger('pythonConfig')
+log.setLevel(LOG_LEVEL)
+log.addHandler(stream)
 
 def key_value_to_tree(data, delimiter):
     '''
@@ -56,8 +76,7 @@ class Template():
         # Default
         output = {}
         output['default'] = 'default'
-
-        
+        output['hostname'] = minion_id
 
         for categ, cdata in [s.items()[0] for s in self.sequence]:
             if categ not in output:
@@ -93,7 +112,7 @@ class Template():
                 log.info("Loading template: {0}".format(fn))
                 template = jinja2.Template(open(fn).read())
 
-                inp = key_value_to_tree(output, delimiter)
+                inp = key_value_to_tree(output, self.delimiter)
                 inp['grains'] = grains.copy()
                 inp['pillar'] = pillar.copy()
                 try:
@@ -106,5 +125,7 @@ class Template():
                 except Exception, e:
                     log.error('Failed to parse YAML in template: {0}\n{1}'.format(fn, e))
 
-#                if res:
-#                    for key in res:
+                if res_yaml:
+                    for key in res_yaml:
+                        log.debug("Substitute key {0}: {1}".format(key, res_yaml[key]))
+                        output[key] = res_yaml[key]
