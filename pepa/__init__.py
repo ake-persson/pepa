@@ -159,7 +159,7 @@ class Template(object):
 
         return key_value_to_tree(output, self.delimiter)
 
-    def testit(self, show=False, teamcity=False):
+    def test(self, show=False, teamcity=False):
         '''
         Test templates
         '''

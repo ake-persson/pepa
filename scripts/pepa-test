@@ -57,6 +57,7 @@ for name in [e.keys()[0] for e in conf['ext_pillar']]:
         break
     loc += 1
 
+# Test templates
 p = conf['ext_pillar'][loc]['pepa']
 templ = pepa.Template(roots=conf['pepa_roots'], resource=p['resource'], sequence=p['sequence'])
-templ.testit(show=args.show, teamcity=args.teamcity)
+templ.test(show=args.show, teamcity=args.teamcity)

@@ -72,9 +72,11 @@ if 'pepa_pillar' in conf:
 if args.pillar:
     pillar.update(yaml.load(args.pillar))
 
+# Compile templates
 p = conf['ext_pillar'][loc]['pepa']
 templ = pepa.Template(roots=conf['pepa_roots'], resource=p['resource'], sequence=p['sequence'])
 res = templ.compile(minion_id='test.example.com', grains=grains, pillar=pillar)
 
+# Print result
 yaml.dumper.SafeDumper.ignore_aliases = lambda self, data: True
 print yaml.safe_dump(res)
