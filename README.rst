@@ -7,6 +7,8 @@ Configuration templating for SaltStack using Hierarchical substitution and Jinja
   :alt: drone.io build status
   :target: https://drone.io/github.com/mickep76/pepa
 
+Pepa is part of the SaltStack as of release 2014.7.
+
 Quick testing
 =============
 
@@ -28,6 +30,14 @@ Clone and run Pepa.
   git clone https://github.com/mickep76/pepa.git
   cd pepa
   ./pepa -c examples/master test.example.com -d
+
+Install Pepa
+============
+
+.. code-block:: bash
+  git clone https://github.com/mickep76/pepa.git
+  mkdir -p /srv/salt/ext/pillar/pepa.py
+  cp ext_pillar/pepa.py /srv/salt/ext/pillar/pepa.py
 
 Configuring Pepa
 ================
