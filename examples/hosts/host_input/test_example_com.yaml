@@ -11,5 +11,3 @@ network..interfaces..eth0..ipv4: 10.0.0.3
 network..interfaces..eth0..netmask: 255.255.255.0
 network..interfaces..eth0..fqdn: {{ hostname }}
 cobbler..profile: fedora-19-x86_64
-jack_in_the_box..burgers:
-  - Sirloin Cheeseburger

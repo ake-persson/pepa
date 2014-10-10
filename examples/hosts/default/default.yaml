@@ -10,11 +10,3 @@ osfinger: {{ grains.osfinger }}
 salt..version: 2014.1.5
 salt..release: 1
 salt..master: salt.{{ location['region'] }}.example.com
-mcdonalds..burgers:
-  - Big Mac
-burgerking..burgers..immutable():
-  - WHOPPER
-  - DOUBLE WHOPPER
-wrong_operator..dummy(): abc123
-jack_in_the_box..burgers..merge():
-  - Sourdough Jack

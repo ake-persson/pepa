@@ -1,7 +1,0 @@
-burgerking..burgers:
-  - Rodeo Burger
-mcdonalds..burgers..merge():
-  Filet-O-Fish: Don't like fish
-jack_in_the_box..burgers..unset():
-mcdonalds..burgers..merge(): This is a string
-mcdonalds..burgers..unset():
