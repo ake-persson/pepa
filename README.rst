@@ -29,7 +29,7 @@ Clone and run Pepa.
 
   git clone https://github.com/mickep76/pepa.git
   cd pepa
-  ./pepa -c examples/master test.example.com -d
+  pepa -c examples/master test.example.com -d
 
 Install Pepa
 ============
@@ -37,7 +37,7 @@ Install Pepa
 .. code-block:: bash
 
   git clone https://github.com/mickep76/pepa.git
-  mkdir -p /srv/salt/ext/pillar/pepa.py
+  mkdir -p /srv/salt/ext/pillar
   cp ext_pillar/pepa.py /srv/salt/ext/pillar/pepa.py
 
 Configuring Pepa
