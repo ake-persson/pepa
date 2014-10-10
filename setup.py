@@ -4,9 +4,11 @@
 Setup script for pepa
 '''
 
-from setuptools import setup
+from setuptools import setup, find_packages
+import sys, os
 
 #VERSION = __import__('pepa').__version__
+VERSION='0.6.6'
 CLASSIFIERS = [
     'Development Status :: 5 - Production/Stable',
     'Environment :: Console',
@@ -17,8 +19,7 @@ CLASSIFIERS = [
 
 setup(
     name             = 'pepa',
-    version          = '0.6.6',
-#    version         = VERSION,
+    version          = VERSION,
 
     description      = 'Configuration templating for SaltStack using Hierarchical substitution and Jinja',
     long_description = open("README.rst").read(),
@@ -28,7 +29,7 @@ setup(
     url              = 'https://github.com/mickep76/pepa.git',
     license          = 'Apache License 2.0',
 
-    packages         = ['pepa'],
+    packages         = find_packages(exclude=['examples', 'tests']),
 
     classifiers      = CLASSIFIERS,
 )
