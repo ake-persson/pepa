@@ -1,6 +1,0 @@
-grains..osfinger: CentOS Linux-7
-hostname: test.example.com
-interface: mib0
-location..region: amer
-osfinger: CentOS Linux-7
-pkgrepo..mirror: yum-amer.example.com

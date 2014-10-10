@@ -20,10 +20,10 @@ extension_modules: /srv/salt/ext
 
 ext_pillar:
   - pepa:
-      resource: hosts
+      resource: host
       sequence:
         - hostname:
-            name: host_input
+            name: input
             base_only: True
         - default:
         - environment:
@@ -36,7 +36,7 @@ ext_pillar:
         - roles:
         - osfinger:
         - hostname:
-            name: host_override
+            name: override
             base_only: True  
 #      subkey: True
 #      subkey_only: True

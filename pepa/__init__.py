@@ -58,6 +58,8 @@ class Template(object):
         output['default'] = 'default'
         output['hostname'] = minion_id
 
+        immutable = {}
+
         for categ, cdata in [s.items()[0] for s in self.sequence]:
             if categ not in output:
                 logger.warn("Category is not defined: {0}".format(categ))
@@ -98,16 +100,62 @@ class Template(object):
                     res_jinja = template.render(inp)
                 except Exception, e:
                     logger.error('Failed to parse JINJA in template: {0}\n{1}'.format(fn, e))
+                    return {}
 
                 try:
-                    res_yaml = yaml.load(res_jinja)
+                    results = yaml.load(res_jinja)
                 except Exception, e:
                     logger.error('Failed to parse YAML in template: {0}\n{1}'.format(fn, e))
+                    return {}
 
-                if res_yaml:
-                    for key in res_yaml:
-                        logger.debug("Substitute key {0}: {1}".format(key, res_yaml[key]))
-                        output[key] = res_yaml[key]
+                if not results:
+                    continue
+
+                for key in results:
+                    skey = key.rsplit(self.delimiter, 1)
+                    rkey = None
+                    operator = None
+                    if len(skey) > 1 and key.rfind('()') > 0:
+                        rkey = skey[0].rstrip(self.delimiter)
+                        operator = skey[1]
+
+                    if key in immutable:
+                        logger.warning('Key {0} is immutable, changes are not allowed'.format(key))
+                    elif rkey in immutable:
+                        logger.warning("Key {0} is immutable, changes are not allowed".format(rkey))
+                    elif operator == 'merge()' or operator == 'imerge()':
+                        if operator == 'merge()':
+                            logger.debug("Merge key {0}: {1}".format(rkey, results[key]))
+                        else:
+                            logger.debug("Set immutable and merge key {0}: {1}".format(rkey, results[key]))
+                            immutable[rkey] = True
+                        if rkey not in output:
+                            logger.error('Cant\'t merge key {0} doesn\'t exist'.format(rkey))
+                        elif type(results[key]) != type(output[rkey]):
+                            logger.error('Can\'t merge different types for key {0}'.format(rkey))
+                        elif type(results[key]) is dict:
+                            output[rkey].update(results[key])
+                        elif type(results[key]) is list:
+                            output[rkey].extend(results[key])
+                        else:
+                            logger.error('Unsupported type need to be list or dict for key {0}'.format(rkey))
+                    elif operator == 'unset()' or operator == 'iunset()':
+                        if operator == 'unset()':
+                            logger.debug("Unset key {0}".format(rkey))
+                        else:
+                            logger.debug("Set immutable and unset key {0}".format(rkey))
+                            immutable[rkey] = True
+                        if rkey in output:
+                            del output[rkey]
+                    elif operator == 'immutable()':
+                        logger.debug("Set immutable and substitute key {0}: {1}".format(rkey, results[key]))
+                        immutable[rkey] = True
+                        output[rkey] = results[key]
+                    elif operator is not None:
+                        logger.error('Unsupported operator {0}, skipping key {1}'.format(operator, rkey))
+                    else:
+                        logger.debug("Substitute key {0}: {1}".format(key, results[key]))
+                        output[key] = results[key]
 
         return key_value_to_tree(output, self.delimiter)
 

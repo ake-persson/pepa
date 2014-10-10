@@ -1,6 +1,0 @@
-grains..osfinger: Fedora-19
-hostname: test.example.com
-interface: eth0
-location..region: emea
-osfinger: Fedora-19
-pkgrepo..mirror: yum-emea.example.com
