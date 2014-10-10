@@ -1,7 +1,7 @@
 #!/usr/bin/env python -u
 # -*- coding: utf-8 -*-
 '''
-Test templates
+CLI interface for Pepa Test
 '''
 
 import logging

@@ -7,8 +7,7 @@ Setup script for pepa
 from setuptools import setup, find_packages
 import sys, os
 
-#VERSION = __import__('pepa').__version__
-VERSION = '0.6.6'
+VERSION = '0.7.0'
 CLASSIFIERS = [
     'Development Status :: 5 - Production/Stable',
     'Environment :: Console',
@@ -18,6 +17,7 @@ CLASSIFIERS = [
 ]
 SCRIPTS = [
     'scripts/pepa',
+    'scripts/pepa-test',
 ]
 REQUIRES = [
     'pyyaml',
