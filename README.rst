@@ -102,8 +102,8 @@ Command line
 
 .. code-block:: bash
 
-    usage: pepa.py [-h] [-c CONFIG] [-d] [-g GRAINS] [-p PILLAR] [-n] [-v]
-                   hostname
+    usage: pepa [-h] [-c CONFIG] [-d] [-g GRAINS] [-p PILLAR] [-n] [-v]
+                hostname
 
     positional arguments:
       hostname              Hostname
