@@ -14,9 +14,9 @@ import glob
 import yaml
 import jinja2
 import re
-from os.path import isfile, join
+from os.path import isfile, isdir, join, dirname, basename
 import logging
-import __main__
+import cerberus
 
 logger = logging.getLogger(__name__)
 
@@ -110,3 +110,157 @@ class Template(object):
                         output[key] = res_yaml[key]
 
         return key_value_to_tree(output, self.delimiter)
+
+    def testit(self, show=False, teamcity=False):
+        '''
+        Test templates
+        '''
+
+        if teamcity:
+            print "##teamcity[testSuiteStarted name='pepa']"
+
+        success = True
+        resdir = join(self.roots['base'], self.resource)
+        schema = {}
+        for fn in glob.glob(resdir + '/schemas/*.yaml'):
+            sfn = 'schemas/' + basename(fn)
+            logger.debug('Load schema {0}'.format(sfn))
+
+            template = jinja2.Template(open(fn).read())
+            try:
+                res_jinja = template.render()
+            except Exception, e:
+                logger.critical('Failed to parse YAML in schema {0}\n{1}'.format(sfn, e))
+                sys.exit(1)
+            try:
+                res_yaml = yaml.load(res_jinja)
+            except Exception, e:
+                logger.critical('Failed to parse YAML in test {0}\n{1}'.format(sfn, e))
+                sys.exit(1)
+            schema.update(res_yaml)
+
+            if show:
+                print '### Schema: {0} ###\n'.format(sfn)
+                print yaml.safe_dump(res_yaml, default_flow_style=False)
+
+        for categ, info in [s.items()[0] for s in self.sequence]:
+            templdir = join(self.roots['base'], self.resource, categ)
+            alias = categ
+            if isinstance(info, dict) and 'name' in info:
+                alias = info['name']
+                templdir = join(self.roots['base'], self.resource, alias)
+
+            if not isdir(templdir + '/tests'):
+                success = False
+                logger.error('No tests defined for category {0}'.format(alias))
+                continue
+
+            for testf in glob.glob(templdir + '/tests/*.yaml'):
+                stestf = alias + '/tests/' + basename(testf)
+                logger.debug('Load test {0}'.format(stestf))
+
+                # Load tests
+                template = jinja2.Template(open(testf).read())
+                try:
+                    res_jinja = template.render()
+                except Exception, e:
+                    logger.critical('Failed to parse Jinja test {0}\n{1}'.format(stestf, e))
+                    sys.exit(1)
+                try:
+                    res_yaml = yaml.load(res_jinja)
+                except Exception, e:
+                    logger.critical('Failed to parse YAML in test {0}\n{1}'.format(stestf, e))
+                    sys.exit(1)
+
+                if show:
+                    print '### Test: {0} ###\n'.format(stestf)
+                    print yaml.safe_dump(res_yaml, default_flow_style=False)
+
+                defaults = key_value_to_tree(res_yaml, self.delimiter)
+
+                for fn in glob.glob(templdir + '/*.yaml'):
+                    sfn = alias + '/' + basename(fn)
+
+                    logger.debug('Load template {0}'.format(sfn))
+                    if teamcity:
+                        print "##teamcity[testStarted name='{0}']".format(sfn)
+
+                    # Parse Jinja
+                    template = jinja2.Template(open(fn).read())
+                    res_jinja = None
+                    res_yaml = None
+                    try:
+                        res_jinja = template.render(defaults)
+                    except Exception, e:
+                        success = False
+                        if teamcity:
+                            print "##teamcity[testFailed name='{0}' message='Failed to parse Jinja: {1}']".format(sfn, e)
+                            print "##teamcity[testFinished name='{0}']".format(sfn)
+                        else:
+                            logger.critical('Failed to parse Jinja template {0}\n{1}'.format(sfn, e))
+                        continue
+
+                    # Parse YAML
+                    try:
+                        res_yaml = yaml.load(res_jinja)
+                    except Exception, e:
+                        success = False
+                        if teamcity:
+                            print "##teamcity[testFailed name='{0}' message='Failed to parse YAML: {1}']".format(sfn, e)
+                            print "##teamcity[testFinished name='{0}']".format(sfn)
+                        else:
+                            logger.critical('Failed to parse YAML in template {0}\n{1}'.format(sfn, e))
+                        continue
+
+                    # Validate operators
+                    if not res_yaml:
+                        continue
+
+                    for key in res_yaml:
+                        skey = key.rsplit(self.delimiter, 1)
+                        rkey = None
+                        operator = None
+                        if len(skey) > 1 and key.rfind('()') > 0:
+                            rkey = skey[0].rstrip(self.delimiter)
+                            operator = skey[1]
+
+                        if operator == 'merge()' or operator == 'imerge()' or operator == 'immutable()':
+                            res_yaml[rkey] = res_yaml[key]
+                            del res_yaml[key]
+                        elif operator == 'unset' or operator == 'iunset':
+                            del res_yaml[key]
+                        elif operator is not None:
+                            success = False
+                            if teamcity:
+                                print "##teamcity[testFailed name='{0}' message='Unsupported operator {1}']".format(sfn, operator)
+                            else:
+                                logger.error('Unsupported operator {0} in template {1}'.format(operator, sfn))
+
+                    if show:
+                        print '### Template: {0} ###\n'.format(sfn)
+                        print yaml.safe_dump(res_yaml, default_flow_style=False)
+
+                    val = cerberus.Validator()
+                    try:
+                        status = val.validate(res_yaml, schema)
+                        if not status:
+                            success = False
+                            for ekey, error in val.errors.items():
+                                if teamcity:
+                                    print "##teamcity[testFailed name='{0}' message='{1}: {2}']".format(sfn, ekey, error)
+                                else:
+                                    logger.error('Incorrect key {0} in template {1}: {2}'.format(ekey, sfn, error))
+                    except Exception, e:
+                        success = False
+                        if teamcity:
+                            print "##teamcity[testFailed name='{0}' message='Failed to validate output for template: {1}']".format(sfn, e)
+                        else:
+                            logger.error('Failed to validate output for template {0}: {1}'.format(sfn, e))
+
+                    if teamcity:
+                        print "##teamcity[testFinished name='{0}']".format(sfn)
+
+        if teamcity:
+            print "##teamcity[testSuiteFinished name='pepa']"
+
+        return success

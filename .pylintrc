@@ -1,2 +1,2 @@
 [MESSAGES CONTROL]
-disable=no-member,maybe-no-member,line-too-long,invalid-name,import-error,too-many-branches,too-many-locals,too-many-statements,too-many-arguments,dangerous-default-value,too-few-public-methods
+disable=no-member,maybe-no-member,line-too-long,invalid-name,import-error,too-many-branches,too-many-locals,too-many-statements,too-many-arguments,dangerous-default-value,too-few-public-methods,broad-except
