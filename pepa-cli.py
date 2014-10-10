@@ -1,5 +1,8 @@
 #!/usr/bin/env python -u
 # -*- coding: utf-8 -*-
+'''
+CLI interface for Pepa
+'''
 
 import argparse
 import sys
@@ -8,12 +11,25 @@ import yaml
 import logging
 import pepa
 
+# Get arguments
+parser = argparse.ArgumentParser()
+parser.add_argument('hostname', help='Hostname')
+parser.add_argument('-c', '--config', default='/etc/salt/master', help='Configuration file')
+parser.add_argument('-d', '--debug', action='store_true', help='Print debug info')
+parser.add_argument('-g', '--grains', help='Input Grains as YAML')
+parser.add_argument('-p', '--pillar', help='Input Pillar as YAML')
+parser.add_argument('-n', '--no-color', dest='color', action='store_false', help='No color output')
+args = parser.parse_args()
+
 # Create formatter
-try:
-    import colorlog
-    formatter = colorlog.ColoredFormatter("[%(log_color)s%(levelname)-8s%(reset)s] %(log_color)s%(message)s%(reset)s")
-except ImportError:
-    formatter = logger.Formatter("[%(levelname)-8s] %(message)s")
+if args.color:
+    try:
+        import colorlog
+        formatter = colorlog.ColoredFormatter("[%(log_color)s%(levelname)-8s%(reset)s] %(log_color)s%(message)s%(reset)s")
+    except ImportError:
+        formatter = logging.Formatter("[%(levelname)-8s] %(message)s")
+else:
+    formatter = logging.Formatter("[%(levelname)-8s] %(message)s")
 
 # Create console handle
 console = logging.StreamHandler()
@@ -28,16 +44,6 @@ logger.addHandler(console)
 logger_pepa = logging.getLogger('pepa')
 logger_pepa.setLevel(logging.DEBUG)
 logger_pepa.addHandler(console)
-
-# Get arguments
-parser = argparse.ArgumentParser()
-parser.add_argument('hostname', help='Hostname')
-parser.add_argument('-c', '--config', default='/etc/salt/master', help='Configuration file')
-parser.add_argument('-d', '--debug', action='store_true', help='Print debug info')
-parser.add_argument('-g', '--grains', help='Input Grains as YAML')
-parser.add_argument('-p', '--pillar', help='Input Pillar as YAML')
-parser.add_argument('-n', '--no-color', action='store_true', help='No color output')
-args = parser.parse_args()
 
 # Load configuration file
 if not isfile(args.config):

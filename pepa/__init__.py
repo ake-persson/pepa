@@ -35,11 +35,11 @@ def key_value_to_tree(data, delimiter):
                 t = t.setdefault(key, {})
     return tree
 
-class Template():
+class Template(object):
     '''
     Template class
     '''
-    def __init__(self, roots = { 'base': '/srv/pepa' }, delimiter = '..', resource = 'host', sequence = { 'hostname': { 'name': 'input', 'base_only': True } }):
+    def __init__(self, roots={'base': '/srv/pepa'}, delimiter='..', resource='host', sequence={'hostname': {'name': 'input', 'base_only': True}}):
         '''
         Initialize template object
         '''
@@ -48,7 +48,7 @@ class Template():
         self.resource = resource
         self.sequence = sequence
 
-    def compile(self, minion_id, grains = {}, pillar = {}, environment = 'base'):
+    def compile(self, minion_id, grains={}, pillar={}, environment='base'):
         '''
         Compile templates
         '''
@@ -82,7 +82,6 @@ class Template():
             else:
                 entries = [output[categ]]
 
-            res = None
             for entry in entries:
                 fn = join(tdir, re.sub(r'\W', '_', entry.lower()) + '.yaml')
                 if not isfile(fn):
