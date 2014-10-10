@@ -35,6 +35,7 @@ Install Pepa
 ============
 
 .. code-block:: bash
+
   git clone https://github.com/mickep76/pepa.git
   mkdir -p /srv/salt/ext/pillar/pepa.py
   cp ext_pillar/pepa.py /srv/salt/ext/pillar/pepa.py
