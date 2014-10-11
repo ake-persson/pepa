@@ -25,7 +25,6 @@ REQUIRES = [
     'argparse',
     'logging',
     'colorlog',
-    'pygments',
     'cerberus',
 ]
 
