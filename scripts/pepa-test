@@ -14,6 +14,7 @@ import pepa
 # Get arguments
 parser = argparse.ArgumentParser()
 parser.add_argument('-c', '--config', default='/etc/salt/master', help='Configuration file')
+parser.add_argument('-r', '--resource', help='Configuration file, defaults to first resource')
 parser.add_argument('-d', '--debug', action='store_true', help='Print debug info')
 parser.add_argument('-s', '--show', action='store_true', help='Show result of template')
 parser.add_argument('-t', '--teamcity', action='store_true', help='Output validation in TeamCity format')
@@ -46,16 +47,31 @@ logger_pepa.addHandler(console)
 
 # Load configuration file
 if not isfile(args.config):
-    logger.critical('Configuration file doesn\'t exist {0}'.format(args.config))
+    logger.critical("Configuration file doesn't exist: {0}".format(args.config))
     sys.exit(1)
 
 # Get configuration
-conf = yaml.load(open(args.config).read())
+conf_yaml = open(args.config).read()
+try:
+    conf = yaml.load(conf_yaml)
+except Exception, e:
+    logger.critical('Failed to parse YAML in config file: {0}'.format(e))
+    sys.exit(1)
+
+# Load configuration file
+if not isfile(args.config):
+    logger.critical('Configuration file doesn\'t exist {0}'.format(args.config))
+    sys.exit(1)
+
+# Get resource
 loc = 0
 for name in [e.keys()[0] for e in conf['ext_pillar']]:
     if name == 'pepa':
-        break
+        if args.resource is None or args.resource == conf['ext_pillar'][loc]['pepa']['resource']:
+            break
     loc += 1
+
+p = conf['ext_pillar'][loc]['pepa']
 
 # Test templates
 p = conf['ext_pillar'][loc]['pepa']
