@@ -1,2 +1,6 @@
 network..dns..servers..merge():
 - 10.2.0.3
+default: 123
+default: abc
+default..immutable(): aha
+default..unset():

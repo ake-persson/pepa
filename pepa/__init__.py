@@ -39,7 +39,7 @@ class Template(object):
     '''
     Template class
     '''
-    def __init__(self, roots={'base': '/srv/pepa'}, delimiter='..', resource='host', sequence={'hostname': {'name': 'input', 'base_only': True}}):
+    def __init__(self, roots={'base': '/srv/pepa'}, delimiter='..', resource='host', sequence={'hostname': {'name': 'input', 'base_only': True}}, subkey=False, subkey_only=False):
         '''
         Initialize template object
         '''
@@ -47,8 +47,10 @@ class Template(object):
         self.delimiter = delimiter
         self.resource = resource
         self.sequence = sequence
+        self.subkey = subkey
+        self.subkey_only = subkey_only
 
-    def compile(self, minion_id, grains={}, pillar={}, environment='base'):
+    def compile(self, minion_id, grains={}, pillar={}):
         '''
         Compile templates
         '''
@@ -57,6 +59,14 @@ class Template(object):
         output = {}
         output['default'] = 'default'
         output['hostname'] = minion_id
+
+        # Environment
+        if 'environment' in pillar:
+            output['environment'] = pillar['environment']
+        elif 'environment' in grains:
+            output['environment'] = grains['environment']
+        else:
+            output['environment'] = 'base'
 
         immutable = {}
 
@@ -71,7 +81,7 @@ class Template(object):
                 calias = cdata['name']
 
             # Template dir.
-            tdir = join(self.roots[environment], self.resource, calias)
+            tdir = join(self.roots[output['environment']], self.resource, calias)
             if cdata and 'base_only' in cdata and cdata['base_only']:
                 tdir = join(self.roots['base'], self.resource, calias)
 
@@ -157,7 +167,16 @@ class Template(object):
                         logger.debug("Substitute key {0}: {1}".format(key, results[key]))
                         output[key] = results[key]
 
-        return key_value_to_tree(output, self.delimiter)
+        tree = key_value_to_tree(output, self.delimiter)
+        pdata = {}
+        if self.subkey_only:
+            pdata[self.resource] = tree.copy()
+        elif self.subkey:
+            pdata = tree
+            pdata[self.resource] = tree.copy()
+        else:
+            pdata = tree
+        return pdata
 
     def test(self, show=False, teamcity=False):
         '''
