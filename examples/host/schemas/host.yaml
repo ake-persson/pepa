@@ -1,0 +1,16 @@
+osfinger:
+  type: string
+  regex: ^[A-Za-z0-9\ \-\.]+$
+
+hostname:
+  type: string
+  regex: {{ hostname }}
+
+environment:
+  type: string
+  allowed: [ 'base', 'dev', 'qa', 'pilot', 'prod' ]
+
+roles:
+  type: list
+  schema:
+    regex: ^([a-z\-\_]+\.)*[a-z\-\_]+$

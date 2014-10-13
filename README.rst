@@ -230,3 +230,98 @@ iunset()    Set immutable and unset
       - dummy.nl
     owner..immutable(): Operations
     host..printers..unset():
+
+Testing
+=======
+
+Pepa also come's with a test/validation tool for templates. This allows you to test for valid Jinja/YAML and validate key values.
+
+Command Line
+============
+
+.. code-block:: bash
+
+    usage: pepa-test [-h] [-c CONFIG] [-r RESOURCE] [-d] [-s] [-t] [-n]
+
+    optional arguments:
+      -h, --help            show this help message and exit
+      -c CONFIG, --config CONFIG
+                            Configuration file
+      -r RESOURCE, --resource RESOURCE
+                            Configuration file, defaults to first resource
+      -d, --debug           Print debug info
+      -s, --show            Show result of template
+      -t, --teamcity        Output validation in TeamCity format
+      -n, --no-color        No color output
+
+Test
+====
+
+A test is a set of input values for a template, it's generally a good idea to create a separate test for each outcome if you have Jinja if statements.
+
+**Example:** host/default/tests/default-1.yaml
+
+.. code-block:: yaml
+
+    grains..osfinger: Fedora-20
+    location..region: emea
+
+You can also use Jinja inside a test, for example if you wan't to iterate through test values.
+
+Schema
+======
+
+A schema is a set of validation rules for each key/value. Schemas use Cerberus module for validation: http://cerberus.readthedocs.org/en/latest/#
+
+**Example:** host/schemas/pkgrepo.yaml
+
+.. code-block:: yaml
+
+    {% set hostname = '^([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+[a-zA-Z]{2,6}$' %}
+    {% set url = '(http|https?://([-\w\.]+)+(:\d+)?(/([\w/_\.]*(\?\S+)?)?)?)' %}
+
+    pkgrepo..mirror:
+      type: string
+      regex: {{ hostname }}
+
+    pkgrepo..type:
+      type: string
+      allowed: yum
+
+    pkgrepo..osabbr:
+      type: string
+      regex: ^(fc|rhel)[0-9]+$
+
+    {% for repo in [ 'base', 'everything', 'updates' ] %}
+    pkgrepo..repos..{{ repo }}..name:
+      type: string
+      regex: ^[A-Za-z\ 0-9\-\_]+$
+
+    pkgrepo..repos..{{ repo }}..baseurl:
+      type: string
+      regex: {{ url }}
+    {% endfor %}
+
+You can also use Jinja inside a schema, for example if you wan't to iterate through a list of different keys.
+
+You can create complicated datastructures underneth a key, but it's advisable to split it in several
+keys using the delimiter for a nested data structures.
+
+**Bad**
+
+.. code-block:: yaml
+
+    network:
+      interfaces:
+        eth0:
+          ipv4: 192.168.1.2
+          netmask: 255.255.255.0
+
+**Good**
+
+.. code-block:: yaml
+
+    network..interfaces..eth0..ipv4: 192.168.1.2
+    network..interfaces..eth0..netmask: 255.255.255.0
+
+The first example you can't properly use substitution and defining the schema becomes more complicated.

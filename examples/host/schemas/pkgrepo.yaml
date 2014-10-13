@@ -1,0 +1,24 @@
+{% set hostname = '^([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+[a-zA-Z]{2,6}$' %}
+{% set url = '(http|https?://([-\w\.]+)+(:\d+)?(/([\w/_\.]*(\?\S+)?)?)?)' %}
+
+pkgrepo..mirror:
+  type: string
+  regex: {{ hostname }}
+
+pkgrepo..type:
+  type: string
+  allowed: yum
+
+pkgrepo..osabbr:
+  type: string
+  regex: ^(fc|rhel)[0-9]+$
+
+{% for repo in [ 'base', 'everything', 'updates' ] %}
+pkgrepo..repos..{{ repo }}..name:
+  type: string
+  regex: ^[A-Za-z\ 0-9\-\_]+$
+
+pkgrepo..repos..{{ repo }}..baseurl:
+  type: string
+  regex: {{ url }}
+{% endfor %}
