@@ -50,7 +50,7 @@ Install Pepa
 
   git clone https://github.com/mickep76/pepa.git
   mkdir -p /srv/salt/ext/pillar
-  cp ext_pillar/pepa.py /srv/salt/ext/pillar/pepa.py
+  cp pillar/pepa.py /srv/salt/ext/pillar/pepa.py
 
 Configuring Pepa
 ================
@@ -283,7 +283,7 @@ You can also use Jinja inside a test, for example if you wan't to iterate throug
 Schema
 ======
 
-A schema is a set of validation rules for each key/value. Schemas use Cerberus module for validation: http://cerberus.readthedocs.org/en/latest/#
+A schema is a set of validation rules for each key/value. Schemas use `Cerberus <http://cerberus.readthedocs.org/en/latest>`_ module for validation.
 
 **Example:** host/schemas/pkgrepo.yaml
 
