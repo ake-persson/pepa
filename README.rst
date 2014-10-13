@@ -31,6 +31,18 @@ Clone and run Pepa.
   cd pepa
   pepa -c examples/master test.example.com -d
 
+Test and validate templates.
+
+.. code-block:: bash
+
+    pepa-test --config examples/master -d
+
+Look at output.
+
+.. code-block:: bash
+
+    pepa-test --config examples/master -d -s
+
 Install Pepa
 ============
 
