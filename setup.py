@@ -7,7 +7,7 @@ Setup script for pepa
 from setuptools import setup, find_packages
 import sys, os
 
-VERSION = '0.7.3'
+VERSION = '0.7.4'
 CLASSIFIERS = [
     'Development Status :: 5 - Production/Stable',
     'Environment :: Console',
@@ -26,6 +26,7 @@ REQUIRES = [
     'logging',
     'colorlog',
     'cerberus',
+    'requests',
 ]
 
 setup(

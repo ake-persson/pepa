@@ -10,6 +10,10 @@ from os.path import isfile
 import yaml
 import logging
 import pepa
+import requests
+import getpass
+
+# Add show option
 
 # Get arguments
 parser = argparse.ArgumentParser()
@@ -21,8 +25,8 @@ parser.add_argument('-g', '--grains', help='Input Grains as YAML')
 parser.add_argument('-p', '--pillar', help='Input Pillar as YAML')
 parser.add_argument('-n', '--no-color', dest='color', action='store_false', help='No color output')
 parser.add_argument('-q', '--query-api', action='store_true', help='Query Saltstack REST API for Grains')
-parser.add_argument('--url', default='https://salt:8000', help='URL for SaltStack REST API')
-parser.add_argument('-u', '--username', help='Username for SaltStack REST API')
+parser.add_argument('-u', '--url', default='https://salt:8000', help='URL for SaltStack REST API')
+parser.add_argument('-U', '--username', help='Username for SaltStack REST API')
 parser.add_argument('-P', '--password', help='Password for SaltStack REST API')
 args = parser.parse_args()
 
@@ -75,9 +79,6 @@ if args.grains:
 
 # Get grains from SaltStack API
 if args.query_api:
-    import requests
-    import getpass
-
     username = args.username
     password = args.password
     if username is None:
@@ -104,6 +105,8 @@ if args.query_api:
         raise RuntimeError('Failed to get Grains from SaltStack REST API')
 
     grains.update(result[args.hostname])
+
+print grains
 
 # Get pillar
 pillar = {}
@@ -133,7 +136,7 @@ if 'subkey_only' in p:
 
 # Compile templates
 templ = pepa.Template(roots=conf['pepa_roots'], resource=p['resource'], sequence=p['sequence'], subkey=subkey, subkey_only=subkey_only)
-res = templ.compile(minion_id='test.example.com', grains=grains, pillar=pillar)
+res = templ.compile(minion_id=args.hostname, grains=grains, pillar=pillar)
 
 # Print result
 yaml.dumper.SafeDumper.ignore_aliases = lambda self, data: True
