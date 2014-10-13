@@ -14,3 +14,7 @@ roles:
   type: list
   schema:
     regex: ^([a-z\-\_]+\.)*[a-z\-\_]+$
+
+cobbler..profile:
+  type: string
+  regex: ^(redhat|fedora)-[0-9]+-x86_64$

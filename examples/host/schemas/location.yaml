@@ -1,0 +1,11 @@
+location..region:
+  type: string
+  allowed: [ 'amer', 'apac', 'emea' ]
+
+location..country:
+  type: string
+  regex: ^[a-z]{2}$
+
+location..datacenter:
+  type: string
+  regex: ^[a-z0-9]+$

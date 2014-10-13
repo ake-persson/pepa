@@ -1,9 +1,9 @@
 network..dns..servers:
-  - 10.2.0.1
-  - 10.2.0.2
+- 10.2.0.1
+- 10.2.0.2
 time..ntp..servers:
-  - ntp1.amer.example.com
-  - ntp2.amer.example.com
-  - ntp3.amer.example.com
+- ntp1.amer.example.com
+- ntp2.amer.example.com
+- ntp3.amer.example.com
 time..timezone: Europe/Stockholm
 pkgrepo..mirror: yum.emea.example.com

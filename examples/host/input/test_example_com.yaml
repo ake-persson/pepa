@@ -3,7 +3,7 @@ location..country: nl
 location..datacenter: foobar
 environment: dev
 roles:
-  - salt.master
+- salt.master
 network..gateway: 10.0.0.254
 network..interfaces..eth0..hwaddr: 00:20:26:a1:12:12
 network..interfaces..eth0..dhcp: False
