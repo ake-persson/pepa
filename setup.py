@@ -7,7 +7,7 @@ Setup script for pepa
 from setuptools import setup, find_packages
 import sys, os
 
-VERSION = '0.7.4'
+VERSION = '0.7.5'
 CLASSIFIERS = [
     'Development Status :: 5 - Production/Stable',
     'Environment :: Console',
