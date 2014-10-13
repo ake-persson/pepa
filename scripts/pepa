@@ -15,7 +15,7 @@ import pepa
 parser = argparse.ArgumentParser()
 parser.add_argument('hostname', help='Hostname')
 parser.add_argument('-c', '--config', default='/etc/salt/master', help='Configuration file')
-parser.add_argument('-r', '--resource', help='Configuration file, defaults to first resource')
+parser.add_argument('-r', '--resource', help='Resource, defaults to first resource')
 parser.add_argument('-d', '--debug', action='store_true', help='Print debug info')
 parser.add_argument('-g', '--grains', help='Input Grains as YAML')
 parser.add_argument('-p', '--pillar', help='Input Pillar as YAML')

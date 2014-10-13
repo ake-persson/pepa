@@ -14,7 +14,7 @@ import pepa
 # Get arguments
 parser = argparse.ArgumentParser()
 parser.add_argument('-c', '--config', default='/etc/salt/master', help='Configuration file')
-parser.add_argument('-r', '--resource', help='Configuration file, defaults to first resource')
+parser.add_argument('-r', '--resource', help='Resource, defaults to first resource')
 parser.add_argument('-d', '--debug', action='store_true', help='Print debug info')
 parser.add_argument('-s', '--show', action='store_true', help='Show result of template')
 parser.add_argument('-t', '--teamcity', action='store_true', help='Output validation in TeamCity format')

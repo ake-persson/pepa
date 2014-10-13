@@ -112,6 +112,8 @@ Command line
       -h, --help            show this help message and exit
       -c CONFIG, --config CONFIG
                             Configuration file
+      -r RESOURCE, --resource RESOURCE
+                            Resource, defaults to first resource
       -d, --debug           Print debug info
       -g GRAINS, --grains GRAINS
                             Input Grains as YAML
