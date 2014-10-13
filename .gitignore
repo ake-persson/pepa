@@ -7,3 +7,7 @@ bin/
 include/
 lib/
 lib64/
+
+# PyPi package
+dist/
+pepa.egg-info/

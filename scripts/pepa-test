@@ -35,14 +35,18 @@ else:
 console = logging.StreamHandler()
 console.setFormatter(formatter)
 
+loglvl = logging.WARN
+if args.debug:
+    loglvl = logging.DEBUG
+
 # Create logger
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(loglvl)
 logger.addHandler(console)
 
 # Create logger for module
 logger_pepa = logging.getLogger('pepa')
-logger_pepa.setLevel(logging.DEBUG)
+logger_pepa.setLevel(loglvl)
 logger_pepa.addHandler(console)
 
 # Load configuration file
