@@ -81,11 +81,11 @@ p = conf['ext_pillar'][loc]['pepa']
 # Subkey
 subkey = False
 if 'subkey' in p:
-  subkey = p['subkey']
+    subkey = p['subkey']
 
 subkey_only = False
 if 'subkey_only' in p:
-  subkey_only = p['subkey_only']
+    subkey_only = p['subkey_only']
 
 # Compile templates
 templ = pepa.Template(roots=conf['pepa_roots'], resource=p['resource'], sequence=p['sequence'], subkey=subkey, subkey_only=subkey_only)
