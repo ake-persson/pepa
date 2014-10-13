@@ -106,8 +106,6 @@ if args.query_api:
 
     grains.update(result[args.hostname])
 
-print grains
-
 # Get pillar
 pillar = {}
 if 'pepa_pillar' in conf:
