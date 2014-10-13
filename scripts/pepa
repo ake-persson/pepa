@@ -50,16 +50,17 @@ logger_pepa = logging.getLogger('pepa')
 logger_pepa.setLevel(loglvl)
 logger_pepa.addHandler(console)
 
-# Get configuration
+# Load configuration file
+if not isfile(args.config):
+    logger.critical("Configuration file doesn't exist: {0}".format(args.config))
+    sys.exit(1)
+
 conf_yaml = open(args.config).read()
 try:
     conf = yaml.load(conf_yaml)
 except Exception, e:
     logger.critical('Failed to parse YAML in config file: {0}'.format(e))
     sys.exit(1)
-
-# Get configuration
-conf = yaml.load(open(args.config).read())
 
 # Get grains
 grains = {}
