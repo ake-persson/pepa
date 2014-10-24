@@ -79,4 +79,6 @@ p = conf['ext_pillar'][loc]['pepa']
 # Test templates
 p = conf['ext_pillar'][loc]['pepa']
 templ = pepa.Template(roots=conf['pepa_roots'], resource=p['resource'], sequence=p['sequence'])
-templ.test(show=args.show, teamcity=args.teamcity)
+success = templ.test(show=args.show, teamcity=args.teamcity)
+if not success:
+    sys.exit(1)
