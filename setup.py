@@ -17,7 +17,7 @@ CLASSIFIERS = [
 
 setup(
     name             = 'pepa',
-    version          = __version__,
+    version          = '0.7.7',
 
     description      = 'Configuration templating for SaltStack using Hierarchical substitution and Jinja',
     long_description = open("README.rst").read(),
