@@ -6,7 +6,6 @@ Setup script for pepa
 
 from setuptools import setup, find_packages
 import sys, os
-from pillar.pepa import __author__, __author_email__, __url__, __version__, __license__
 
 CLASSIFIERS = [
     'Development Status :: 5 - Production/Stable',
@@ -14,10 +13,6 @@ CLASSIFIERS = [
     'Intended Audience :: System Administrators',
     'License :: OSI Approved :: Apache Software License',
     'Operating System :: POSIX :: Linux',
-]
-SCRIPTS = [
-    'scripts/pepa',
-    'scripts/pepa-test',
 ]
 
 setup(
@@ -27,13 +22,13 @@ setup(
     description      = 'Configuration templating for SaltStack using Hierarchical substitution and Jinja',
     long_description = open("README.rst").read(),
 
-    author           = __author__,
-    author_email     = __author_email__,
-    url              = __url__,
-    license          = __license__,
+    author           = 'Michael Persson',
+    author_email     = 'michael.ake.persson@gmail.com',
+    url              = 'https://github.com/mickep76/pepa.git',
+    license          = 'Apache License, Version 2.0',
 
     packages         = find_packages(exclude=['examples', 'tests']),
     classifiers      = CLASSIFIERS,
-    scripts          = SCRIPTS,
+    scripts          = ['scripts/pepa', 'scripts/pepa-test'],
     install_requires = open("requirements.txt").readlines(),
 )
