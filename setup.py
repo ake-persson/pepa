@@ -12,7 +12,7 @@ CLASSIFIERS = [
     'Development Status :: 5 - Production/Stable',
     'Environment :: Console',
     'Intended Audience :: System Administrators',
-    'License :: OSI Approved :: ' + __license__,
+    'License :: OSI Approved :: Apache Software License',
     'Operating System :: POSIX :: Linux',
 ]
 SCRIPTS = [
