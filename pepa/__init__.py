@@ -214,7 +214,10 @@ class Template(object):
 
             if not isdir(templdir + '/tests'):
                 success = False
-                logger.error('No tests defined for category {0}'.format(alias))
+                if teamcity:
+                    print "##teamcity[testFailed name='pepa' message='No tests defined for category {0}']".format(alias)
+                else:
+                    logger.error('No tests defined for category {0}'.format(alias))
                 continue
 
             for testf in glob.glob(templdir + '/tests/*.yaml'):
@@ -276,6 +279,8 @@ class Template(object):
 
                     # Validate operators
                     if not res_yaml:
+                        if teamcity:
+                            print "##teamcity[testFinished name='{0}']".format(sfn)
                         continue
 
                     for key in res_yaml:

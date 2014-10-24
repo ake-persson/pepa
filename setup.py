@@ -14,10 +14,19 @@ CLASSIFIERS = [
     'License :: OSI Approved :: Apache Software License',
     'Operating System :: POSIX :: Linux',
 ]
+REQUIRES = [
+    'pyyaml',
+    'jinja2',
+    'argparse',
+    'logging',
+    'colorlog',
+    'cerberus',
+    'requests',
+]
 
 setup(
     name             = 'pepa',
-    version          = '0.7.7',
+    version          = '0.7.9',
 
     description      = 'Configuration templating for SaltStack using Hierarchical substitution and Jinja',
     long_description = open("README.rst").read(),
@@ -30,5 +39,5 @@ setup(
     packages         = find_packages(exclude=['examples', 'tests']),
     classifiers      = CLASSIFIERS,
     scripts          = ['scripts/pepa', 'scripts/pepa-test'],
-    install_requires = open("requirements.txt").readlines(),
+    install_requires = REQUIRES,
 )
