@@ -283,7 +283,7 @@ class Template(object):
                             print "##teamcity[testFinished name='{0}']".format(sfn)
                         continue
 
-                    for key in res_yaml:
+                    for key in res_yaml.copy():
                         skey = key.rsplit(self.delimiter, 1)
                         rkey = None
                         operator = None
@@ -294,7 +294,7 @@ class Template(object):
                         if operator == 'merge()' or operator == 'imerge()' or operator == 'immutable()':
                             res_yaml[rkey] = res_yaml[key]
                             del res_yaml[key]
-                        elif operator == 'unset' or operator == 'iunset':
+                        elif operator == 'unset()' or operator == 'iunset()':
                             del res_yaml[key]
                         elif operator is not None:
                             success = False
