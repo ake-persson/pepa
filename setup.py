@@ -26,7 +26,7 @@ REQUIRES = [
 
 setup(
     name             = 'pepa',
-    version          = '0.7.9',
+    version          = '0.8.1',
 
     description      = 'Configuration templating for SaltStack using Hierarchical substitution and Jinja',
     long_description = open("README.rst").read(),
