@@ -23,14 +23,11 @@ def key_value_to_tree(data, delimiter):
     for flatkey, value in data.items():
         t = tree
         keys = flatkey.split(delimiter)
-        key_count = keys.count(keys[-1])
-        for key in keys:
-            if key == keys[-1]:
-                key_count -= 1
-                if key_count == 0:
-                    t[key] = value
-                    continue
-            t = t.setdefault(key, {})
+        for i, key in enumerate(keys):
+            if i == len(keys):
+                t[key] = value
+            else:
+                t = t.setdefault(key, {})
     return tree
 
 class Template(object):
