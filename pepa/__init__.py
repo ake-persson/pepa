@@ -23,7 +23,7 @@ def key_value_to_tree(data, delimiter):
     for flatkey, value in data.items():
         t = tree
         keys = flatkey.split(delimiter)
-        for i, key in enumerate(keys):
+        for i, key in enumerate(keys, 1):
             if i == len(keys):
                 t[key] = value
             else:
